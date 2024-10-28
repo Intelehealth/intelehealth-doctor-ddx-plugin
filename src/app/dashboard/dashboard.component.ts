@@ -94,10 +94,10 @@ export class DashboardComponent implements OnInit {
   @ViewChild('tempPaginator2') tempPaginator2: MatPaginator;
   @ViewChild('tempPaginator3') tempPaginator3: MatPaginator;
   
-  @ViewChild('apSearchInput', { static: true }) apSearchElement: ElementRef;
-  @ViewChild('prSearchInput', { static: true }) prSearchElement: ElementRef;
-  @ViewChild('awSearchInput', { static: true }) awSearchElement: ElementRef;
-  @ViewChild('ipSearchInput', { static: true }) ipSearchElement: ElementRef;
+  @ViewChild('apSearchInput', { static: false }) apSearchElement: ElementRef;
+  @ViewChild('prSearchInput', { static: false }) prSearchElement: ElementRef;
+  @ViewChild('awSearchInput', { static: false }) awSearchElement: ElementRef;
+  @ViewChild('ipSearchInput', { static: false }) ipSearchElement: ElementRef;
 
   @ViewChild(CompletedVisitsComponent) completedVisitsComponent: CompletedVisitsComponent;
   @ViewChild(FollowupVisitsComponent) followUpVisitsComponent: FollowupVisitsComponent;
@@ -210,7 +210,7 @@ export class DashboardComponent implements OnInit {
    * @return {void}
    */
   getCompletedVisits(page: number = 1) {
-    this.visitService.getCompletedVisits(this.specialization, page).subscribe((res: ApiResponseModel) => {
+    this.visitService.getEndedVisits(this.specialization, page).subscribe((res: ApiResponseModel) => {
       if (res.success) {
         this.completedVisitsCount = res.totalCount;
         this.completedRecordsFetched += this.offset;
