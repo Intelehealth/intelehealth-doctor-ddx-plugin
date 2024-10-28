@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
 import { CoreService } from '../services/core/core.service';
 import { ToastrService } from 'ngx-toastr';
 import { TranslateService } from '@ngx-translate/core';
-import { getCacheData, checkIfDateOldThanOneDay } from '../utils/utility-functions';
+import { getCacheData, checkIfDateOldThanOneDay, deleteCacheData } from '../utils/utility-functions';
 import { doctorDetails, languages, visitTypes } from 'src/config/constant';
 import { ApiResponseModel, AppointmentModel, CustomEncounterModel, CustomObsModel, CustomVisitModel, PatientVisitSummaryConfigModel, ProviderAttributeModel, RescheduleAppointmentModalResponseModel } from '../model/model';
 import { AppConfigService } from '../services/app-config.service';
@@ -20,6 +20,7 @@ import { CompletedVisitsComponent } from './completed-visits/completed-visits.co
 import { FollowupVisitsComponent } from './followup-visits/followup-visits.component';
 import { MindmapService } from '../services/mindmap.service';
 import { NgxRolesService } from 'ngx-permissions';
+import { HelpTourService } from '../services/help-tour.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -113,6 +114,7 @@ export class DashboardComponent implements OnInit {
     private translateService: TranslateService,
     private mindmapService: MindmapService,
     private appConfigService: AppConfigService,
+    public tourSvc: HelpTourService,
     private rolesService: NgxRolesService) {
       this.isMCCUser = !!this.rolesService.getRole('ORGANIZATIONAL:MCC');
       Object.keys(this.appConfigService.patient_registration).forEach(obj=>{
@@ -153,6 +155,22 @@ export class DashboardComponent implements OnInit {
     }
 
     this.socket.initSocket(true);
+    this.initHelpTour();
+  }
+
+  initHelpTour(){
+    if(getCacheData(false,doctorDetails.IS_NEW_DOCTOR) === getCacheData(true, doctorDetails.USER)?.uuid && !this.isGettingStarted) {
+      const tour = this.tourSvc.initHelpTour();
+      if(tour){
+        tour.onFinish(() => {
+          deleteCacheData(doctorDetails.IS_NEW_DOCTOR);
+        });
+      }
+    }
+  }
+
+  get isGettingStarted(){
+    return location.hash.includes('dashboard/get-started'); 
   }
 
   get tempPaginator4() {
