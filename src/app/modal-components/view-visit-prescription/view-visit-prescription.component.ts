@@ -14,7 +14,7 @@ import { DiagnosisModel, EncounterModel, EncounterProviderModel, FollowUpDataMod
 (<any>pdfMake).vfs = pdfFonts.pdfMake.vfs;
 import { precription, logo } from "../../utils/base64"
 import { AppConfigService } from 'src/app/services/app-config.service';
-import { style } from '@angular/animations';
+import { calculateBMI } from 'src/app/utils/utility-functions';
 
 @Component({
   selector: 'app-view-visit-prescription',
@@ -1109,7 +1109,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
         break;
       case visitTypes.VITALS:
         this.vitals.forEach((v: VitalModel) => {
-          records.push({ text: [{ text: `${v.name} : `, bold: true }, `${this.getObsValue(v.uuid) ? this.getObsValue(v.uuid) : `No information`}`], margin: [0, 5, 0, 5] });
+          records.push({ text: [{ text: `${v.name} : `, bold: true }, `${this.getObsValue(v.uuid, v.key) ? this.getObsValue(v.uuid, v.key) : `No information`}`], margin: [0, 5, 0, 5] });
         });
         break;
     }
@@ -1145,9 +1145,13 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
   * @param {string} uuid - Vital uuid
   * @return {any} - Obs value
   */
-  getObsValue(uuid: string): any {
+  getObsValue(uuid: string, key?: string): any {
     const v = this.vitalObs.find(e => e.concept.uuid === uuid);
-    return v?.value ? ( typeof v.value == 'object') ? v.value?.display : v.value : null;
+    const value = v?.value ? ( typeof v.value == 'object') ? v.value?.display : v.value : null;
+    if(!value && key === 'bmi') {
+      return calculateBMI(this.vitals, this.vitalObs);
+    }
+    return value
   }
 
   checkPatientRegField(fieldName): boolean{
