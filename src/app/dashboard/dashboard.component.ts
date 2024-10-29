@@ -32,7 +32,7 @@ export class DashboardComponent implements OnInit {
   showAll: boolean = true;
   displayedColumns1: string[] = ['name', 'age', 'starts_in', 'location', 'cheif_complaint', 'telephone','actions'];
   displayedColumns2: string[] = ['name', 'age', 'location', 'cheif_complaint', 'visit_created'];
-  displayedColumns3: string[] = ['name', 'age', 'location', 'cheif_complaint', 'visit_created'];
+  displayedColumns3: string[] = ['name', 'age', 'location', 'cheif_complaint', 'patient_type', 'visit_created'];
   displayedColumns4: string[] = ['name', 'age', 'location', 'cheif_complaint', 'prescription_started'];
 
   dataSource1 = new MatTableDataSource<any>();
@@ -271,6 +271,7 @@ export class DashboardComponent implements OnInit {
           visit.cheif_complaint = this.getCheifComplaint(visit);
           visit.visit_created = visit?.date_created ? this.getCreatedAt(visit.date_created.replace('Z','+0530')) : this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
           visit.person.age = this.calculateAge(visit.person.birthdate);
+          visit.patient_type = this.getDemarcation(visit?.encounters);
           this.awaitingVisits.push(visit);
         }
         this.dataSource3.data = [...this.awaitingVisits];
@@ -283,6 +284,18 @@ export class DashboardComponent implements OnInit {
         }
       }
     });
+  }
+
+  getDemarcation(enc) {
+    let isFollowUp = false;
+    const adlIntl = enc?.find?.(e => e?.type?.name === visitTypes.ADULTINITIAL);
+    if (Array.isArray(adlIntl?.obs)) {
+      adlIntl?.obs.forEach(obs => {
+        if (!isFollowUp)
+          isFollowUp = obs?.value_text?.toLowerCase?.()?.includes?.("follow up");
+      });
+    }
+    return isFollowUp ? visitTypes.FOLLOW_UP : visitTypes.NEW;
   }
 
   /**
@@ -471,7 +484,7 @@ export class DashboardComponent implements OnInit {
   * @param {string} encounterName - Encounter type
   * @return {string} - Encounter datetime
   */
-  getEncounterObs(encounters: CustomEncounterModel[] , encounterName: string, conceptId: number) {
+  getEncounterObs(encounters: CustomEncounterModel[], encounterName: string, conceptId: number) {
     let obs: CustomObsModel;
     encounters.forEach((encounter: CustomEncounterModel) => {
       if (encounter.type?.name === encounterName) {

@@ -33,6 +33,8 @@ export const visitTypes = {
     VISIT_NOTE:'Visit Note',
     MEDICAL_HISTORY:'MEDICAL HISTORY',
     FAMILY_HISTORY:'FAMILY HISTORY',
+    FOLLOW_UP:'Follow-up',
+    NEW:'New',
 }
 
 export const doctorDetails = {
