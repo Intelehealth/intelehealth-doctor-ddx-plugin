@@ -804,7 +804,7 @@ export class ViewVisitSummaryComponent implements OnInit, OnDestroy {
                     widths: ['100%'],
                     body: [
                       [ 
-                        [ {text: 'Contact no.', style: 'subheader'},
+                        [ {text: 'Phone Number', style: 'subheader'},
                           `${this.getPersonAttributeValue('Telephone Number') ? this.getPersonAttributeValue('Telephone Number') : 'NA'}`
                         ]
                       ],
