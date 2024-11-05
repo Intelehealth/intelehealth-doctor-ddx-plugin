@@ -197,11 +197,12 @@ export class DashboardComponent implements OnInit {
     this.visitService.getFollowUpVisits(this.specialization).subscribe({
       next: (res: ApiResponseModel) => {
         if (res.success) {
-          this.followUpVisitsCount = res.totalCount;
+          this.followUpVisitsCount = 0;
           this.completedRecordsFetched += this.offset;
           for (let i = 0; i < res.data.length; i++) {
             let visit = res.data[i];
             if (visit?.encounters?.length) {
+              this.followUpVisitsCount += 1;
               visit.cheif_complaint = this.getCheifComplaint(visit);
               visit.visit_created = visit?.date_created ? this.getCreatedAt(visit.date_created.replace('Z', '+0530')) : this.getEncounterCreated(visit, visitTypes.COMPLETED_VISIT);
               visit.person.age = this.calculateAge(visit.person.birthdate);
