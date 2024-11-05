@@ -942,13 +942,15 @@
                       <tr>
                         <th scope="col">{{'Patient interaction'|translate}}</th>
                         <th scope="col">{{'Status'|translate}}</th>
+                        <th scope="col">{{'Comment'|translate}}</th>
                         <th scope="col"></th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr *ngIf="patientInteractionForm.value.hwPresent && appConfigService?.patient_visit_summary?.hw_interaction">
                         <td>{{'Spoken with the healthcare worker directly?'|translate}}</td>
-                        <td>{{ patientInteractionForm.value.hwSpoken }}</td>
+                        <td>{{ patientInteractionForm.value.hwSpoken.split(',')[0] }}</td>
+                        <td>{{ patientInteractionForm.value.hwSpoken.split(':')[1] }}</td>
                         <td class="pr-0">
                           <button
                             type="button"
@@ -2212,13 +2214,17 @@
                       <tr>
                         <th scope="col">{{'Patient interaction'|translate}}</th>
                         <th scope="col">{{'Status'|translate}}</th>
+                        <th scope="col">{{'Call status'|translate}}</th>
+                        <th scope="col">{{'Reason'|translate}}</th>
                         <th scope="col"></th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr *ngIf="patientCallStatusForm.value.patientPresent">
                         <td>{{'Spoken with the patient directly?'|translate}}</td>
-                        <td>{{ patientCallStatusForm.value.spoken }}</td>
+                        <td>{{ patientCallStatusForm.value.spoken.split(',')[0] }}</td>
+                        <td>{{ patientCallStatusForm.value.spoken.split(',')[1].split(':')[1] }}</td>
+                        <td>{{ patientCallStatusForm.value.spoken.split(',')[2].split(':')[1] }}</td>
                         <td class="pr-0">
                           <button
                             type="button"
