@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -27,6 +27,7 @@ export class ListTicketsComponent {
   pageSize: number = 5;
   openTicketsCount: number = 0;
   statuses = { 'triggered' : 'To Do', 'resolved': "Done", "acknowledged": "In Progress" };
+  @ViewChild('searchInput', { static: false }) searchInput: ElementRef;
 
   constructor(
     private translateService: TranslateService,
@@ -57,6 +58,7 @@ export class ListTicketsComponent {
       this.totalData = res.totalItems;
       this.openTicketsCount = res.openItems ? res.openItems : 0;
       this.dataSource.sort = this.sort;
+      this.dataSource.filterPredicate = (data, filter: string) => data?.title.toLowerCase().indexOf(filter) != -1 || data?.priority.toLowerCase().indexOf(filter) != -1;
     })
   }
 
@@ -73,6 +75,25 @@ export class ListTicketsComponent {
         this.toastr.success('Ticket has been raised successfully!', 'Ticket raised');      
       }
     });
+  }
+
+  /**
+  * Clear filter from a datasource 1
+  * @return {void}
+  */
+  applyFilter(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
+
+    /**
+  * Clear filter from a given datasource
+  * @param {string} dataSource - Datasource name
+  * @return {void}
+  */
+  clearFilter(): void {
+    this.dataSource.filter = null;
+    this.searchInput.nativeElement.value = "";
   }
 }
 
