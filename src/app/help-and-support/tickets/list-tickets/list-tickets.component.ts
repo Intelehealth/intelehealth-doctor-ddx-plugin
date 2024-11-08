@@ -103,6 +103,7 @@ export class ListTicketsComponent {
   */
   clearFilter(): void {
     this.searchInput.nativeElement.value = "";
+    this.getAllTickets();
   }
 }
 
