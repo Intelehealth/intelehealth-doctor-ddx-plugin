@@ -5,6 +5,8 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ToastrService } from 'ngx-toastr';
+import { fromEvent } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { PagerdutyList, PagerdutyModel } from 'src/app/model/model';
 import { CoreService } from 'src/app/services/core/core.service';
 import { PagerdutyService } from 'src/app/services/pagerduty.service';
@@ -44,21 +46,21 @@ export class ListTicketsComponent {
 
   ngAfterViewInit() {
     this.dataSource.sort = this.sort;
+    this.applyFilter();
   }
 
   /**
   * Get Tickets
   * @return {void}
   */
-  getAllTickets(): void{
-    this.pagerdutyService.getAllTickets(this.pageIndex+1, this.pageSize).subscribe((res:PagerdutyList)=>{
+  getAllTickets(search:string=""): void{
+    this.pagerdutyService.getAllTickets(this.pageIndex+1, this.pageSize, search).subscribe((res:PagerdutyList)=>{
       this.ticketData = res.tickets;
       this.dataSource = new MatTableDataSource(this.ticketData);
       this.pageIndex = res.currentPage - 1;
       this.totalData = res.totalItems;
       this.openTicketsCount = res.openItems ? res.openItems : 0;
       this.dataSource.sort = this.sort;
-      this.dataSource.filterPredicate = (data, filter: string) => data?.title.toLowerCase().indexOf(filter) != -1 || data?.priority.toLowerCase().indexOf(filter) != -1;
     })
   }
 
@@ -81,9 +83,17 @@ export class ListTicketsComponent {
   * Clear filter from a datasource 1
   * @return {void}
   */
-  applyFilter(event: Event): void {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+  applyFilter(): void {
+    fromEvent(this.searchInput.nativeElement, 'keyup').pipe(
+      // get value
+      map((event: any) => event.target.value)
+      // Time in milliseconds between key events
+      ,debounceTime(500)        
+      // If previous query is diffent from current   
+      ,distinctUntilChanged()
+      ).subscribe((res:string) => {
+        this.getAllTickets(res);
+      });
   }
 
     /**
@@ -92,7 +102,6 @@ export class ListTicketsComponent {
   * @return {void}
   */
   clearFilter(): void {
-    this.dataSource.filter = null;
     this.searchInput.nativeElement.value = "";
   }
 }
