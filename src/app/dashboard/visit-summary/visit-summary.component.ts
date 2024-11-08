@@ -69,7 +69,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
 
   additionalDocs: DocImagesModel[] = [];
   eyeImages: DocImagesModel[] = [];
-  notes: ObsModel[] = [];
   medicines: MedicineModel[] = [];
   existingDiagnosis: DiagnosisModel[] = [];
   advices: ObsModel[] = [];
@@ -100,7 +99,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   showAll = true;
   @ViewChild(MatAccordion) accordion: MatAccordion;
 
-  addMoreNote = false;
   addMoreMedicine = false;
   addMoreAdditionalInstruction = false;
   addMoreAdvice = false;
@@ -110,7 +108,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
 
   patientInteractionForm: FormGroup;
   diagnosisForm: FormGroup;
-  addNoteForm: FormGroup;
   addMedicineForm: FormGroup;
   addAdditionalInstructionForm: FormGroup;
   addAdviceForm: FormGroup;
@@ -241,10 +238,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       diagnosisName: new FormControl(null, Validators.required),
       diagnosisType: new FormControl(null, Validators.required),
       diagnosisStatus: new FormControl(null, Validators.required)
-    });
-
-    this.addNoteForm = new FormGroup({
-      note: new FormControl(null, [Validators.required])
     });
 
     this.addMedicineForm = new FormGroup({
@@ -393,7 +386,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
               });
               this.checkIfPatientInteractionPresent(visit.attributes);
               this.checkIfDiagnosisPresent();
-              this.checkIfNotePresent();
               this.checkIfMedicationPresent();
               this.getAdvicesList();
               this.checkIfAdvicePresent();
@@ -1130,67 +1122,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   deleteDiagnosis(index: number, uuid: string): void {
     this.diagnosisService.deleteObs(uuid).subscribe(() => {
       this.existingDiagnosis.splice(index, 1);
-    });
-  }
-
-  /**
-  * Toggle notes add form, show/hide add more notes button
-  * @returns {void}
-  */
-  toggleNote(): void {
-    this.addMoreNote = !this.addMoreNote;
-    this.addNoteForm.reset();
-  }
-
-  /**
-  * Get notes for the visit
-  * @returns {void}
-  */
-  checkIfNotePresent(): void {
-    this.notes = [];
-    this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptNote).subscribe((response: ObsApiResponseModel) => {
-      response.results.forEach((obs: ObsModel) => {
-        if (obs.encounter.visit.uuid === this.visit.uuid) {
-          this.notes.push(obs);
-        }
-      });
-    });
-  }
-
-  /**
-  * Save note
-  * @returns {void}
-  */
-  addNote(): void {
-    if (this.addNoteForm.invalid) {
-      this.toastr.warning(this.translateService.instant('Please enter note text to add'), this.translateService.instant('Invalid note'));
-      return;
-    }
-    if (this.notes.find((o: ObsModel) => o.value === this.addNoteForm.value.note)) {
-      this.toastr.warning(this.translateService.instant('Note already added, please add another note.'), this.translateService.instant('Already Added'));
-      return;
-    }
-    this.encounterService.postObs({
-      concept: conceptIds.conceptNote,
-      person: this.visit.patient.uuid,
-      obsDatetime: new Date(),
-      value: this.addNoteForm.value.note,
-      encounter: this.visitNotePresent.uuid
-    }).subscribe((res: ObsModel) => {
-      this.notes.push({ uuid: res.uuid, value: this.addNoteForm.value.note });
-      this.addNoteForm.reset();
-    });
-  }
-
-  /**
-  * Delete note for a given index and uuid
-  * @param {number} index - Index
-  * @param {string} uuid - Note obs uuid
-  * @returns {void}
-  */
-  deleteNote(index: number, uuid: string): void {
-    this.diagnosisService.deleteObs(uuid).subscribe(() => {
-      this.notes.splice(index, 1);
     });
   }
 
