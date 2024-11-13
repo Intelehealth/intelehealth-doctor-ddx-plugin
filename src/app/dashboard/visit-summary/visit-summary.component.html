@@ -551,9 +551,9 @@
                               </ul>
                             </div>
                           </ng-container>
-                          <app-notes [title]="'Family History Notes'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded"
+                          <app-notes *ngIf="appConfigService?.patient_visit_summary?.family_history_notes" [title]="'Family History Notes'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded"
                           [visit]="visit" [visitNotePresent]="visitNotePresent"></app-notes>
-                          <app-notes [title]="'Past Medical History Notes'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded"
+                          <app-notes *ngIf="appConfigService?.patient_visit_summary?.past_medical_history_notes" [title]="'Past Medical History Notes'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded"
                           [visit]="visit" [visitNotePresent]="visitNotePresent"></app-notes>
                         </ng-container>
                       <!-- END Medical History -->
