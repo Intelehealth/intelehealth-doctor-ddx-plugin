@@ -127,7 +127,6 @@ export class DashboardComponent implements OnInit {
       this.displayedColumns3 = this.displayedColumns3.filter(col=>(col!=='age' || this.checkPatientRegField('Age')));
       this.displayedColumns4 = this.displayedColumns4.filter(col=>(col!=='age' || this.checkPatientRegField('Age')));
       
-      console.log('this.pvs: ', this.pvs);
       if(!this.pvs.awaiting_visits_patient_type_demarcation){
         this.displayedColumns3 = this.displayedColumns3.filter(col=>(col!=='patient_type'));
       }
