@@ -669,6 +669,7 @@ export interface PatientVisitSummaryConfigModel {
   completed_visit_section: boolean
   follow_up_visit_section: boolean
   hw_interaction: boolean
+  awaiting_visits_patient_type_demarcation: boolean
 }
 
 export interface PagerdutyList {
