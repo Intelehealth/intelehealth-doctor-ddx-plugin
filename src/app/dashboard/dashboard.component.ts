@@ -126,8 +126,12 @@ export class DashboardComponent implements OnInit {
       this.displayedColumns2 = this.displayedColumns2.filter(col=>(col!=='age' || this.checkPatientRegField('Age')));
       this.displayedColumns3 = this.displayedColumns3.filter(col=>(col!=='age' || this.checkPatientRegField('Age')));
       this.displayedColumns4 = this.displayedColumns4.filter(col=>(col!=='age' || this.checkPatientRegField('Age')));
+      
+      if(!this.pvs.awaiting_visits_patient_type_demarcation){
+        this.displayedColumns3 = this.displayedColumns3.filter(col=>(col!=='patient_type'));
+      }
     }
-
+    
   ngOnInit(): void {
     this.translateService.use(getCacheData(false, languages.SELECTED_LANGUAGE));
     this.pageTitleService.setTitle({ title: "Dashboard", imgUrl: "assets/svgs/menu-info-circle.svg" });
