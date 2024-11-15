@@ -551,10 +551,6 @@
                               </ul>
                             </div>
                           </ng-container>
-                          <app-notes *ngIf="appConfigService?.patient_visit_summary?.family_history_notes" [title]="'Family History Notes'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded"
-                          [visit]="visit" [visitNotePresent]="visitNotePresent"></app-notes>
-                          <app-notes *ngIf="appConfigService?.patient_visit_summary?.past_medical_history_notes" [title]="'Past Medical History Notes'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded"
-                          [visit]="visit" [visitNotePresent]="visitNotePresent"></app-notes>
                         </ng-container>
                       <!-- END Medical History -->
                       
@@ -813,6 +809,12 @@
       <div class="intel-card">
         <div class="card-body">
           <mat-accordion class="intel-accordion-con" multi>
+
+            <app-notes *ngIf="appConfigService?.patient_visit_summary?.family_history_notes" [title]="'Family History Notes'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded"
+            [visit]="visit" [visitNotePresent]="visitNotePresent"></app-notes>
+            <app-notes *ngIf="appConfigService?.patient_visit_summary?.past_medical_history_notes" [title]="'Past Medical History Notes'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded"
+            [visit]="visit" [visitNotePresent]="visitNotePresent"></app-notes>
+
             <mat-expansion-panel [expanded]="true" #panel1 hideToggle *ngIf="isSubSectionEnabled('patient_interaction','HW')">
               <mat-expansion-panel-header>
                 <mat-panel-title>
