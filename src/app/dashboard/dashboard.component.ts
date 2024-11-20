@@ -21,11 +21,40 @@ import { FollowupVisitsComponent } from './followup-visits/followup-visits.compo
 import { MindmapService } from '../services/mindmap.service';
 import { NgxRolesService } from 'ngx-permissions';
 import { HelpTourService } from '../services/help-tour.service';
+import { MatMenuTrigger } from '@angular/material/menu';
+import { DateAdapter, MAT_DATE_FORMATS, NativeDateAdapter } from '@angular/material/core';
+import { formatDate } from '@angular/common';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+
+
+export const PICK_FORMATS = {
+  parse: { dateInput: { month: 'short', year: 'numeric', day: 'numeric' } },
+  display: {
+    dateInput: 'input',
+    monthYearLabel: { year: 'numeric', month: 'short' },
+    dateA11yLabel: { year: 'numeric', month: 'long', day: 'numeric' },
+    monthYearA11yLabel: { year: 'numeric', month: 'long' }
+  }
+};
+
+class PickDateAdapter extends NativeDateAdapter {
+  format(date: Date, displayFormat: Object): string {
+    if (displayFormat === 'input') {
+      return formatDate(date, 'dd MMM yyyy', this.locale);
+    } else {
+      return date.toDateString();
+    }
+  }
+};
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  styleUrls: ['./dashboard.component.scss'],
+  providers: [
+    { provide: DateAdapter, useClass: PickDateAdapter },
+    { provide: MAT_DATE_FORMATS, useValue: PICK_FORMATS }
+  ]
 })
 export class DashboardComponent implements OnInit {
 
@@ -91,6 +120,16 @@ export class DashboardComponent implements OnInit {
   pvs: PatientVisitSummaryConfigModel;
   isMCCUser: boolean = false;
 
+  panelExpanded: boolean = true;
+  mode: 'date' | 'range' = 'date';
+
+  filteredDateAndRangeForm1: FormGroup;
+  filteredDateAndRangeForm2: FormGroup;
+  filteredDateAndRangeForm3: FormGroup;
+  filteredDateAndRangeForm4: FormGroup;
+  
+  @ViewChild(MatMenuTrigger) menuTrigger: MatMenuTrigger;
+
   @ViewChild('tempPaginator1') tempPaginator1: MatPaginator;
   @ViewChild('tempPaginator2') tempPaginator2: MatPaginator;
   @ViewChild('tempPaginator3') tempPaginator3: MatPaginator;
@@ -116,6 +155,11 @@ export class DashboardComponent implements OnInit {
     private appConfigService: AppConfigService,
     public tourSvc: HelpTourService,
     private rolesService: NgxRolesService) {
+      this.filteredDateAndRangeForm1 = this.createFilteredDateRangeForm();
+      this.filteredDateAndRangeForm2 = this.createFilteredDateRangeForm();
+      this.filteredDateAndRangeForm3 = this.createFilteredDateRangeForm();
+      this.filteredDateAndRangeForm4 = this.createFilteredDateRangeForm();
+
       this.isMCCUser = !!this.rolesService.getRole('ORGANIZATIONAL:MCC');
       Object.keys(this.appConfigService.patient_registration).forEach(obj=>{
         this.patientRegFields.push(...this.appConfigService.patient_registration[obj].filter((e: { is_enabled: any; })=>e.is_enabled).map((e: { name: any; })=>e.name));
@@ -131,6 +175,14 @@ export class DashboardComponent implements OnInit {
         this.displayedColumns3 = this.displayedColumns3.filter(col=>(col!=='patient_type'));
       }
     }
+
+  createFilteredDateRangeForm(): FormGroup {
+    return new FormGroup({
+      date: new FormControl('', [Validators.required]),
+      startDate: new FormControl(null, Validators.required),
+      endDate: new FormControl(null, Validators.required),
+    });
+  }
     
   ngOnInit(): void {
     this.translateService.use(getCacheData(false, languages.SELECTED_LANGUAGE));
@@ -731,5 +783,173 @@ export class DashboardComponent implements OnInit {
 
   getTelephoneNumber(person: AppointmentModel['visit']['person']): any {
     return person?.person_attribute.find((v: { person_attribute_type_id: number; }) => v.person_attribute_type_id == 8)?.value;
+  }
+
+  closeMenu() {
+    if (this.menuTrigger) {
+      this.menuTrigger.closeMenu();
+    }
+  }
+
+  setMode(mode: 'date' | 'range') {
+    this.mode = mode;
+  }
+
+  formatDate(date: any): string {
+    return new Date(date).toISOString().split('T')[0];
+  }
+
+  applyDateOrRangeFilter1() {
+    const selectedDate = this.filteredDateAndRangeForm1.get('date')?.value;
+    const startDate = this.filteredDateAndRangeForm1.get('startDate')?.value;
+    const endDate = this.filteredDateAndRangeForm1.get('endDate')?.value;
+  
+    if (selectedDate) {
+      const formattedDate = this.formatDate(selectedDate);
+
+      this.dataSource1.filterPredicate = (data: any, filter: string) => {
+        const itemDate = this.formatDate(data.createdAt);
+        return itemDate === filter;
+      };
+      this.dataSource1.filter = formattedDate;
+    } else if (startDate && endDate) {
+      const formattedStartDate = this.formatDate(startDate);
+      const formattedEndDate = this.formatDate(endDate);
+  
+      this.dataSource1.filterPredicate = (data: any, filter: string) => {
+        const itemDate = this.formatDate(data.createdAt);
+        return itemDate >= formattedStartDate && itemDate <= formattedEndDate;
+      };
+      this.dataSource1.filter = `${formattedStartDate}:${formattedEndDate}`;
+    } else {
+      this.dataSource1.filter = '';
+    }
+    this.tempPaginator3.firstPage();
+    this.inprogressPaginator?.firstPage();
+    this.closeMenu();
+  }
+
+  applyDateOrRangeFilter2() {
+    const selectedDate = this.filteredDateAndRangeForm2.get('date')?.value;
+    const startDate = this.filteredDateAndRangeForm2.get('startDate')?.value;
+    const endDate = this.filteredDateAndRangeForm2.get('endDate')?.value;
+  
+    if (selectedDate) {
+      const formattedDate = this.formatDate(selectedDate);
+      
+      this.dataSource2.filterPredicate = (data: any, filter: string) => {
+        const itemDate = this.formatDate(data.date_created);
+        return itemDate === filter;
+      };
+      this.dataSource2.filter = formattedDate;
+    } else if (startDate && endDate) {
+      const formattedStartDate = this.formatDate(startDate);
+      const formattedEndDate = this.formatDate(endDate);
+  
+      this.dataSource2.filterPredicate = (data: any, filter: string) => {
+        const itemDate = this.formatDate(data.date_created);
+        return itemDate >= formattedStartDate && itemDate <= formattedEndDate;
+      };
+      this.dataSource2.filter = `${formattedStartDate}:${formattedEndDate}`;
+    } else {
+      this.dataSource2.filter = '';
+    }
+    this.tempPaginator3.firstPage();
+    this.priorityPaginator?.firstPage();
+    this.closeMenu();
+  }
+
+  applyDateOrRangeFilter3() {    
+    const selectedDate = this.filteredDateAndRangeForm3.get('date')?.value;
+    const startDate = this.filteredDateAndRangeForm3.get('startDate')?.value;
+    const endDate = this.filteredDateAndRangeForm3.get('endDate')?.value;
+  
+    if (selectedDate) {
+      const formattedDate = this.formatDate(selectedDate);
+      
+      this.dataSource3.filterPredicate = (data: any, filter: string) => {
+        const itemDate = this.formatDate(data.date_created);
+        return itemDate === filter;
+      };
+      this.dataSource3.filter = formattedDate;
+    } else if (startDate && endDate) {
+      const formattedStartDate = this.formatDate(startDate);
+      const formattedEndDate = this.formatDate(endDate);
+  
+      this.dataSource3.filterPredicate = (data: any, filter: string) => {
+        const itemDate = this.formatDate(data.date_created);
+        return itemDate >= formattedStartDate && itemDate <= formattedEndDate;
+      };
+      this.dataSource3.filter = `${formattedStartDate}:${formattedEndDate}`;
+    } else {
+      this.dataSource3.filter = '';
+    }
+    this.tempPaginator3.firstPage();
+    this.awaitingPaginator?.firstPage();
+    this.closeMenu();
+  }
+
+  applyDateOrRangeFilter4() {
+    const selectedDate = this.filteredDateAndRangeForm4.get('date')?.value;
+    const startDate = this.filteredDateAndRangeForm4.get('startDate')?.value;
+    const endDate = this.filteredDateAndRangeForm4.get('endDate')?.value;
+    
+    if (selectedDate) {
+      const formattedDate = this.formatDate(selectedDate);
+
+      this.dataSource4.filterPredicate = (data: any, filter: string) => {
+        const itemDate = this.formatDate(data.date_created);
+        return itemDate === filter;
+      };
+      this.dataSource4.filter = formattedDate;
+    } else if (startDate && endDate) {
+      const formattedStartDate = this.formatDate(startDate);
+      const formattedEndDate = this.formatDate(endDate);
+  
+      this.dataSource4.filterPredicate = (data: any, filter: string) => {
+        const itemDate = this.formatDate(data.date_created);
+        return itemDate >= formattedStartDate && itemDate <= formattedEndDate;
+      };
+      this.dataSource4.filter = `${formattedStartDate}:${formattedEndDate}`;
+    } else {
+      this.dataSource4.filter = '';
+    }
+    this.tempPaginator3.firstPage();
+    this.inprogressPaginator?.firstPage();
+    this.closeMenu();
+  }
+  
+  resetDate1() {
+    this.filteredDateAndRangeForm1.reset();
+    this.dataSource1.filter = '';
+    this.dataSource1.filterPredicate = (data: any, filter: string) => true;
+    this.closeMenu();
+  }
+
+  resetDate2() {
+    this.filteredDateAndRangeForm2.reset();
+    this.dataSource2.filter = '';
+    this.dataSource2.filterPredicate = (data: any, filter: string) => true;
+    this.tempPaginator1.firstPage();
+    this.priorityPaginator?.firstPage();
+    this.closeMenu();
+  }
+
+  resetDate3() {
+    this.filteredDateAndRangeForm3.reset();
+    this.dataSource3.filter = '';
+    this.dataSource3.filterPredicate = (data: any, filter: string) => true;
+    this.tempPaginator2.firstPage();
+    this.awaitingPaginator?.firstPage();
+    this.closeMenu();
+  }
+
+  resetDate4() {    
+    this.filteredDateAndRangeForm4.reset();
+    this.dataSource4.filter = '';
+    this.dataSource4.filterPredicate = (data: any, filter: string) => true;
+    this.tempPaginator3.firstPage();
+    this.inprogressPaginator?.firstPage();
+    this.closeMenu();
   }
 }

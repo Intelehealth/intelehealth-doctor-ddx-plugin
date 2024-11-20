@@ -34,6 +34,7 @@ import { OpenChatComponent } from './open-chat/open-chat.component';
 import { CompletedVisitsComponent } from './completed-visits/completed-visits.component';
 import { FollowupVisitsComponent } from './followup-visits/followup-visits.component';
 import { NotesComponent } from './visit-summary/notes/notes.component';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(httpClient: HttpClient) {
@@ -54,6 +55,7 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
     NotesComponent
   ],
   imports: [
+    MatMenuModule,
     CommonModule,
     DashboardRoutingModule,
     MatExpansionModule,
