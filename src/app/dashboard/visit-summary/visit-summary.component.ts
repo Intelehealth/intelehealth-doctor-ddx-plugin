@@ -69,7 +69,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
 
   additionalDocs: DocImagesModel[] = [];
   eyeImages: DocImagesModel[] = [];
-  notes: ObsModel[] = [];
   medicines: MedicineModel[] = [];
   existingDiagnosis: DiagnosisModel[] = [];
   advices: ObsModel[] = [];
@@ -100,7 +99,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   showAll = true;
   @ViewChild(MatAccordion) accordion: MatAccordion;
 
-  addMoreNote = false;
   addMoreMedicine = false;
   addMoreAdditionalInstruction = false;
   addMoreAdvice = false;
@@ -109,8 +107,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   addMoreDiagnosis = false;
 
   patientInteractionForm: FormGroup;
+  patientCallStatusForm: FormGroup;
   diagnosisForm: FormGroup;
-  addNoteForm: FormGroup;
   addMedicineForm: FormGroup;
   addAdditionalInstructionForm: FormGroup;
   addAdviceForm: FormGroup;
@@ -171,7 +169,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     ]
   };
 
-  @ViewChild(NgSelectComponent) ngSelectComponent: NgSelectComponent;
+  @ViewChild('reasonSelect', { static: false }) reasonSelectComponent: NgSelectComponent;
   reasonsList: { name: string }[] = [];
   patientInteraction: PatientVisitSection[] = [];
 
@@ -222,7 +220,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
 
     this.patientInteractionForm = new FormGroup({
       uuid: new FormControl(null),
-      present: new FormControl(false, [Validators.required]),
+      comment: new FormControl(null, [Validators.required]),
+    });
+
+    this.patientCallStatusForm = new FormGroup({
+      uuid: new FormControl(null),
       spoken: new FormControl(null, [Validators.required]),
       reason: new FormControl(null, [Validators.required]),
       callStatus: new FormControl(null, [Validators.required]),
@@ -233,18 +235,13 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       this.patientInteractionForm.addControl('hwPresent', new FormControl(false, [Validators.required]));
       this.patientInteractionForm.addControl('hwSpoken', new FormControl("", [Validators.required]));
       this.patientInteractionForm.addControl('comment', new FormControl("", [Validators.required]));
-      this.patientInteractionForm.addControl('callStatus', new FormControl("", [Validators.required]));
-      this.patientInteractionForm.addControl('reason', new FormControl("", [Validators.required]));
+      this.patientCallStatusForm.addControl('patientPresent', new FormControl(false, [Validators.required]));
     }
 
     this.diagnosisForm = new FormGroup({
       diagnosisName: new FormControl(null, Validators.required),
       diagnosisType: new FormControl(null, Validators.required),
       diagnosisStatus: new FormControl(null, Validators.required)
-    });
-
-    this.addNoteForm = new FormGroup({
-      note: new FormControl(null, [Validators.required])
     });
 
     this.addMedicineForm = new FormGroup({
@@ -393,7 +390,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
               });
               this.checkIfPatientInteractionPresent(visit.attributes);
               this.checkIfDiagnosisPresent();
-              this.checkIfNotePresent();
               this.checkIfMedicationPresent();
               this.getAdvicesList();
               this.checkIfAdvicePresent();
@@ -953,7 +949,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   checkIfPatientInteractionPresent(attributes: VisitAttributeModel[]): void {
     attributes.forEach((attr: VisitAttributeModel) => {
       if (attr.attributeType.display === visitTypes.PATIENT_INTERACTION) {
-        this.patientInteractionForm.patchValue({ present: true, spoken: attr.value, uuid: attr.uuid });
+        this.patientCallStatusForm.patchValue({ patientPresent: true, spoken: attr.value, uuid: attr.uuid });        
       }
       if (attr.attributeType.display === visitTypes.HW_INTERACTION) {
         this.patientInteractionForm.patchValue({ hwPresent: true, hwSpoken: attr.value, hwIntUuid: attr.uuid });
@@ -979,25 +975,12 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   * @returns {void}
   */
   savePatientInteraction(): void {
-    if (!this.isVisitNoteProvider) {
+    if (this.patientInteractionForm.invalid || !this.isVisitNoteProvider) {
       return;
-    }
-    if(!this.patientInteractionForm.value.present && this.isSubSectionEnabled('patient_interaction','Patient')){
-      const payload = {
-        attributeType: "6cc0bdfe-ccde-46b4-b5ff-e3ae238272cc",
-        value: this.patientInteractionForm.value.callStatus?.trim().length > 0 ? `${this.patientInteractionForm.value.spoken}, ${this.translateService.instant("Call status")}: ${this.patientInteractionForm.value.callStatus}, ${this.translateService.instant("Reason")}: ${this.patientInteractionForm.value.reason}` :  this.patientInteractionForm.value.spoken,
-      };
-
-      this.visitService.postAttribute(this.visit.uuid, payload)
-      .subscribe((res: VisitAttributeModel) => {
-        if (res) {
-          this.patientInteractionForm.patchValue({ present: true, uuid: res.uuid, spoken: res.value });
-        }
-      });
     }
 
     if(this.appConfigService?.patient_visit_summary?.hw_interaction){
-      if(!this.patientInteractionForm.value.hwPresent && this.isSubSectionEnabled('patient_interaction','HW')){
+      if(!this.patientInteractionForm.value.hwPresent){
         const payload = {
           attributeType: "c3e885bf-6c97-4d27-9171-a7e0c25450e9",
           value: this.patientInteractionForm.value.comment?.trim().length > 0 ? `${this.patientInteractionForm.value.hwSpoken}, ${this.translateService.instant("Comment")}: ${this.patientInteractionForm.value.comment}` : this.patientInteractionForm.value.hwSpoken,
@@ -1013,12 +996,34 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   };
 
   /**
+  * Save patient interaction visit attribute
+  * @returns {void}
+  */
+  saveCallStatus(): void {
+    if (this.patientCallStatusForm.invalid || !this.isVisitNoteProvider) {
+      return;
+    }
+    if(!this.patientCallStatusForm.value.patientPresent){
+      const payload = {
+        attributeType: "6cc0bdfe-ccde-46b4-b5ff-e3ae238272cc",
+        value: this.patientCallStatusForm.value.callStatus?.trim().length > 0 ? `${this.patientCallStatusForm.value.spoken}, ${this.translateService.instant("Call status")}: ${this.patientCallStatusForm.value.callStatus}, ${this.translateService.instant("Reason")}: ${this.patientCallStatusForm.value.reason}` :  this.patientCallStatusForm.value.spoken,
+      };
+      this.visitService.postAttribute(this.visit.uuid, payload)
+      .subscribe((res: VisitAttributeModel) => {
+        if (res) {
+          this.patientCallStatusForm.patchValue({ patientPresent: true, uuid: res.uuid, spoken: res.value });
+        }
+      });
+    }
+  };
+
+  /**
   * Delete patient interaction visit attribute
   * @returns {void}
   */
   deletePatientInteraction(): void {
-    this.visitService.deleteAttribute(this.visit.uuid, this.patientInteractionForm.value.uuid).subscribe(() => {
-      this.patientInteractionForm.patchValue({ present:false, spoken: null, uuid: null, callStatus: null, reason: null });
+    this.visitService.deleteAttribute(this.visit.uuid, this.patientCallStatusForm.value.uuid).subscribe(() => {
+      this.patientCallStatusForm.patchValue({ patientPresent:false, spoken: null, uuid: null, callStatus: null, reason: null });
     });
   }
 
@@ -1130,67 +1135,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   deleteDiagnosis(index: number, uuid: string): void {
     this.diagnosisService.deleteObs(uuid).subscribe(() => {
       this.existingDiagnosis.splice(index, 1);
-    });
-  }
-
-  /**
-  * Toggle notes add form, show/hide add more notes button
-  * @returns {void}
-  */
-  toggleNote(): void {
-    this.addMoreNote = !this.addMoreNote;
-    this.addNoteForm.reset();
-  }
-
-  /**
-  * Get notes for the visit
-  * @returns {void}
-  */
-  checkIfNotePresent(): void {
-    this.notes = [];
-    this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptNote).subscribe((response: ObsApiResponseModel) => {
-      response.results.forEach((obs: ObsModel) => {
-        if (obs.encounter.visit.uuid === this.visit.uuid) {
-          this.notes.push(obs);
-        }
-      });
-    });
-  }
-
-  /**
-  * Save note
-  * @returns {void}
-  */
-  addNote(): void {
-    if (this.addNoteForm.invalid) {
-      this.toastr.warning(this.translateService.instant('Please enter note text to add'), this.translateService.instant('Invalid note'));
-      return;
-    }
-    if (this.notes.find((o: ObsModel) => o.value === this.addNoteForm.value.note)) {
-      this.toastr.warning(this.translateService.instant('Note already added, please add another note.'), this.translateService.instant('Already Added'));
-      return;
-    }
-    this.encounterService.postObs({
-      concept: conceptIds.conceptNote,
-      person: this.visit.patient.uuid,
-      obsDatetime: new Date(),
-      value: this.addNoteForm.value.note,
-      encounter: this.visitNotePresent.uuid
-    }).subscribe((res: ObsModel) => {
-      this.notes.push({ uuid: res.uuid, value: this.addNoteForm.value.note });
-      this.addNoteForm.reset();
-    });
-  }
-
-  /**
-  * Delete note for a given index and uuid
-  * @param {number} index - Index
-  * @param {string} uuid - Note obs uuid
-  * @returns {void}
-  */
-  deleteNote(index: number, uuid: string): void {
-    this.diagnosisService.deleteObs(uuid).subscribe(() => {
-      this.notes.splice(index, 1);
     });
   }
 
@@ -1920,9 +1864,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     const status = (event.target as HTMLInputElement).getAttribute('data-value');
   
     this.reasonsList = this.reasons[status] || [];
-    this.patientInteractionForm.patchValue({ reason: null });
+    this.patientCallStatusForm.patchValue({ reason: null });
   
-    setTimeout(() => this.ngSelectComponent?.open(), 0);
+    setTimeout(() => this.reasonSelectComponent?.open(), 0);
   }
 
   /**
@@ -1940,25 +1884,4 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     return subSection ? subSection.is_enabled : false;
   }
 
-  /**
-   * @returns {boolean} - True if the form can be saved, false otherwise.
-   */
-  canSavePatientInteractionForm(): boolean {
-    const form = this.patientInteractionForm;
-    const bothTrue = this.isSubSectionEnabled('patient_interaction', 'HW') && this.isSubSectionEnabled('patient_interaction', 'Patient') && !form.value.present && this.appConfigService?.patient_visit_summary?.hw_interaction;
-    const patientInteractionValid = !form.value.present && form.get('spoken')?.valid && form.get('callStatus')?.valid && form.get('reason')?.valid && !bothTrue;
-    const hwInteractionValid = this.appConfigService?.patient_visit_summary?.hw_interaction && form.get('hwSpoken')?.valid && form.get('comment')?.valid && !bothTrue;
-  
-    return bothTrue ? (form.value.spoken && form.value.callStatus && form.value.reason && form.value.hwSpoken && form.value.comment) : patientInteractionValid || hwInteractionValid;
-  }
-
-  /**
-   * @returns {boolean} - True if the save button should be shown, false otherwise.
-   */
-  canShowSaveButton(): boolean {
-    const hwEnabled = this.isSubSectionEnabled('patient_interaction', 'HW');
-    const patientEnabled = this.isSubSectionEnabled('patient_interaction', 'Patient');
-  
-    return (hwEnabled && !patientEnabled && !this.patientInteractionForm.value.hwPresent && this.appConfigService?.patient_visit_summary?.hw_interaction) || (patientEnabled && !hwEnabled && !this.patientInteractionForm.value.present) || (hwEnabled && patientEnabled);
-  }
 }
