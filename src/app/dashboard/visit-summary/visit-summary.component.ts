@@ -295,7 +295,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     this.pvsConfigs = this.appConfigService.patient_visit_sections;
     this.patientInteraction = this.appConfigService.patient_visit_sections;
     this.isMCCUser = !!this.rolesService.getRole('ORGANIZATIONAL:MCC');
-    console.log("CALSL", this.isMCCUser);
   }
 
   ngOnInit(): void {
