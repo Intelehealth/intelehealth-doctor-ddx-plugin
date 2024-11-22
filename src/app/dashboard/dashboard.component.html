@@ -72,7 +72,7 @@
                 <h6 class="mb-0 ml-2">{{'Appointments' | translate}} ({{appointments.length ? appointments.length : 0}})</h6>
                 <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon" matTooltip="{{'Scheduled appointments' | translate}}" matTooltipPosition="right" data-test-id="matIcoHelpAppointment">help_outline</mat-icon>
                 <div class="ml-auto filter-search-container">
-                  <button mat-stroked-button [matMenuTriggerFor]="filterMenu1" class="filter-btn d-flex" (click)="$event.stopPropagation();">
+                  <button mat-stroked-button [matMenuTriggerFor]="filterMenu1" class="filter-btn" (click)="$event.stopPropagation();">
                     <img src="assets/svgs/filter.svg" alt=""> {{'Filter' | translate}}
                   </button>
                   <mat-menu #filterMenu1="matMenu" class="custom-menu" [hasBackdrop]="true" xPosition="before">
@@ -137,10 +137,10 @@
                   <div class="input-group search-bar ml-auto" (click)="$event.stopPropagation();">
                     <input type="text" #apSearchInput class="form-control" placeholder="{{ 'Search Appointments' | translate }}" aria-label="search1" aria-describedby="basic-addon1" (keyup)="applyFilter1($event)" (keydown.Space)="$event.stopPropagation()" (keydown.Enter)="$event.stopPropagation()" data-test-id="etSearchAppointmentDashboard">
                     <div class="input-group-append">
-                      <span class="input-group-text" id="basic-addon1" *ngIf="!dataSource1.filter">
+                      <span class="input-group-text" id="basic-addon1" *ngIf="!isFilterApplied1">
                         <img src="assets/svgs/search-icon.svg" alt="" width="20px" height="20px">
                       </span>
-                      <button data-test-id="btnResetApSerach" mat-icon-button aria-label="Reset appointment search" *ngIf="dataSource1.filter" (click)="clearFilter('Appointment')">
+                      <button data-test-id="btnResetApSerach" mat-icon-button aria-label="Reset appointment search" *ngIf="isFilterApplied1" (click)="clearFilter('Appointment')">
                         <mat-icon class="ml-0" style="line-height: normal;">close</mat-icon>
                       </button>
                     </div>
@@ -233,7 +233,7 @@
                 <h6 class="mb-0 ml-2"> {{ 'Priority visits'| translate }} ({{priorityVisitsCount ? priorityVisitsCount : 0}})</h6>
                 <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon" matTooltip="{{'High priority visit' | translate}}" matTooltipPosition="right" data-test-id="matIcoHelpPriority">help_outline</mat-icon>
                 <div class="ml-auto filter-search-container">
-                  <button mat-stroked-button [matMenuTriggerFor]="filterMenu2" class="filter-btn d-flex" (click)="$event.stopPropagation();">
+                  <button mat-stroked-button [matMenuTriggerFor]="filterMenu2" class="filter-btn" (click)="$event.stopPropagation();">
                     <img src="assets/svgs/filter.svg" alt=""> {{'Filter' | translate}}
                   </button>
                   <mat-menu #filterMenu2="matMenu" class="custom-menu" [hasBackdrop]="true" xPosition="before">
@@ -298,10 +298,10 @@
                   <div class="input-group search-bar" (click)="$event.stopPropagation();">
                     <input type="text" #prSearchInput class="form-control" placeholder="{{ 'Search Priority Visits' | translate }}" aria-label="search1" aria-describedby="basic-addon1" (keyup)="applyFilter2($event)" (keydown.Space)="$event.stopPropagation()" (keydown.Enter)="$event.stopPropagation()" data-test-id="etSearchPriorityDashboard">
                     <div class="input-group-append">
-                      <span class="input-group-text" id="basic-addon1" *ngIf="!dataSource2.filter">
+                      <span class="input-group-text" id="basic-addon1" *ngIf="!isFilterApplied2">
                         <img src="assets/svgs/search-icon.svg" alt="" width="20px" height="20px">
                       </span>
-                      <button data-test-id="btnResetPrSerach" mat-icon-button aria-label="Reset priority search" *ngIf="dataSource2.filter" (click)="clearFilter('Priority')">
+                      <button data-test-id="btnResetPrSerach" mat-icon-button aria-label="Reset priority search" *ngIf="isFilterApplied2" (click)="clearFilter('Priority')">
                         <mat-icon class="ml-0" style="line-height: normal;">close</mat-icon>
                       </button>
                     </div>
@@ -381,7 +381,7 @@
                 <h6 class="mb-0 ml-2"> {{'Awaiting visits'|translate}} ({{awaitingVisitsCount ? awaitingVisitsCount : 0}})</h6>
                 <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon" matTooltip="{{'General Uploaded Visits' | translate}}" matTooltipPosition="right" data-test-id="matIcoHelpAwaiting">help_outline</mat-icon>
                 <div class="ml-auto filter-search-container">
-                  <button mat-stroked-button [matMenuTriggerFor]="filterMenu3" class="filter-btn d-flex" (click)="$event.stopPropagation();">
+                  <button mat-stroked-button [matMenuTriggerFor]="filterMenu3" class="filter-btn" (click)="$event.stopPropagation();">
                     <img src="assets/svgs/filter.svg" alt=""> {{'Filter' | translate}}
                   </button>
                   <mat-menu #filterMenu3="matMenu" class="custom-menu" [hasBackdrop]="true" xPosition="before">
@@ -438,7 +438,7 @@
                       </div>
 
                     <div class="action-buttons">
-                      <button mat-button class="reset-btn" (click)="resetDate3(); $event.stopPropagation();">{{ 'Reset'| translate }}</button>
+                      <button mat-button class="reset-btn" (click)="resetDate3()">{{ 'Reset'| translate }}</button>
                       <div *ngIf="mode === 'date'">
                         <button mat-button class="apply-btn" (click)="applyDateOrRangeFilter3()">{{ 'Date Apply'| translate }}</button>
                       </div>
@@ -450,10 +450,10 @@
                   <div class="input-group search-bar ml-auto" (click)="$event.stopPropagation();">
                     <input type="text" #awSearchInput class="form-control" placeholder="{{ 'Search Awaiting Visits' | translate }}" aria-label="Username" aria-describedby="basic-addon1" (keyup)="applyFilter3($event)" (keydown.Space)="$event.stopPropagation()" (keydown.Enter)="$event.stopPropagation()" data-test-id="etSearchAwaitingDashboard">
                     <div class="input-group-append">
-                      <span class="input-group-text" id="basic-addon1" *ngIf="!dataSource3.filter">
+                      <span class="input-group-text" id="basic-addon1" *ngIf="!isFilterApplied3">
                         <img src="assets/svgs/search-icon.svg" alt="" width="20px" height="20px">
                       </span>
-                      <button data-test-id="btnResetAwSerach" mat-icon-button aria-label="Reset awaiting search" *ngIf="dataSource3.filter" (click)="clearFilter('Awaiting')">
+                      <button data-test-id="btnResetAwSerach" mat-icon-button aria-label="Reset awaiting search" *ngIf="isFilterApplied3" (click)="clearFilter('Awaiting')">
                         <mat-icon class="ml-0" style="line-height: normal;">close</mat-icon>
                       </button>
                     </div>
@@ -542,7 +542,7 @@
                 <h6 class="mb-0 ml-2">  {{'In-progress visits'| translate }} ({{inprogressVisitsCount ? inprogressVisitsCount : 0}})</h6>
                 <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon" matTooltip="{{'Visits going through the consultation' | translate}}" matTooltipPosition="right" data-test-id="matIcoHelpInprogress">help_outline</mat-icon>
                 <div class="ml-auto filter-search-container">
-                  <button mat-stroked-button [matMenuTriggerFor]="filterMenu4" class="filter-btn d-flex" (click)="$event.stopPropagation();">
+                  <button mat-stroked-button [matMenuTriggerFor]="filterMenu4" class="filter-btn" (click)="$event.stopPropagation();">
                     <img src="assets/svgs/filter.svg" alt=""> {{'Filter' | translate}}
                   </button>
                   <mat-menu #filterMenu4="matMenu" class="custom-menu" [hasBackdrop]="true" xPosition="before">
@@ -595,7 +595,7 @@
                       </form>
                     </div>
                     <div class="action-buttons">
-                      <button mat-button class="reset-btn" (click)="resetDate4(); $event.stopPropagation();">{{ 'Reset'| translate }}</button>
+                      <button mat-button class="reset-btn" (click)="resetDate4()">{{ 'Reset'| translate }}</button>
                       <div *ngIf="mode === 'date'">
                         <button mat-button class="apply-btn" (click)="applyDateOrRangeFilter4()">{{ 'Date Apply'| translate }}</button>
                       </div>
@@ -608,10 +608,10 @@
                   <div class="input-group search-bar ml-auto" (click)="$event.stopPropagation();">
                     <input type="text" #ipSearchInput class="form-control" placeholder="{{ 'Search In-progress Visits' | translate }}" aria-label="Username" aria-describedby="basic-addon1" (keyup)="applyFilter4($event)" (keydown.Space)="$event.stopPropagation()" (keydown.Enter)="$event.stopPropagation()" data-test-id="etSearchInprogressDashboard">
                     <div class="input-group-append">
-                      <span class="input-group-text" id="basic-addon1" *ngIf="!dataSource4.filter">
+                      <span class="input-group-text" id="basic-addon1" *ngIf="!isFilterApplied4">
                         <img src="assets/svgs/search-icon.svg" alt="" width="20px" height="20px">
                       </span>
-                      <button data-test-id="btnResetIpSerach" mat-icon-button aria-label="Reset inprogress search" *ngIf="dataSource4.filter" (click)="clearFilter('In-progress')">
+                      <button data-test-id="btnResetIpSerach" mat-icon-button aria-label="Reset inprogress search" *ngIf="isFilterApplied4" (click)="clearFilter('In-progress')">
                         <mat-icon class="ml-0" style="line-height: normal;">close</mat-icon>
                       </button>
                     </div>

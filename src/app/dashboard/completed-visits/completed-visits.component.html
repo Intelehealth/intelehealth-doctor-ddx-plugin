@@ -9,7 +9,7 @@
           </h6>
           <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon" matTooltip="{{ 'Ended visits after prescription' | translate }}" matTooltipPosition="right" data-test-id="matIcoHelpCompleted">help_outline</mat-icon>
           <div class="ml-auto filter-search-container">
-            <button mat-stroked-button [matMenuTriggerFor]="filterMenu5" class="filter-btn d-flex" (click)="$event.stopPropagation();">
+            <button mat-stroked-button [matMenuTriggerFor]="filterMenu5" class="filter-btn" (click)="$event.stopPropagation();">
               <img src="assets/svgs/filter.svg" alt=""> {{'Filter' | translate}}
             </button>
             <mat-menu #filterMenu5="matMenu" class="custom-menu" [hasBackdrop]="true" xPosition="before">
@@ -71,7 +71,7 @@
                 </div>
               </div>
             </mat-menu>
-            <div class="input-group search-bar ml-auto d-flex" (click)="$event.stopPropagation();">
+            <div class="input-group search-bar ml-auto" (click)="$event.stopPropagation();">
               <input type="text" #ipSearchInput class="form-control" placeholder="{{ 'Search Completed Visits' | translate }}" aria-label="Username" aria-describedby="basic-addon1" (keyup)="applyFilter($event)" (keydown.Space)="$event.stopPropagation()" (keydown.Enter)="$event.stopPropagation()" data-test-id="etSearchCompletedDashboard">
               <div class="input-group-append">
                 <span class="input-group-text" id="basic-addon1" *ngIf="!tblDataSource.filter">

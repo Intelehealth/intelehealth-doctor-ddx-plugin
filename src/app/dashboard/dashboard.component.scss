@@ -26,6 +26,11 @@
   box-shadow: 0px 4px 8px 0px rgba(127, 123, 146, 0.16);
 }
 
+.intel-accordion-con .mat-expansion-panel .mat-expansion-panel-header.mat-expanded {
+  .filter-btn {
+    display: flex;
+  }
+}
 
 .filter-btn {
   align-items: center;

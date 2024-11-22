@@ -127,6 +127,11 @@ export class DashboardComponent implements OnInit {
   filteredDateAndRangeForm2: FormGroup;
   filteredDateAndRangeForm3: FormGroup;
   filteredDateAndRangeForm4: FormGroup;
+
+  isFilterApplied1 = false;
+  isFilterApplied2 = false;
+  isFilterApplied3 = false;
+  isFilterApplied4 = false;
   
   @ViewChild(MatMenuTrigger) menuTrigger: MatMenuTrigger;
 
@@ -694,6 +699,7 @@ export class DashboardComponent implements OnInit {
   applyFilter1(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource1.filter = filterValue.trim().toLowerCase();
+    this.isFilterApplied1 = true;
   }
 
   /**
@@ -705,6 +711,7 @@ export class DashboardComponent implements OnInit {
     this.dataSource2.filter = filterValue.trim().toLowerCase();
     this.tempPaginator1.firstPage();
     this.priorityPaginator?.firstPage();
+    this.isFilterApplied2 = true;
   }
 
   /**
@@ -716,6 +723,7 @@ export class DashboardComponent implements OnInit {
     this.dataSource3.filter = filterValue.trim().toLowerCase();
     this.tempPaginator2?.firstPage();
     this.awaitingPaginator?.firstPage();
+    this.isFilterApplied3 = true;
   }
 
   /**
@@ -727,6 +735,7 @@ export class DashboardComponent implements OnInit {
     this.dataSource4.filter = filterValue.trim().toLowerCase();
     this.tempPaginator3.firstPage();
     this.inprogressPaginator?.firstPage();
+    this.isFilterApplied4 = true;
   }
 
   /**
@@ -739,18 +748,22 @@ export class DashboardComponent implements OnInit {
       case 'Appointment':
         this.dataSource1.filter = null;
         this.apSearchElement.nativeElement.value = "";
+        this.isFilterApplied1 = false;
         break;
       case 'Priority':
         this.dataSource2.filter = null;
         this.prSearchElement.nativeElement.value = "";
+        this.isFilterApplied2 = false;
         break;
       case 'Awaiting':
         this.dataSource3.filter = null;
         this.awSearchElement.nativeElement.value = "";
+        this.isFilterApplied3 = false;
         break;
       case 'In-progress':
         this.dataSource4.filter = null;
         this.ipSearchElement.nativeElement.value = "";
+        this.isFilterApplied4 = false;
         break;
       default:
         break;

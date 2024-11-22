@@ -8,6 +8,9 @@
     box-shadow: 0px 4px 8px 0px rgba(127, 123, 146, 0.16);
   }
   
+  .mat-expansion-panel.mat-expanded .mat-expansion-panel-header .filter-btn {
+    display: flex !important;
+  }
   
   .filter-btn {
     align-items: center;
