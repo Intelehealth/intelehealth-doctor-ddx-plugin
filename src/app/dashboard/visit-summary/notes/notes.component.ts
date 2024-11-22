@@ -23,7 +23,8 @@ export class NotesComponent implements OnInit {
   }
   @Input() visitNotePresent: EncounterModel;
   @Input() title: string = 'notes';
-
+  @Input() isMCCUser: boolean = false;
+ 
   _visit: VisitModel;
   addNoteForm: FormGroup = new FormGroup({
     note: new FormControl(null, [Validators.required])
