@@ -70,6 +70,7 @@ export class DashboardComponent implements OnInit {
   dataSource4 = new MatTableDataSource<any>();
 
   baseUrl: string = environment.baseURL;
+  isKCDOServer: boolean = environment.isKCDOServer;
   appointments: AppointmentModel[] = [];
   priorityVisits: CustomVisitModel[] = [];
   awaitingVisits: CustomVisitModel[] = [];
@@ -202,7 +203,9 @@ export class DashboardComponent implements OnInit {
       if (this.pvs.appointment_button && !this.isMCCUser) {
         this.getAppointments();
       }
-      this.getAwaitingVisits(1);
+      if(!this.isKCDOServer){
+        this.getAwaitingVisits(1);
+      }
       if (this.pvs.priority_visit_section) {
         this.getPriorityVisits(1);
       }
@@ -217,6 +220,11 @@ export class DashboardComponent implements OnInit {
 
     this.socket.initSocket(true);
     this.initHelpTour();
+
+    if(this.isKCDOServer){
+      this.displayedColumns1 = ['TMH_patient_id', 'name', 'age', 'starts_in','actions'];
+      this.displayedColumns4 = ['TMH_patient_id', 'name', 'age', 'prescription_started'];
+    }
   }
 
   initHelpTour(){
@@ -459,6 +467,7 @@ export class DashboardComponent implements OnInit {
           visit.visit_created = visit?.date_created ? this.getCreatedAt(visit.date_created.replace('Z','+0530')) : this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
           visit.prescription_started = this.getEncounterCreated(visit, visitTypes.VISIT_NOTE);
           visit.person.age = this.calculateAge(visit.person.birthdate);
+          visit.TMH_patient_id = this.getAttribute(visit, "TMH Case Number");
           this.inProgressVisits.push(visit);
         }
         this.dataSource4.data = [...this.inProgressVisits];
@@ -473,6 +482,21 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  getAttribute(data: any, attributeName: string): { name: string; value: string } | null {
+    if (data?.person_attribute && Array.isArray(data.person_attribute)) {
+      const attribute = data.person_attribute.find(
+        (attr: any) => attr.person_attribute_type?.name === attributeName
+      );
+      if (attribute) {
+        return {
+          name: attribute.person_attribute_type.name,
+          value: attribute.value
+        };
+      }
+    }
+    return null;
+  }
+    
   /**
   * Callback for page change event and Get inprogress visit for a selected page index and page size
   * @param {PageEvent} event - onerror event

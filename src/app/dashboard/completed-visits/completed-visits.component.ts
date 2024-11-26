@@ -54,6 +54,7 @@ export class CompletedVisitsComponent {
   filteredDateAndRangeForm: FormGroup;
   
   @ViewChild(MatMenuTrigger) menuTrigger: MatMenuTrigger;
+  isKCDOServer: boolean = environment.isKCDOServer;
   
   constructor(){
     this.filteredDateAndRangeForm = new FormGroup({
@@ -61,6 +62,9 @@ export class CompletedVisitsComponent {
       startDate: new FormControl(null, Validators.required),
       endDate: new FormControl(null, Validators.required),
     });
+    if(this.isKCDOServer){
+      this.displayedColumns = ['TMH_patient_id', 'name', 'age', 'visit_completed'];
+    }
   }
 
   checkPatientRegField(fieldName): boolean {
