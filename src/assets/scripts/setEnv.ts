@@ -80,7 +80,7 @@ const environmentFileContent = `
     recordsPerPage: 1000,
     abhaEnabled: ${process.env.ABHA_ENABLED},
     configPublicURL: '${process.env.CONFIG_PUBLIC_URL}',
-    isKCDOServer: '${process.env.IS_KCDO_SERVER}',
+    isKCDOServer: ${process.env.IS_KCDO_SERVER},
   };
 `;
 
