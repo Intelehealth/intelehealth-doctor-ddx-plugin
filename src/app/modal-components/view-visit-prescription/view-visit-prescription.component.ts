@@ -1365,6 +1365,18 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
           case 'Social Category':
             value = this.getPersonAttributeValue('Caste');
             break;
+          case 'TMH Case Number':
+            value = this.getPersonAttributeValue('TMH Case Number');
+            break;
+          case 'Request ID':
+            value = this.getPersonAttributeValue('Request ID');
+            break;
+          case 'Discipline':
+            value = this.getPersonAttributeValue('Discipline');
+            break;
+          case 'Department':
+            value = this.getPersonAttributeValue('Department');
+            break;
           default:
             break;
         }
