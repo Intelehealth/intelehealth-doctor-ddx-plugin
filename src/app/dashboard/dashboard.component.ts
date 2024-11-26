@@ -30,7 +30,7 @@ import { HelpTourService } from '../services/help-tour.service';
 export class DashboardComponent implements OnInit {
 
   showAll: boolean = true;
-  displayedColumns1: string[] = ['name', 'age', 'starts_in', 'location', 'cheif_complaint', 'telephone','actions'];
+  displayedColumns1: string[] = ['name', 'age', 'starts_in', 'location', 'cheif_complaint', 'drName', 'telephone','actions'];
   displayedColumns2: string[] = ['name', 'age', 'location', 'cheif_complaint', 'visit_created'];
   displayedColumns3: string[] = ['name', 'age', 'location', 'cheif_complaint', 'patient_type', 'visit_created'];
   displayedColumns4: string[] = ['name', 'age', 'location', 'cheif_complaint', 'prescription_started'];
@@ -121,8 +121,13 @@ export class DashboardComponent implements OnInit {
         this.patientRegFields.push(...this.appConfigService.patient_registration[obj].filter((e: { is_enabled: any; })=>e.is_enabled).map((e: { name: any; })=>e.name));
       });
       this.pvs = { ...this.appConfigService.patient_visit_summary }; 
-      this.pvs.appointment_button = this.pvs.appointment_button && !this.isMCCUser;
-      this.displayedColumns1 = this.displayedColumns1.filter(col=>(col!=='age' || this.checkPatientRegField('Age')));
+      this.pvs.appointment_button = this.pvs.appointment_button;
+      this.displayedColumns1 = this.displayedColumns1.filter(col=> {
+        if(col === 'drName' && !this.isMCCUser) return false;
+        if(col === 'age') return this.checkPatientRegField('Age');
+        return true;
+      });
+      console.log("this.displayedColumns1", this.displayedColumns1, this.isMCCUser)
       this.displayedColumns2 = this.displayedColumns2.filter(col=>(col!=='age' || this.checkPatientRegField('Age')));
       this.displayedColumns3 = this.displayedColumns3.filter(col=>(col!=='age' || this.checkPatientRegField('Age')));
       this.displayedColumns4 = this.displayedColumns4.filter(col=>(col!=='age' || this.checkPatientRegField('Age')));
@@ -142,7 +147,7 @@ export class DashboardComponent implements OnInit {
       } else {
         this.router.navigate(['/dashboard/get-started']);
       }
-      if (this.pvs.appointment_button && !this.isMCCUser) {
+      if (this.pvs.appointment_button) {
         this.getAppointments();
       }
       this.getAwaitingVisits(1);
@@ -445,7 +450,7 @@ export class DashboardComponent implements OnInit {
   */
   getAppointments() {
     this.appointments = [];
-    this.appointmentService.getUserSlots(getCacheData(true, doctorDetails.USER).uuid, moment().startOf('year').format('DD/MM/YYYY'), moment().endOf('year').format('DD/MM/YYYY'))
+    this.appointmentService.getUserSlots(getCacheData(true, doctorDetails.USER).uuid, moment().startOf('year').format('DD/MM/YYYY'), moment().endOf('year').format('DD/MM/YYYY'), this.isMCCUser ? this.specialization : null)
       .subscribe((res: ApiResponseModel) => {
         let appointmentsdata = res.data;
         appointmentsdata.forEach((appointment: AppointmentModel) => {
