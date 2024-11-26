@@ -124,6 +124,13 @@
                 <p data-test-id="etPatient">{{ getPersonAttributeValue('Emergency Contact Type') }}</p>
               </div>
             </div>
+
+            <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('Email') && getPersonAttributeValue('Email') !== 'NA'">
+              <div class="patient-info-item mb-3">
+                <h6 data-test-id="etPatient">{{'Email' | translate}}</h6>
+                <p data-test-id="etPatient">{{ getPersonAttributeValue('Email') }}</p>
+              </div>
+            </div>
           </div>
 
           <button (click)="collapsedButton()" class="btn">
@@ -223,6 +230,34 @@
                   <div class="patient-info-item mb-3">
                     <h6 data-test-id="etPatient">{{'Social Category' | translate}}</h6>
                     <p data-test-id="etPatient">{{ getPersonAttributeValue('Caste') }}</p>
+                  </div>
+                </div>
+
+                <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('TMH Case Number') && getPersonAttributeValue('TMH Case Number') !== 'NA'">
+                  <div class="patient-info-item mb-3">
+                    <h6 data-test-id="etPatient">{{'TMH Case Number' | translate}}</h6>
+                    <p data-test-id="etPatient">{{ getPersonAttributeValue('TMH Case Number') }}</p>
+                  </div>
+                </div>
+
+                <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('Request ID') && getPersonAttributeValue('Request ID') !== 'NA'">
+                  <div class="patient-info-item mb-3">
+                    <h6 data-test-id="etPatient">{{'Request ID' | translate}}</h6>
+                    <p data-test-id="etPatient">{{ getPersonAttributeValue('Request ID') }}</p>
+                  </div>
+                </div>
+
+                <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('Discipline') && getPersonAttributeValue('Discipline') !== 'NA'">
+                  <div class="patient-info-item mb-3">
+                    <h6 data-test-id="etPatient">{{'Discipline' | translate}}</h6>
+                    <p data-test-id="etPatient">{{ getPersonAttributeValue('Discipline') }}</p>
+                  </div>
+                </div>
+
+                <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('Department') && getPersonAttributeValue('Department') !== 'NA'">
+                  <div class="patient-info-item mb-3">
+                    <h6 data-test-id="etPatient">{{'Department' | translate}}</h6>
+                    <p data-test-id="etPatient">{{ getPersonAttributeValue('Department') }}</p>
                   </div>
                 </div>
               </div>
@@ -834,7 +869,7 @@
                 [formGroup]="patientInteractionForm"
                 (ngSubmit)="savePatientInteraction()"
               >
-                <ul class="items-list">
+                <ul class="items-list" *ngIf="!isMCCUser">
                   <li>
                     <div class="row">
                       <label class="col-sm-3 col-form-label"
@@ -912,7 +947,7 @@
                     </div>
                   </li>
                 </ul>
-                <div *ngIf="!patientInteractionForm.value.hwPresent && appConfigService?.patient_visit_summary?.hw_interaction" class="form-group">
+                <div *ngIf="!patientInteractionForm.value.hwPresent && appConfigService?.patient_visit_summary?.hw_interaction && !isMCCUser" class="form-group">
                   <label for="note"
                     ><b>{{'Comment'|translate}}*&nbsp;</b>
                     </label
@@ -928,6 +963,7 @@
                 <div
                   class="form-group mb-0 mt-3"
                   *ngIf="
+                    !isMCCUser &&
                     isVisitNoteProvider &&
                     !visitEnded &&
                     (!patientInteractionForm.value.hwPresent && appConfigService?.patient_visit_summary?.hw_interaction)
@@ -962,7 +998,7 @@
                             type="button"
                             mat-icon-button
                             class="float-right"
-                            *ngIf="isVisitNoteProvider && !visitEnded"
+                            *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded"
                             (click)="deleteHWInteraction()"
                             data-test-id="btnDeleteHWtInteraction"
                           >
@@ -972,6 +1008,10 @@
                       </tr>
                     </tbody>
                   </table>
+                </div>
+                <div class="no-docs text-center font-weight-bold" 
+                  *ngIf="isMCCUser && !patientInteractionForm.value.present && !patientInteractionForm.value.hwPresent">
+                  {{ "Patient Interaction not present" | translate }}
                 </div>
               </form>
             </mat-expansion-panel>
@@ -1012,7 +1052,7 @@
                           <button
                             mat-icon-button
                             class="float-right"
-                            *ngIf="isVisitNoteProvider && !visitEnded"
+                            *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded"
                             (click)="deleteDiagnosis(i, d.uuid)"
                             data-test-id="{{'btnDeleteDiagnosisVisitSummary' + i}}"
                           >
@@ -1021,7 +1061,7 @@
                         </td>
                       </tr>
                     </ng-container>
-                    <ng-container *ngIf="isVisitNoteProvider && !visitEnded">
+                    <ng-container *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded">
                       <tr *ngIf="addMoreDiagnosis">
                         <td colspan="4" class="px-0">
                           <div class="form-group mb-0">
@@ -1042,7 +1082,7 @@
                 </table>
               </div>
 
-              <ng-container *ngIf="isVisitNoteProvider && !visitEnded">
+              <ng-container *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded">
                 <form
                   [formGroup]="diagnosisForm"
                   (ngSubmit)="saveDiagnosis()"
@@ -1147,7 +1187,7 @@
                       </div>
                     </li>
                   </ul>
-                  <div class="form-group mb-0">
+                  <div class="form-group mb-0" *ngIf="!isMCCUser">
                     <button
                       type="button"
                       class="white-btn mr-2 mt-3"
@@ -1167,10 +1207,10 @@
                   </div>
                 </form>
               </ng-container>
-            </mat-expansion-panel>
+            </mat-expansion-panel>  
 
             <app-notes [title]="'Notes'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded" [visit]="visit"
-              [visitNotePresent]="visitNotePresent"></app-notes>
+              [visitNotePresent]="visitNotePresent" [isMCCUser]="isMCCUser"></app-notes>
 
             <mat-expansion-panel
               [expanded]="true"
@@ -1202,7 +1242,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <ng-container *ngIf="medicines.length">
+                      <ng-container *ngIf="medicines.length else noMedicines">
                         <tr *ngFor="let m of medicines; let i = index">
                           <td>{{ m.drug }}</td>
                           <td>{{ m.strength }}</td>
@@ -1214,7 +1254,7 @@
                               type="button"
                               mat-icon-button
                               class="float-right"
-                              *ngIf="isVisitNoteProvider && !visitEnded"
+                              *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded"
                               (click)="deleteMedicine(i, m.uuid)"
                               data-test-id="{{'btnDeleteMedVisitSummary'+i}}"
                             >
@@ -1224,14 +1264,14 @@
                         </tr>
                       </ng-container>
                       <ng-template #noMedicines>
-                        <tr>
+                        <tr *ngIf="isMCCUser">
                           <td colspan="6" class="text-center font-weight-bold">
                             {{'No medicines added!'|translate}}
                           </td>
                         </tr>
                       </ng-template>
                       <ng-container *ngIf="isVisitNoteProvider && !visitEnded">
-                        <tr *ngIf="addMoreMedicine">
+                        <tr *ngIf="addMoreMedicine && !isMCCUser">
                           <td colspan="6" class="px-0">
                             <div class="form-group mb-0">
                               <button
@@ -1246,7 +1286,7 @@
                             </div>
                           </td>
                         </tr>
-                        <tr *ngIf="!addMoreMedicine">
+                        <tr *ngIf="!addMoreMedicine && !isMCCUser">
                           <td>
                             <div class="form-group mb-0">
                               <input
@@ -1311,7 +1351,7 @@
                             </div>
                           </td>
                         </tr>
-                        <tr *ngIf="!addMoreMedicine">
+                        <tr *ngIf="!addMoreMedicine && !isMCCUser">
                           <td colspan="6" class="border-top-0">
                             <div class="form-group mb-0 float-right">
                               <button
@@ -1340,14 +1380,14 @@
               </form>
 
               <h6 class="list-header mt-3 mb-2">{{'Additional instructions'|translate}}*</h6>
-              <ng-container *ngIf="additionalInstructions.length">
+              <ng-container *ngIf="additionalInstructions.length else noAdditionalInstructions">
                 <ul class="items-list">
                   <li *ngFor="let ai of additionalInstructions; let i = index">
                     <div class="d-flex justify-content-between">
                       <span>{{ ai.value }}</span>
                       <button
                         mat-icon-button
-                        *ngIf="isVisitNoteProvider && !visitEnded"
+                        *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded"
                         (click)="deleteAdditionalInstruction(i, ai.uuid)"
                         data-test-id="{{'btnDeleteAIVisitSummary'+i}}"
                       >
@@ -1359,11 +1399,11 @@
               </ng-container>
 
               <ng-template #noAdditionalInstructions>
-                <div class="no-docs text-center font-weight-bold">
+                <div class="no-docs text-center font-weight-bold" *ngIf="isMCCUser">
                   {{'No additional instructions added!' |translate}}
                 </div>
               </ng-template>
-              <ng-container *ngIf="isVisitNoteProvider && !visitEnded">
+              <ng-container *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded">
                 <div class="form-group" *ngIf="addMoreAdditionalInstruction">
                   <button
                     type="button"
@@ -1427,7 +1467,7 @@
                 <mat-icon>{{ panel5.expanded ? "remove" : "add" }}</mat-icon>
               </mat-expansion-panel-header>
 
-              <ul class="items-list" *ngIf="advices.length">
+              <ul class="items-list" *ngIf="advices.length else noAdvices">
                 <li *ngFor="let ad of advices; let i = index">
                   <div class="d-flex justify-content-between">
                     <span>{{ ad.value }}</span>
@@ -1435,7 +1475,7 @@
                       mat-icon-button
                       (click)="deleteAdvice(i, ad.uuid)"
                       data-test-id="{{'btnDeleteAdviceVisitSummary'+i}}"
-                      *ngIf="isVisitNoteProvider && !visitEnded"
+                      *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded"
                     >
                       <img src="assets/svgs/delete-icon.svg" alt="" />
                     </button>
@@ -1443,11 +1483,11 @@
                 </li>
               </ul>
               <ng-template #noAdvices>
-                <div class="no-docs text-center font-weight-bold">
+                <div class="no-docs text-center font-weight-bold" *ngIf="isMCCUser">
                   {{'No advices added!'|translate}}
                 </div>
               </ng-template>
-              <ng-container *ngIf="isVisitNoteProvider && !visitEnded">
+              <ng-container *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded">
                 <div class="form-group mt-3" *ngIf="addMoreAdvice">
                   <button
                     type="button"
@@ -1514,7 +1554,7 @@
                 <mat-icon>{{ panel6.expanded ? "remove" : "add" }}</mat-icon>
               </mat-expansion-panel-header>
 
-              <ul class="items-list" *ngIf="tests.length">
+              <ul class="items-list" *ngIf="tests.length else noTests">
                 <li *ngFor="let t of tests; let i = index">
                   <div class="d-flex justify-content-between">
                     <span>{{ t.value }}</span>
@@ -1522,7 +1562,7 @@
                       mat-icon-button
                       (click)="deleteTest(i, t.uuid)"
                       data-test-id="{{'btnDeleteTestVisitSummary'+i}}"
-                      *ngIf="isVisitNoteProvider && !visitEnded"
+                      *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded"
                     >
                       <img src="assets/svgs/delete-icon.svg" alt="" />
                     </button>
@@ -1530,11 +1570,11 @@
                 </li>
               </ul>
               <ng-template #noTests>
-                <div class="no-docs text-center font-weight-bold">
+                <div class="no-docs text-center font-weight-bold" *ngIf="isMCCUser">
                   {{'No tests added!'|translate}}
                 </div>
               </ng-template>
-              <ng-container *ngIf="isVisitNoteProvider && !visitEnded">
+              <ng-container *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded">
                 <div class="form-group mt-3" *ngIf="addMoreTest">
                   <button
                     type="button"
@@ -1614,7 +1654,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <ng-container *ngIf="referrals.length">
+                      <ng-container *ngIf="referrals.length else noReferrals">
                         <tr *ngFor="let r of referrals; let i = index">
                           <td>{{ (r.speciality) | translate }}</td>
                           <td>{{ (r.facility) | translate }}</td>
@@ -1627,7 +1667,7 @@
                               mat-icon-button
                               (click)="deleteReferral(i, r.uuid)"
                               data-test-id="{{'btnDeleteReferralVisitSummary'+i}}"
-                              *ngIf="isVisitNoteProvider && !visitEnded"
+                              *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded"
                             >
                               <img src="assets/svgs/delete-icon.svg" alt="" />
                             </button>
@@ -1635,13 +1675,13 @@
                         </tr>
                       </ng-container>
                       <ng-template #noReferrals>
-                        <tr>
+                        <tr *ngIf="isMCCUser">
                           <td colspan="6" class="text-center font-weight-bold">
-                            {{'No medicines added!'|translate}}
+                            {{'No referrals added!'|translate}}
                           </td>
                         </tr>
                       </ng-template>
-                      <ng-container *ngIf="isVisitNoteProvider && !visitEnded">
+                      <ng-container *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded">
                         <tr *ngIf="addMoreReferral">
                           <td colspan="6" class="px-0">
                             <div class="form-group mb-0">
@@ -1657,7 +1697,7 @@
                             </div>
                           </td>
                         </tr>
-                        <tr *ngIf="!addMoreReferral">
+                        <tr *ngIf="!addMoreReferral && !isMCCUser">
                           <td>
                             <div class="form-group mb-0">
                               <ng-select
@@ -1730,7 +1770,7 @@
                             </div>
                           </td>
                         </tr>
-                        <tr *ngIf="!addMoreReferral">
+                        <tr *ngIf="!addMoreReferral && !isMCCUser">
                           <td colspan="6" class="border-top-0">
                             <div class="form-group mb-0 float-right">
                               <button
@@ -1775,7 +1815,7 @@
                 <mat-icon>{{ panel8.expanded ? "remove" : "add" }}</mat-icon>
               </mat-expansion-panel-header>
 
-              <form [formGroup]="followUpForm" (ngSubmit)="saveFollowUp()" *ngIf="!followUpForm.value.present">
+              <form [formGroup]="followUpForm" (ngSubmit)="saveFollowUp()" *ngIf="!followUpForm.value.present && !isMCCUser">
                 <ul class="items-list">
                   <li>
                     <div class="row">
@@ -1932,7 +1972,7 @@
                           mat-icon-button
                           (click)="deleteFollowUp()"
                           data-test-id="btnDeleteFollowUp"
-                          *ngIf="isVisitNoteProvider && !visitEnded"
+                          *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded"
                         >
                           <img src="assets/svgs/delete-icon.svg" alt="" />
                         </button>
@@ -1961,6 +2001,7 @@
               <form
                 [formGroup]="patientCallStatusForm"
                 (ngSubmit)="saveCallStatus()"
+                *ngIf="!isMCCUser"
               >
                 <ul class="items-list">
                   <li>
@@ -2151,7 +2192,7 @@
                             type="button"
                             mat-icon-button
                             class="float-right"
-                            *ngIf="isVisitNoteProvider && !visitEnded"
+                            *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded"
                             (click)="deletePatientInteraction()"
                             data-test-id="btnDeletePatientInteraction"
                           >
@@ -2161,6 +2202,10 @@
                       </tr>
                     </tbody>
                   </table>
+                </div>
+                <div class="no-docs text-center font-weight-bold" 
+                  *ngIf="isMCCUser && !patientCallStatusForm.value.patientPresent">
+                  {{ "Call status not present" | translate }}
                 </div>
               </form>
             </mat-expansion-panel>
@@ -2174,7 +2219,7 @@
         type="button"
         class="blue-btn mr-2 mb-2"
         (click)="sharePrescription()"
-        *ngIf="visitNotePresent && !visitEnded && isVisitNoteProvider"
+        *ngIf="!isMCCUser && visitNotePresent && !visitEnded && isVisitNoteProvider"
         data-test-id="btnSharePrescription"
       >
         {{ visitCompleted ? ('Update'|translate): ('Share'|translate) }} {{'Prescription'|translate}}

@@ -31,6 +31,7 @@ import { ApiResponseModel, DataItemModel, DiagnosisModel, DocImagesModel, Encoun
 import { AppConfigService } from 'src/app/services/app-config.service';
 import { checkIsEnabled, VISIT_SECTIONS } from 'src/app/utils/visit-sections';
 import { NgSelectComponent } from '@ng-select/ng-select';
+import { NgxRolesService } from 'ngx-permissions';
 
 class PickDateAdapter extends NativeDateAdapter {
   format(date: Date, displayFormat: Object): string {
@@ -148,6 +149,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   hasPatientOtherEnabled: boolean = false;
 
   collapsed: boolean = true;
+  isMCCUser: boolean = false;
 
   reasons = {
     'Completed': [
@@ -202,8 +204,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     private translationService: TranslationService,
     private visitSummaryService: VisitSummaryHelperService,
     private mindmapService: MindmapService,
-    public appConfigService: AppConfigService) {
-
+    public appConfigService: AppConfigService,
+    private rolesService: NgxRolesService) {
     Object.keys(this.appConfigService.patient_registration).forEach(obj => {
       this.patientRegFields.push(...this.appConfigService.patient_registration[obj].filter((e: { is_enabled: any; }) => e.is_enabled).map((e: { name: any; }) => e.name));
     });
@@ -292,7 +294,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
 
     this.pvsConfigs = this.appConfigService.patient_visit_sections;
     this.patientInteraction = this.appConfigService.patient_visit_sections;
-
+    this.isMCCUser = !!this.rolesService.getRole('ORGANIZATIONAL:MCC');
   }
 
   ngOnInit(): void {
@@ -361,9 +363,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       if (visit) {
         this.visit = visit;
         if (this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.FLAGGED)) {
-          this.visit['visitUploadTime'] = this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.FLAGGED)['encounterDatetime'];
+          this.visit['visitUploadTime'] = this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.FLAGGED) ? this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.FLAGGED)['encounterDatetime'] : null;
         } else if (this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.ADULTINITIAL) || this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.VITALS)) {
-          this.visit['visitUploadTime'] = this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.ADULTINITIAL)['encounterDatetime'];
+          this.visit['visitUploadTime'] = this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.FLAGGED) ? this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.ADULTINITIAL)['encounterDatetime'] : null;
         }
         this.checkVisitStatus(visit.encounters);
         this.visitService.patientInfo(visit.patient.uuid).subscribe((patient: PatientModel) => {
