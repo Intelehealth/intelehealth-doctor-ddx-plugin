@@ -86,7 +86,7 @@
                           <div class="input-date">
                             <label class="label-text">{{ 'Select date' | translate}}</label>
                             <div class="input-wrapper">
-                              <input type="text" class="form-control" formControlName="date" [matDatepicker]="dobdp" placeholder="{{'Select date' | translate}}" aria-label="Date" aria-describedby="basic-addon1" readonly data-test-id="etDate"/>
+                              <input type="text" class="form-control" [max]="maxDate" formControlName="date" [matDatepicker]="dobdp" placeholder="{{'Select date' | translate}}" aria-label="Date" aria-describedby="basic-addon1" readonly data-test-id="etDate"/>
                               <mat-datepicker #dobdp></mat-datepicker>
                               <mat-datepicker-toggle matSuffix [for]="dobdp" data-test-id="dpDate" class="datepicker-icon">
                                 <img matDatepickerToggleIcon src="assets/svgs/calendar-date.svg" alt="">
@@ -102,7 +102,7 @@
                             <div class="input-date">
                               <label class="label-text">{{ 'Start date' | translate }}</label>
                               <div class="input-wrapper">
-                                <input type="text" class="form-control" formControlName="startDate" [matDatepicker]="picker1" placeholder="{{'Select start date'|translate}}" aria-label="Start date" aria-describedby="basic-addon1" readonly data-test-id="etSelStartDate">
+                                <input type="text" class="form-control" [max]="maxDate" formControlName="startDate" [matDatepicker]="picker1" placeholder="{{'Select start date'|translate}}" aria-label="Start date" aria-describedby="basic-addon1" readonly data-test-id="etSelStartDate">
                                 <mat-datepicker #picker1></mat-datepicker>
                                 <mat-datepicker-toggle matSuffix [for]="picker1" class="datepicker-icon">
                                   <img matDatepickerToggleIcon src="assets/svgs/calendar-date.svg" alt="">
@@ -114,7 +114,7 @@
                             <div class="input-date">
                               <label class="label-text">{{ 'End date' | translate }}</label>
                               <div class="input-wrapper">
-                                <input type="text" class="form-control" formControlName="endDate" [matDatepicker]="picker2" placeholder="{{'Select end date'|translate}}" aria-label="End date" aria-describedby="basic-addon2" readonly data-test-id="etSelEndDate">
+                                <input type="text" class="form-control" [max]="maxDate" formControlName="endDate" [matDatepicker]="picker2" placeholder="{{'Select end date'|translate}}" aria-label="End date" aria-describedby="basic-addon2" readonly data-test-id="etSelEndDate">
                                 <mat-datepicker #picker2></mat-datepicker>
                                 <mat-datepicker-toggle matSuffix [for]="picker2" class="datepicker-icon">
                                   <img matDatepickerToggleIcon src="assets/svgs/calendar-date.svg" alt="">
@@ -125,13 +125,8 @@
                         </form>
                       </div>
                     <div class="action-buttons">
-                      <button mat-button class="reset-btn" (click)="resetDate1(); $event.stopPropagation();">{{ 'Reset'| translate }}</button>
-                      <div *ngIf="mode === 'date'">
-                        <button mat-button class="apply-btn" (click)="applyDateOrRangeFilter1()">{{ 'Date Apply'| translate }}</button>
-                      </div>
-                      <div *ngIf="mode === 'range'">
-                        <button mat-button class="apply-btn" (click)="applyDateOrRangeFilter1()">{{ 'Range Apply'| translate }}</button>
-                      </div>
+                      <button mat-button class="reset-btn" (click)="resetDate1();">{{ 'Reset'| translate }}</button>
+                      <button mat-button class="apply-btn" (click)="applyDateOrRangeFilter1()">{{ 'Apply'| translate }}</button>
                     </div>
                   </mat-menu>
                   <div class="input-group search-bar ml-auto" (click)="$event.stopPropagation();">
@@ -259,7 +254,7 @@
                           <div class="input-date">
                             <label class="label-text">{{ 'Select date' | translate}}</label>
                             <div class="input-wrapper">
-                              <input type="text" class="form-control" formControlName="date" [matDatepicker]="dobdp" placeholder="{{'Select date' | translate}}" aria-label="Date" aria-describedby="basic-addon1" readonly data-test-id="etDate"/>
+                              <input type="text" class="form-control" [max]="maxDate" formControlName="date" [max]="maxDate" [matDatepicker]="dobdp" placeholder="{{'Select date' | translate}}" aria-label="Date" aria-describedby="basic-addon1" readonly data-test-id="etDate"/>
                               <mat-datepicker #dobdp></mat-datepicker>
                               <mat-datepicker-toggle matSuffix [for]="dobdp" data-test-id="dpDate" class="datepicker-icon">
                                 <img matDatepickerToggleIcon src="assets/svgs/calendar-date.svg" alt="">
@@ -275,7 +270,7 @@
                           <div class="input-date">
                             <label class="label-text">{{'Start date'|translate}}</label>
                             <div class="input-wrapper">
-                              <input type="text" class="form-control" formControlName="startDate" [matDatepicker]="picker1" placeholder="{{'Select start date'|translate}}" aria-label="Start date" aria-describedby="basic-addon1" readonly data-test-id="etSelStartDate">
+                              <input type="text" class="form-control" [max]="maxDate" formControlName="startDate" [matDatepicker]="picker1" placeholder="{{'Select start date'|translate}}" aria-label="Start date" aria-describedby="basic-addon1" readonly data-test-id="etSelStartDate">
                               <mat-datepicker #picker1></mat-datepicker>
                               <mat-datepicker-toggle matSuffix [for]="picker1" class="datepicker-icon">
                                 <img matDatepickerToggleIcon src="assets/svgs/calendar-date.svg" alt="">
@@ -287,7 +282,7 @@
                           <div class="input-date">
                             <label class="label-text">{{'End date'|translate}}</label>
                             <div class="input-wrapper">
-                              <input type="text" class="form-control" formControlName="endDate" [matDatepicker]="picker2" placeholder="{{'Select end date'|translate}}" aria-label="End date" aria-describedby="basic-addon2" readonly data-test-id="etSelEndDate">
+                              <input type="text" class="form-control" [max]="maxDate" formControlName="endDate" [matDatepicker]="picker2" placeholder="{{'Select end date'|translate}}" aria-label="End date" aria-describedby="basic-addon2" readonly data-test-id="etSelEndDate">
                               <mat-datepicker #picker2></mat-datepicker>
                               <mat-datepicker-toggle matSuffix [for]="picker2" class="datepicker-icon">
                                 <img matDatepickerToggleIcon src="assets/svgs/calendar-date.svg" alt="">
@@ -299,12 +294,7 @@
                     </div>
                     <div class="action-buttons">
                       <button mat-button class="reset-btn" (click)="resetDate2()">{{ 'Reset'| translate }}</button>
-                      <div *ngIf="mode === 'date'">
-                        <button mat-button class="apply-btn" (click)="applyDateOrRangeFilter2()">{{ 'Date Apply'| translate }}</button>
-                      </div>
-                      <div *ngIf="mode === 'range'">
-                        <button mat-button class="apply-btn" (click)="applyDateOrRangeFilter2()">{{ 'Range Apply'| translate }}</button>
-                      </div>
+                      <button mat-button class="apply-btn" (click)="applyDateOrRangeFilter2()">{{ 'Apply'| translate }}</button>
                     </div>
                   </mat-menu>
                   <div class="input-group search-bar" (click)="$event.stopPropagation();">
@@ -408,7 +398,7 @@
                           <div class="input-date">
                             <label class="label-text">{{ 'Select date' | translate}}</label>
                             <div class="input-wrapper">
-                              <input type="text" class="form-control" formControlName="date" [matDatepicker]="dobdp" placeholder="{{'Select date' | translate}}" aria-label="Date" aria-describedby="basic-addon1" readonly data-test-id="etDate"/>
+                              <input type="text" class="form-control" [max]="maxDate" formControlName="date" [matDatepicker]="dobdp" placeholder="{{'Select date' | translate}}" aria-label="Date" aria-describedby="basic-addon1" readonly data-test-id="etDate"/>
                               <mat-datepicker #dobdp></mat-datepicker>
                               <mat-datepicker-toggle matSuffix [for]="dobdp" data-test-id="dpDate" class="datepicker-icon">
                                 <img matDatepickerToggleIcon src="assets/svgs/calendar-date.svg" alt="">
@@ -425,7 +415,7 @@
                             <div class="input-date">
                               <label class="label-text">{{ 'Start date' | translate }}</label>
                               <div class="input-wrapper">
-                                <input type="text" class="form-control" formControlName="startDate" [matDatepicker]="picker1" placeholder="{{'Select start date'|translate}}" aria-label="Start date" aria-describedby="basic-addon1" readonly data-test-id="etSelStartDate">
+                                <input type="text" class="form-control" [max]="maxDate" formControlName="startDate" [matDatepicker]="picker1" placeholder="{{'Select start date'|translate}}" aria-label="Start date" aria-describedby="basic-addon1" readonly data-test-id="etSelStartDate">
                                 <mat-datepicker #picker1></mat-datepicker>
                                 <mat-datepicker-toggle matSuffix [for]="picker1" class="datepicker-icon">
                                   <img matDatepickerToggleIcon src="assets/svgs/calendar-date.svg" alt="">
@@ -438,7 +428,7 @@
                             <div class="input-date">
                               <label class="label-text">{{ 'End date' | translate }}</label>
                               <div class="input-wrapper">
-                                <input type="text" class="form-control" formControlName="endDate" [matDatepicker]="picker2" placeholder="{{'Select end date'|translate}}" aria-label="End date" aria-describedby="basic-addon2" readonly data-test-id="etSelEndDate">
+                                <input type="text" class="form-control" [max]="maxDate" formControlName="endDate" [matDatepicker]="picker2" placeholder="{{'Select end date'|translate}}" aria-label="End date" aria-describedby="basic-addon2" readonly data-test-id="etSelEndDate">
                                 <mat-datepicker #picker2></mat-datepicker>
                                 <mat-datepicker-toggle matSuffix [for]="picker2" class="datepicker-icon">
                                   <img matDatepickerToggleIcon src="assets/svgs/calendar-date.svg" alt="">
@@ -451,12 +441,7 @@
 
                     <div class="action-buttons">
                       <button mat-button class="reset-btn" (click)="resetDate3()">{{ 'Reset'| translate }}</button>
-                      <div *ngIf="mode === 'date'">
-                        <button mat-button class="apply-btn" (click)="applyDateOrRangeFilter3()">{{ 'Date Apply'| translate }}</button>
-                      </div>
-                      <div *ngIf="mode === 'range'">
-                        <button mat-button class="apply-btn" (click)="applyDateOrRangeFilter3()">{{ 'Range Apply'| translate }}</button>
-                      </div>
+                      <button mat-button class="apply-btn" (click)="applyDateOrRangeFilter3()">{{ 'Apply'| translate }}</button>
                     </div>
                   </mat-menu>
                   <div class="input-group search-bar ml-auto" (click)="$event.stopPropagation();">
@@ -568,7 +553,7 @@
                           <div class="input-date">
                             <label class="label-text">{{ 'Select date' | translate}}</label>
                             <div class="input-wrapper">
-                              <input type="text" class="form-control" formControlName="date" [matDatepicker]="dobdp" placeholder="{{'Select date' | translate}}" aria-label="Date" aria-describedby="basic-addon1" readonly data-test-id="etDate"/>
+                              <input type="text" class="form-control" [max]="maxDate" formControlName="date" [matDatepicker]="dobdp" placeholder="{{'Select date' | translate}}" aria-label="Date" aria-describedby="basic-addon1" readonly data-test-id="etDate"/>
                               <mat-datepicker #dobdp></mat-datepicker>
                               <mat-datepicker-toggle matSuffix [for]="dobdp" data-test-id="dpDate" class="datepicker-icon">
                                 <img matDatepickerToggleIcon src="assets/svgs/calendar-date.svg" alt="">
@@ -584,7 +569,7 @@
                           <div class="input-date">
                             <label class="label-text">{{ 'Start date' | translate }}</label>
                             <div class="input-wrapper">
-                              <input type="text" class="form-control" formControlName="startDate" [matDatepicker]="picker1" placeholder="{{'Select start date'|translate}}" aria-label="Start date" aria-describedby="basic-addon1" readonly data-test-id="etSelStartDate">
+                              <input type="text" class="form-control" [max]="maxDate" formControlName="startDate" [matDatepicker]="picker1" placeholder="{{'Select start date'|translate}}" aria-label="Start date" aria-describedby="basic-addon1" readonly data-test-id="etSelStartDate">
                               <mat-datepicker #picker1></mat-datepicker>
                               <mat-datepicker-toggle matSuffix [for]="picker1" class="datepicker-icon">
                                 <img matDatepickerToggleIcon src="assets/svgs/calendar-date.svg" alt="">
@@ -596,7 +581,7 @@
                           <div class="input-date">
                             <label class="label-text">{{ 'End date' | translate }}</label>
                             <div class="input-wrapper">
-                              <input type="text" class="form-control" formControlName="endDate" [matDatepicker]="picker2" placeholder="{{'Select end date'|translate}}" aria-label="End date" aria-describedby="basic-addon2" readonly data-test-id="etSelEndDate">
+                              <input type="text" class="form-control" [max]="maxDate" formControlName="endDate" [matDatepicker]="picker2" placeholder="{{'Select end date'|translate}}" aria-label="End date" aria-describedby="basic-addon2" readonly data-test-id="etSelEndDate">
                               <mat-datepicker #picker2></mat-datepicker>
                               <mat-datepicker-toggle matSuffix [for]="picker2" class="datepicker-icon">
                                 <img matDatepickerToggleIcon src="assets/svgs/calendar-date.svg" alt="">
@@ -608,12 +593,7 @@
                     </div>
                     <div class="action-buttons">
                       <button mat-button class="reset-btn" (click)="resetDate4()">{{ 'Reset'| translate }}</button>
-                      <div *ngIf="mode === 'date'">
-                        <button mat-button class="apply-btn" (click)="applyDateOrRangeFilter4()">{{ 'Date Apply'| translate }}</button>
-                      </div>
-                      <div *ngIf="mode === 'range'">
-                        <button mat-button class="apply-btn" (click)="applyDateOrRangeFilter4()">{{ 'Range Apply'| translate }}</button>
-                      </div>
+                      <button mat-button class="apply-btn" (click)="applyDateOrRangeFilter4()">{{ 'Apply'| translate }}</button>
                     </div>
                   </mat-menu>
 
