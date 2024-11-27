@@ -55,6 +55,7 @@ export class CompletedVisitsComponent {
   
   @ViewChild(MatMenuTrigger) menuTrigger: MatMenuTrigger;
   isKCDOServer: boolean = environment.isKCDOServer;
+  isFilterApplied: boolean = false;
   
   constructor(){
     this.filteredDateAndRangeForm = new FormGroup({
@@ -79,6 +80,7 @@ export class CompletedVisitsComponent {
     const filterValue = (event.target as HTMLInputElement).value;
     this.tblDataSource.filter = filterValue.trim().toLowerCase();
     this.paginator.firstPage();
+    this.isFilterApplied = true;
   }
 
   /**
@@ -88,6 +90,7 @@ export class CompletedVisitsComponent {
   clearFilter() {
     this.tblDataSource.filter = null;
     this.ipSearchElement.nativeElement.value = "";
+    this.isFilterApplied = false;
   }
   
   closeMenu() {

@@ -55,6 +55,7 @@ export class FollowupVisitsComponent {
   filteredDateAndRangeForm: FormGroup;
   
   @ViewChild(MatMenuTrigger) menuTrigger: MatMenuTrigger;
+  isFilterApplied: boolean = false;
   
   constructor(){
     this.filteredDateAndRangeForm = new FormGroup({
@@ -76,6 +77,7 @@ export class FollowupVisitsComponent {
     const filterValue = (event.target as HTMLInputElement).value;
     this.tblDataSource.filter = filterValue.trim().toLowerCase();
     this.paginator.firstPage();
+    this.isFilterApplied = true;
   }
 
   /**
@@ -85,6 +87,7 @@ export class FollowupVisitsComponent {
   clearFilter() {
     this.tblDataSource.filter = null;
     this.ipSearchElement.nativeElement.value = "";
+    this.isFilterApplied = false;
   }
 
   closeMenu() {

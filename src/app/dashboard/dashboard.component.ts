@@ -227,7 +227,7 @@ export class DashboardComponent implements OnInit {
     this.initHelpTour();
 
     if(this.isKCDOServer){
-      this.displayedColumns1 = ['TMH_patient_id', 'name', 'age', 'starts_in','actions'];
+      this.displayedColumns1 = ['TMH_patient_id', 'name', 'age', 'starts_in', 'actions'];
       this.displayedColumns4 = ['TMH_patient_id', 'name', 'age', 'prescription_started'];
     }
   }
