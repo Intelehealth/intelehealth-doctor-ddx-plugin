@@ -18,7 +18,7 @@
         </div>
       </div>
     </div>
-    <div id="awaiting" class="col p-1" (click)="scrollToPanel('anchor-awaiting')" *ngIf="!isKCDOServer">
+    <div id="awaiting" class="col p-1" (click)="scrollToPanel('anchor-awaiting')" *ngIf="pvs.awaiting_visit_section">
       <div class="chip-item chip-item-green" title="{{'Awaiting visits' | translate}}">
         <img class="chip-img" src="assets/svgs/green-profile.svg" alt="" />
         <div class="chip-info">
@@ -86,7 +86,7 @@
                           <div class="input-date">
                             <label class="label-text">{{ 'Select date' | translate}}</label>
                             <div class="input-wrapper">
-                              <input type="text" class="form-control" formControlName="date" [matDatepicker]="dobdp" placeholder="{{'Enter DOB' | translate}}" aria-label="Date" aria-describedby="basic-addon1" readonly data-test-id="etDate"/>
+                              <input type="text" class="form-control" formControlName="date" [matDatepicker]="dobdp" placeholder="{{'Select date' | translate}}" aria-label="Date" aria-describedby="basic-addon1" readonly data-test-id="etDate"/>
                               <mat-datepicker #dobdp></mat-datepicker>
                               <mat-datepicker-toggle matSuffix [for]="dobdp" data-test-id="dpDate" class="datepicker-icon">
                                 <img matDatepickerToggleIcon src="assets/svgs/calendar-date.svg" alt="">
@@ -259,7 +259,7 @@
                           <div class="input-date">
                             <label class="label-text">{{ 'Select date' | translate}}</label>
                             <div class="input-wrapper">
-                              <input type="text" class="form-control" formControlName="date" [matDatepicker]="dobdp" placeholder="{{'Enter DOB' | translate}}" aria-label="Date" aria-describedby="basic-addon1" readonly data-test-id="etDate"/>
+                              <input type="text" class="form-control" formControlName="date" [matDatepicker]="dobdp" placeholder="{{'Select date' | translate}}" aria-label="Date" aria-describedby="basic-addon1" readonly data-test-id="etDate"/>
                               <mat-datepicker #dobdp></mat-datepicker>
                               <mat-datepicker-toggle matSuffix [for]="dobdp" data-test-id="dpDate" class="datepicker-icon">
                                 <img matDatepickerToggleIcon src="assets/svgs/calendar-date.svg" alt="">
@@ -384,7 +384,7 @@
 
         </mat-expansion-panel>
 
-        <mat-expansion-panel [expanded]="true" data-test-id="matExpAwaiting" *ngIf="!isKCDOServer">
+        <mat-expansion-panel [expanded]="true" data-test-id="matExpAwaiting" *ngIf="pvs.awaiting_visit_section">
           <mat-expansion-panel-header data-test-id="matExpHeaderAwaiting">
             <mat-panel-title>
               <div id="anchor-awaiting" class="anchor-con"></div>
@@ -408,7 +408,7 @@
                           <div class="input-date">
                             <label class="label-text">{{ 'Select date' | translate}}</label>
                             <div class="input-wrapper">
-                              <input type="text" class="form-control" formControlName="date" [matDatepicker]="dobdp" placeholder="{{'Enter DOB' | translate}}" aria-label="Date" aria-describedby="basic-addon1" readonly data-test-id="etDate"/>
+                              <input type="text" class="form-control" formControlName="date" [matDatepicker]="dobdp" placeholder="{{'Select date' | translate}}" aria-label="Date" aria-describedby="basic-addon1" readonly data-test-id="etDate"/>
                               <mat-datepicker #dobdp></mat-datepicker>
                               <mat-datepicker-toggle matSuffix [for]="dobdp" data-test-id="dpDate" class="datepicker-icon">
                                 <img matDatepickerToggleIcon src="assets/svgs/calendar-date.svg" alt="">
@@ -568,7 +568,7 @@
                           <div class="input-date">
                             <label class="label-text">{{ 'Select date' | translate}}</label>
                             <div class="input-wrapper">
-                              <input type="text" class="form-control" formControlName="date" [matDatepicker]="dobdp" placeholder="{{'Enter DOB' | translate}}" aria-label="Date" aria-describedby="basic-addon1" readonly data-test-id="etDate"/>
+                              <input type="text" class="form-control" formControlName="date" [matDatepicker]="dobdp" placeholder="{{'Select date' | translate}}" aria-label="Date" aria-describedby="basic-addon1" readonly data-test-id="etDate"/>
                               <mat-datepicker #dobdp></mat-datepicker>
                               <mat-datepicker-toggle matSuffix [for]="dobdp" data-test-id="dpDate" class="datepicker-icon">
                                 <img matDatepickerToggleIcon src="assets/svgs/calendar-date.svg" alt="">
