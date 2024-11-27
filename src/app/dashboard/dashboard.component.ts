@@ -208,7 +208,7 @@ export class DashboardComponent implements OnInit {
       if (this.pvs.appointment_button) {
         this.getAppointments();
       }
-      if(!this.isKCDOServer){
+      if(this.pvs.awaiting_visit_section){
         this.getAwaitingVisits(1);
       }
       if (this.pvs.priority_visit_section) {
