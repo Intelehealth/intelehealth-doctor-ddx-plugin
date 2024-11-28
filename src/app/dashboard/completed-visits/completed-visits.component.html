@@ -14,8 +14,8 @@
             </button>
             <mat-menu #filterMenu5="matMenu" class="custom-menu" [hasBackdrop]="true" xPosition="before">
               <div class="toggle-buttons">
-                <button mat-button [class.active]="mode === 'date'" (click)="setMode('date'); $event.stopPropagation()">{{'Date' | translate}}</button>
-                <button mat-button [class.active]="mode === 'range'" (click)="setMode('range'); $event.stopPropagation()">{{'Range' | translate}}</button>
+                <button mat-button [class.active]="mode === 'date'" (click)="setMode('date'); $event.stopPropagation(); resetDate(true)">{{'Date' | translate}}</button>
+                <button mat-button [class.active]="mode === 'range'" (click)="setMode('range'); $event.stopPropagation(); resetDate(true)">{{'Range' | translate}}</button>
               </div>
               <div *ngIf="mode === 'date'" class="date-view" (click)="$event.stopPropagation()">
                 <form [formGroup]="filteredDateAndRangeForm">
