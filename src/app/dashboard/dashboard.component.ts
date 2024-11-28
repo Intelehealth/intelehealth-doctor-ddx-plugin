@@ -177,7 +177,6 @@ export class DashboardComponent implements OnInit {
         if(col === 'age') return this.checkPatientRegField('Age');
         return true;
       });
-      console.log("this.displayedColumns1", this.displayedColumns1, this.isMCCUser)
       this.displayedColumns2 = this.displayedColumns2.filter(col=>(col!=='age' || this.checkPatientRegField('Age')));
       this.displayedColumns3 = this.displayedColumns3.filter(col=>(col!=='age' || this.checkPatientRegField('Age')));
       this.displayedColumns4 = this.displayedColumns4.filter(col=>(col!=='age' || this.checkPatientRegField('Age')));
