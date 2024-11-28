@@ -50,6 +50,7 @@ export class CompletedVisitsComponent {
 
   panelExpanded: boolean = true;
   mode: 'date' | 'range' = 'date';
+  maxDate: Date = new Date();
 
   filteredDateAndRangeForm: FormGroup;
   
@@ -104,7 +105,24 @@ export class CompletedVisitsComponent {
   }
 
   formatDate(date: any): string {
-    return new Date(date).toISOString().split('T')[0];
+    const localDate = new Date(date);
+    const year = localDate.getFullYear();
+    const month = String(localDate.getMonth() + 1).padStart(2, '0');
+    const day = String(localDate.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  convertToDate(relativeTime: string): string {
+    const now = new Date();
+    const [value, unit] = relativeTime.split(' ');
+    const amount = parseInt(value, 10);
+  
+    if (['hour', 'hours'].includes(unit.toLowerCase())) now.setHours(now.getHours() - amount);
+    else if (['minute', 'minutes'].includes(unit.toLowerCase())) now.setMinutes(now.getMinutes() - amount);
+    else if (['day', 'days'].includes(unit.toLowerCase())) now.setDate(now.getDate() - amount);
+    else throw new Error('Invalid time unit. Only "hours", "minutes", or "days" are supported.');
+  
+    return now.toISOString().split('T')[0];
   }
 
   applyDateOrRangeFilter() {
@@ -117,7 +135,7 @@ export class CompletedVisitsComponent {
       const formattedDate = this.formatDate(selectedDate);
 
       this.tblDataSource.filterPredicate = (data: any, filter: string) => {
-        const itemDate = this.formatDate(data.date_created);
+        const itemDate = data.completed.includes(',') ? this.formatDate(data.completed) : this.convertToDate(data.completed);
         return itemDate === filter;
       };
       this.tblDataSource.filter = formattedDate;
@@ -127,7 +145,7 @@ export class CompletedVisitsComponent {
       const formattedEndDate = this.formatDate(endDate);
   
       this.tblDataSource.filterPredicate = (data: any, filter: string) => {
-        const itemDate = this.formatDate(data.date_created);
+        const itemDate = data.completed.includes(',') ? this.formatDate(data.completed) : this.convertToDate(data.completed);
         return itemDate >= formattedStartDate && itemDate <= formattedEndDate;
       };
       this.tblDataSource.filter = `${formattedStartDate}:${formattedEndDate}`;

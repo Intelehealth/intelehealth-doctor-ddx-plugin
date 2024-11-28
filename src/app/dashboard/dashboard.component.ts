@@ -123,6 +123,7 @@ export class DashboardComponent implements OnInit {
 
   panelExpanded: boolean = true;
   mode: 'date' | 'range' = 'date';
+  maxDate: Date = new Date();
 
   filteredDateAndRangeForm1: FormGroup;
   filteredDateAndRangeForm2: FormGroup;
@@ -311,7 +312,7 @@ export class DashboardComponent implements OnInit {
           visit.cheif_complaint = this.getCheifComplaint(visit);
           visit.visit_created = visit?.date_created ? this.getCreatedAt(visit.date_created.replace('Z', '+0530')) : this.getEncounterCreated(visit, visitTypes.COMPLETED_VISIT);
           visit.person.age = this.calculateAge(visit.person.birthdate);
-          visit.completed = this.getEncounterCreated(visit, visitTypes.VISIT_COMPLETE);
+          visit.completed = visit?.date_created ? this.getCreatedAt(visit.date_created.replace('Z', '+0530')) : this.getEncounterCreated(visit, visitTypes.VISIT_COMPLETE);
           this.completedVisits.push(visit);
         }
         this.dataSource5.data = [...this.completedVisits];
@@ -837,7 +838,25 @@ export class DashboardComponent implements OnInit {
   }
 
   formatDate(date: any): string {
-    return new Date(date).toISOString().split('T')[0];
+    const localDate = new Date(date);
+    const year = localDate.getFullYear();
+    const month = String(localDate.getMonth() + 1).padStart(2, '0');
+    const day = String(localDate.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+  
+
+  convertToDate(relativeTime: string): string {
+    const now = new Date();
+    const [value, unit] = relativeTime.split(' ');
+    const amount = parseInt(value, 10);
+  
+    if (['hour', 'hours'].includes(unit.toLowerCase())) now.setHours(now.getHours() - amount);
+    else if (['minute', 'minutes'].includes(unit.toLowerCase())) now.setMinutes(now.getMinutes() - amount);
+    else if (['day', 'days'].includes(unit.toLowerCase())) now.setDate(now.getDate() - amount);
+    else throw new Error('Invalid time unit. Only "hours", "minutes", or "days" are supported.');
+  
+    return now.toISOString().split('T')[0];
   }
 
   applyDateOrRangeFilter1() {
@@ -879,7 +898,7 @@ export class DashboardComponent implements OnInit {
       const formattedDate = this.formatDate(selectedDate);
       
       this.dataSource2.filterPredicate = (data: any, filter: string) => {
-        const itemDate = this.formatDate(data.date_created);
+        const itemDate = data.visit_created.includes(',') ? this.formatDate(data.visit_created) : this.convertToDate(data.visit_created);
         return itemDate === filter;
       };
       this.dataSource2.filter = formattedDate;
@@ -888,7 +907,7 @@ export class DashboardComponent implements OnInit {
       const formattedEndDate = this.formatDate(endDate);
   
       this.dataSource2.filterPredicate = (data: any, filter: string) => {
-        const itemDate = this.formatDate(data.date_created);
+        const itemDate = data.visit_created.includes(',') ? this.formatDate(data.visit_created) : this.convertToDate(data.visit_created);
         return itemDate >= formattedStartDate && itemDate <= formattedEndDate;
       };
       this.dataSource2.filter = `${formattedStartDate}:${formattedEndDate}`;
@@ -909,7 +928,7 @@ export class DashboardComponent implements OnInit {
       const formattedDate = this.formatDate(selectedDate);
       
       this.dataSource3.filterPredicate = (data: any, filter: string) => {
-        const itemDate = this.formatDate(data.date_created);
+        const itemDate = data.visit_created.includes(',') ? this.formatDate(data.visit_created) : this.convertToDate(data.visit_created);
         return itemDate === filter;
       };
       this.dataSource3.filter = formattedDate;
@@ -918,7 +937,7 @@ export class DashboardComponent implements OnInit {
       const formattedEndDate = this.formatDate(endDate);
   
       this.dataSource3.filterPredicate = (data: any, filter: string) => {
-        const itemDate = this.formatDate(data.date_created);
+        const itemDate = data.visit_created.includes(',') ? this.formatDate(data.visit_created) : this.convertToDate(data.visit_created);
         return itemDate >= formattedStartDate && itemDate <= formattedEndDate;
       };
       this.dataSource3.filter = `${formattedStartDate}:${formattedEndDate}`;
@@ -939,7 +958,7 @@ export class DashboardComponent implements OnInit {
       const formattedDate = this.formatDate(selectedDate);
 
       this.dataSource4.filterPredicate = (data: any, filter: string) => {
-        const itemDate = this.formatDate(data.date_created);
+        const itemDate = data.prescription_started.includes(',') ? this.formatDate(data.prescription_started) : this.convertToDate(data.prescription_started);
         return itemDate === filter;
       };
       this.dataSource4.filter = formattedDate;
@@ -948,7 +967,7 @@ export class DashboardComponent implements OnInit {
       const formattedEndDate = this.formatDate(endDate);
   
       this.dataSource4.filterPredicate = (data: any, filter: string) => {
-        const itemDate = this.formatDate(data.date_created);
+        const itemDate = data.prescription_started.includes(',') ? this.formatDate(data.prescription_started) : this.convertToDate(data.prescription_started);
         return itemDate >= formattedStartDate && itemDate <= formattedEndDate;
       };
       this.dataSource4.filter = `${formattedStartDate}:${formattedEndDate}`;

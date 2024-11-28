@@ -51,6 +51,7 @@ export class FollowupVisitsComponent {
 
   panelExpanded: boolean = true;
   mode: 'date' | 'range' = 'date';
+  maxDate: Date = new Date();
 
   filteredDateAndRangeForm: FormGroup;
   
@@ -101,8 +102,21 @@ export class FollowupVisitsComponent {
   }
 
   formatDate(date: any): string {
-    return new Date(date).toISOString().split('T')[0];
+    const localDate = new Date(date);
+    const year = localDate.getFullYear();
+    const month = String(localDate.getMonth() + 1).padStart(2, '0');
+    const day = String(localDate.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
+
+  convertToISO(followUp: string): string {
+    const [datePart, timePart] = followUp.split(', Time: ');
+    const fullDateTime = `${datePart} ${timePart.split(',')[0]}`;
+    const date = new Date(fullDateTime);
+    date.setDate(date.getDate());
+    return date.toISOString();
+  }
+  
 
   applyDateOrRangeFilter() {
     const selectedDate = this.filteredDateAndRangeForm.get('date')?.value;
@@ -113,7 +127,7 @@ export class FollowupVisitsComponent {
       const formattedDate = this.formatDate(selectedDate);
 
       this.tblDataSource.filterPredicate = (data: any, filter: string) => {
-        const itemDate = this.formatDate(data.date_created);
+        const itemDate = this.formatDate(this.convertToISO(data.followUp));
         return itemDate === filter;
       };
       this.tblDataSource.filter = formattedDate;
@@ -122,7 +136,7 @@ export class FollowupVisitsComponent {
       const formattedEndDate = this.formatDate(endDate);
   
       this.tblDataSource.filterPredicate = (data: any, filter: string) => {
-        const itemDate = this.formatDate(data.date_created);
+        const itemDate = this.formatDate(this.convertToISO(data.followUp));
         return itemDate >= formattedStartDate && itemDate <= formattedEndDate;
       };
       this.tblDataSource.filter = `${formattedStartDate}:${formattedEndDate}`;
