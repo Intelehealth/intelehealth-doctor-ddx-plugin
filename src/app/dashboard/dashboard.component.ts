@@ -869,7 +869,7 @@ export class DashboardComponent implements OnInit {
       const formattedDate = this.formatDate(selectedDate);
 
       this.dataSource1.filterPredicate = (data: any, filter: string) => {
-        const itemDate = this.formatDate(data.createdAt);
+        const itemDate = this.formatDate(data.slotJsDate);
         return itemDate === filter;
       };
       this.dataSource1.filter = formattedDate;
@@ -878,7 +878,7 @@ export class DashboardComponent implements OnInit {
       const formattedEndDate = this.formatDate(endDate);
   
       this.dataSource1.filterPredicate = (data: any, filter: string) => {
-        const itemDate = this.formatDate(data.createdAt);
+        const itemDate = this.formatDate(data.slotJsDate);
         return itemDate >= formattedStartDate && itemDate <= formattedEndDate;
       };
       this.dataSource1.filter = `${formattedStartDate}:${formattedEndDate}`;
