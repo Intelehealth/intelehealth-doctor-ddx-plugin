@@ -1223,6 +1223,9 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
         case 'Contact Type':
           value = this.getPersonAttributeValue('Contact Type');
           break;
+        case 'Email':
+          value = this.getPersonAttributeValue('Email');
+          break;
         default:
           break;
       }
