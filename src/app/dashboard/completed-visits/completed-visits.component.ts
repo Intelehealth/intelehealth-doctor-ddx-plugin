@@ -156,11 +156,13 @@ export class CompletedVisitsComponent {
     this.closeMenu();
   }
   
-  resetDate() {
+  resetDate(flag: boolean = false) {
     this.filteredDateAndRangeForm.reset();
     this.tblDataSource.filter = '';
     this.tblDataSource.filterPredicate = (data: any, filter: string) => true;
     this.paginator.firstPage();
-    this.closeMenu();
+    if(!flag){
+      this.closeMenu();
+    }
   }
 }

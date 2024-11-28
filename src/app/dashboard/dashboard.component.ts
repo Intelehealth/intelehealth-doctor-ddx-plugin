@@ -979,37 +979,45 @@ export class DashboardComponent implements OnInit {
     this.closeMenu();
   }
   
-  resetDate1() {
+  resetDate1(flag:boolean = false) {
     this.filteredDateAndRangeForm1.reset();
     this.dataSource1.filter = '';
     this.dataSource1.filterPredicate = (data: any, filter: string) => true;
-    this.closeMenu();
+    if(!flag){
+      this.closeMenu();
+    }
   }
 
-  resetDate2() {
+  resetDate2(flag:boolean = false) {
     this.filteredDateAndRangeForm2.reset();
     this.dataSource2.filter = '';
     this.dataSource2.filterPredicate = (data: any, filter: string) => true;
     this.tempPaginator1.firstPage();
     this.priorityPaginator?.firstPage();
-    this.closeMenu();
+    if(!flag){
+      this.closeMenu();
+    }
   }
 
-  resetDate3() {
+  resetDate3(flag:boolean = false) {
     this.filteredDateAndRangeForm3.reset();
     this.dataSource3.filter = '';
     this.dataSource3.filterPredicate = (data: any, filter: string) => true;
     this.tempPaginator2.firstPage();
     this.awaitingPaginator?.firstPage();
-    this.closeMenu();
+    if(!flag){
+      this.closeMenu();
+    }
   }
 
-  resetDate4() {    
+  resetDate4(flag:boolean = false) {    
     this.filteredDateAndRangeForm4.reset();
     this.dataSource4.filter = '';
     this.dataSource4.filterPredicate = (data: any, filter: string) => true;
     this.tempPaginator3.firstPage();
     this.inprogressPaginator?.firstPage();
-    this.closeMenu();
+    if(!flag){
+      this.closeMenu();
+    }
   }
 }
