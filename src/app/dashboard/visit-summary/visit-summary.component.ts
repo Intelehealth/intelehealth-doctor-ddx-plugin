@@ -279,7 +279,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       followUpDate: new FormControl(null),
       followUpTime: new FormControl(null),
       followUpReason: new FormControl(null),
-      uuid: new FormControl(null)
+      uuid: new FormControl(null),
+      followUpType: new FormControl([Validators.required])
     });
 
     this.diagnosisSubject = new BehaviorSubject<any[]>([]);
@@ -1480,11 +1481,12 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptFollow).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
-          let followUpDate: string, followUpTime: any, followUpReason: any, wantFollowUp: string;
+          let followUpDate: string, followUpTime: any, followUpReason: any, wantFollowUp: string, followUpType: string;
           if (obs.value.includes('Time:')) {
             followUpDate = (obs.value.includes('Time:')) ? moment(obs.value.split(', Time: ')[0]).format('YYYY-MM-DD') : moment(obs.value.split(', Remark: ')[0]).format('YYYY-MM-DD');
             followUpTime = (obs.value.includes('Time:')) ? obs.value.split(', Time: ')[1].split(', Remark: ')[0] : null;
             followUpReason = (obs.value.split(', Remark: ')[1]) ? obs.value.split(', Remark: ')[1] : null;
+            followUpType = (obs.value.split(', Type: ')[1]) ? obs.value.split(', Type: ')[1] : null;
             wantFollowUp = 'Yes';
           } else {
             wantFollowUp = 'No';
@@ -1496,7 +1498,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
             followUpDate,
             followUpTime,
             followUpReason,
-            uuid: obs.uuid
+            uuid: obs.uuid,
+            followUpType
           });
         }
       });
@@ -1522,7 +1525,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         return;
       }
       body.value = (this.followUpForm.value.followUpReason) ?
-        `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')}, Time: ${this.followUpForm.value.followUpTime}, Remark: ${this.followUpForm.value.followUpReason}` : `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')}, Time: ${this.followUpForm.value.followUpTime}`;
+        `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')}, Type: ${this.followUpForm.value.followUpType}, Time: ${this.followUpForm.value.followUpTime}, Remark: ${this.followUpForm.value.followUpReason}` : `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')}, Time: ${this.followUpForm.value.followUpTime}`;
     }
     this.encounterService.postObs(body).subscribe((res: ObsModel) => {
       if (res) {
@@ -1540,7 +1543,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   */
   deleteFollowUp(): void {
     this.diagnosisService.deleteObs(this.followUpForm.value.uuid).subscribe(() => {
-      this.followUpForm.patchValue({ present: false, uuid: null, wantFollowUp: '', followUpDate: null, followUpTime: null, followUpReason: null });
+      this.followUpForm.patchValue({ present: false, uuid: null, wantFollowUp: '', followUpDate: null, followUpTime: null, followUpReason: null, followUpType: null });
       this.followUpDatetime = null;
     });
   }

@@ -553,7 +553,8 @@ export interface FollowUpDataModel {
   wantFollowUp?: string,
   followUpDate?: string,
   followUpTime?: string,
-  followUpReason?: string
+  followUpReason?: string,
+  followUpType?: string
 }
 
 export interface HwModel {

@@ -42,10 +42,17 @@
                     <span>{{ patient?.person?.preferredName?.givenName }}</span>
                     <span *ngIf="checkPatientRegField('Middle Name') && patient?.person?.preferredName?.middleName">{{ ' ' + patient?.person?.preferredName?.middleName }}</span>
                     <span>{{ ' ' + patient?.person?.preferredName?.familyName }}</span>
-                    <span *ngIf="checkPatientRegField('Gender')">{{ " (" + (patient?.person.gender | translate) + ") "}}</span>
+                    <!-- <span *ngIf="checkPatientRegField('Gender')">{{ " (" + (patient?.person.gender | translate) + ") "}}</span> -->
                   </h6>
-                  <p data-test-id="etPatienOpenMRSId">{{ getPatientIdentifier("OpenMRS ID") }}</p>
+                  <p data-test-id="etPatienOpenMRSId">{{ getPersonAttributeValue('TMH Case Number') !== 'NA' ? getPersonAttributeValue('TMH Case Number') : getPatientIdentifier('OpenMRS ID') }}</p>
                 </div>
+              </div>
+            </div>
+
+            <div class="col-md-2 patient-info-section p-3" *ngIf="checkPatientRegField('Gender') && patient?.person.age">
+              <div class="patient-info-item mb-3">
+                <h6 data-test-id="etPatientAge">{{'Gender'|translate}}</h6>
+                <p data-test-id="etPatient">{{ patient?.person.gender | translate }}</p>
               </div>
             </div>
 
@@ -233,12 +240,12 @@
                   </div>
                 </div>
 
-                <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('TMH Case Number') && getPersonAttributeValue('TMH Case Number') !== 'NA'">
+                <!-- <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('TMH Case Number') && getPersonAttributeValue('TMH Case Number') !== 'NA'">
                   <div class="patient-info-item mb-3">
                     <h6 data-test-id="etPatient">{{'TMH Case Number' | translate}}</h6>
                     <p data-test-id="etPatient">{{ getPersonAttributeValue('TMH Case Number') }}</p>
                   </div>
-                </div>
+                </div> -->
 
                 <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('Request ID') && getPersonAttributeValue('Request ID') !== 'NA'">
                   <div class="patient-info-item mb-3">
@@ -1852,6 +1859,37 @@
                   <ng-container
                     *ngIf="followUpForm.value.wantFollowUp == 'Yes' || followUpForm.value.wantFollowUp == 'Да'"
                   >
+                  <li>
+                    <div class="row">
+                      <label for="follow-up" class="col-sm-3 col-form-label"
+                        >{{'Follow-up type' | translate}}</label
+                      >
+                      <div class="col-sm-9 d-flex align-items-center">
+                        <div class="pretty p-default p-round">
+                          <input
+                            type="radio"
+                            value="{{'In person' | translate}}"
+                            formControlName="followUpType"
+                            data-test-id="radioFollowUpInperson"
+                          />
+                          <div class="state p-success">
+                            <label>{{'In person'|translate}}</label>
+                          </div>
+                        </div>
+                        <div class="pretty p-default p-round">
+                          <input
+                            type="radio"
+                            value="{{'Telemedicine' | translate}}"
+                            formControlName="followUpType"
+                            data-test-id="radioFollowUpTelemedicine"
+                          />
+                          <div class="state p-success">
+                            <label>{{'Telemedicine'|translate}}</label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
                     <li>
                       <div class="row">
                         <label for="follow-date" class="col-sm-3 col-form-label"
@@ -1953,6 +1991,7 @@
                   <thead>
                     <tr>
                       <th scope="col">{{'Follow Up Requested'|translate}}</th>
+                      <th scope="col">{{'Type'|translate}}</th>
                       <th scope="col">{{'Date'|translate}}</th>
                       <th scope="col">{{'Time'| translate}}</th>
                       <th scope="col">{{'Reason'|translate}}</th>
@@ -1962,6 +2001,7 @@
                   <tbody>
                     <tr>
                       <td>{{ followUpForm.value.wantFollowUp }}</td>
+                      <td>{{ (followUpForm.value.followUpType) ? followUpForm.value.followUpType : '-' }}</td>
                       <td>{{ (followUpForm.value.followUpDate) ? (followUpForm.value.followUpDate|date:'dd MMMM yyyy') : '-' }}</td>
                       <td>{{ (followUpForm.value.followUpTime) ? followUpForm.value.followUpTime : '-' }}</td>
                       <td>{{ (followUpForm.value.followUpReason) ? followUpForm.value.followUpReason : '-' }}</td>
