@@ -476,6 +476,11 @@ export class DashboardComponent implements OnInit {
           this.inProgressVisits.push(visit);
         }
         this.dataSource4.data = [...this.inProgressVisits];
+        this.dataSource4.data.sort((a, b) => {
+          const dateA = isNaN(new Date(a.prescription_started).getTime()) ? new Date(this.convertToDate(a.prescription_started)).getTime() : new Date(a.prescription_started).getTime();
+          const dateB = isNaN(new Date(b.prescription_started).getTime()) ? new Date(this.convertToDate(b.prescription_started)).getTime() : new Date(b.prescription_started).getTime();
+          return dateA - dateB;
+        });
         if (page == 1) {
           this.dataSource4.paginator = this.tempPaginator3;
           this.dataSource4.filterPredicate = (data, filter: string) => data?.patient.identifier.toLowerCase().indexOf(filter) != -1 || data?.patient_name.given_name.concat((data?.patient_name.middle_name && this.checkPatientRegField('Middle Name') ? ' ' + data?.patient_name.middle_name : '') + ' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1;
