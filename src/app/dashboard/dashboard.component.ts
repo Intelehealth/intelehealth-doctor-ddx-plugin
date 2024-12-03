@@ -70,7 +70,6 @@ export class DashboardComponent implements OnInit {
   dataSource4 = new MatTableDataSource<any>();
 
   baseUrl: string = environment.baseURL;
-  isKCDOServer: boolean = environment.isKCDOServer;
   appointments: AppointmentModel[] = [];
   priorityVisits: CustomVisitModel[] = [];
   awaitingVisits: CustomVisitModel[] = [];
@@ -226,7 +225,7 @@ export class DashboardComponent implements OnInit {
     this.socket.initSocket(true);
     this.initHelpTour();
 
-    if(this.isKCDOServer){
+    if(environment.brandName === 'KCDO'){
       this.displayedColumns1 = ['TMH_patient_id', 'name', 'age', 'starts_in', 'actions'];
       this.displayedColumns4 = ['TMH_patient_id', 'name', 'age', 'prescription_started'];
     }

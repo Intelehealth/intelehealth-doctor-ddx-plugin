@@ -24,7 +24,7 @@ import { ChatBoxComponent } from 'src/app/modal-components/chat-box/chat-box.com
 import { VideoCallComponent } from 'src/app/modal-components/video-call/video-call.component';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslationService } from 'src/app/services/translation.service';
-import { calculateBMI, deleteCacheData, getCacheData, getFieldValueByLanguage, setCacheData } from 'src/app/utils/utility-functions';
+import { calculateBMI, deleteCacheData, getCacheData, getFieldValueByLanguage, setCacheData, isFeaturePresent } from 'src/app/utils/utility-functions';
 import { doctorDetails, languages, visitTypes, facility, refer_specialization, refer_prioritie, strength, days, timing, PICK_FORMATS, conceptIds } from 'src/config/constant';
 import { VisitSummaryHelperService } from 'src/app/services/visit-summary-helper.service';
 import { ApiResponseModel, DataItemModel, DiagnosisModel, DocImagesModel, EncounterModel, EncounterProviderModel, MedicineModel, ObsApiResponseModel, ObsModel, PatientHistoryModel, PatientIdentifierModel, PatientModel, PatientVisitSection, PatientVisitSummaryConfigModel, PersonAttributeModel, ProviderAttributeModel, ProviderModel, RecentVisitsApiResponseModel, ReferralModel, SpecializationModel, TestModel, VisitAttributeModel, VisitModel, VitalModel } from 'src/app/model/model';
@@ -243,7 +243,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     this.diagnosisForm = new FormGroup({
       diagnosisName: new FormControl(null, Validators.required),
       diagnosisType: new FormControl(null, Validators.required),
-      diagnosisStatus: new FormControl(null, Validators.required)
+      diagnosisStatus: new FormControl(null, Validators.required),
+      diagnosisTNMStaging: new FormControl(null)
     });
 
     this.addMedicineForm = new FormGroup({
@@ -279,7 +280,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       followUpDate: new FormControl(null),
       followUpTime: new FormControl(null),
       followUpReason: new FormControl(null),
-      uuid: new FormControl(null)
+      uuid: new FormControl(null),
+      followUpType: new FormControl(null)
     });
 
     this.diagnosisSubject = new BehaviorSubject<any[]>([]);
@@ -1061,7 +1063,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
             diagnosisName: obs.value.split(':')[0].trim(),
             diagnosisType: obs.value.split(':')[1].split('&')[0].trim(),
             diagnosisStatus: obs.value.split(':')[1].split('&')[1].trim(),
-            uuid: obs.uuid
+            uuid: obs.uuid,
+            diagnosisTNMStaging: obs.value.split(':')[1].split('&')[2].trim(),
           });
         }
       });
@@ -1118,7 +1121,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       concept: conceptIds.conceptDiagnosis,
       person: this.visit.patient.uuid,
       obsDatetime: new Date(),
-      value: `${diagnosisName}:${this.diagnosisForm.value.diagnosisType} & ${this.diagnosisForm.value.diagnosisStatus}`,
+      value: `${diagnosisName}:${this.diagnosisForm.value.diagnosisType} & ${this.diagnosisForm.value.diagnosisStatus} & ${this.diagnosisForm.value.diagnosisTNMStaging}`,
       encounter: this.visitNotePresent.uuid
     }).subscribe((res: ObsModel) => {
       if (res) {
@@ -1480,11 +1483,12 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptFollow).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
-          let followUpDate: string, followUpTime: any, followUpReason: any, wantFollowUp: string;
+          let followUpDate: string, followUpTime: any, followUpReason: any, wantFollowUp: string, followUpType: string;
           if (obs.value.includes('Time:')) {
             followUpDate = (obs.value.includes('Time:')) ? moment(obs.value.split(', Time: ')[0]).format('YYYY-MM-DD') : moment(obs.value.split(', Remark: ')[0]).format('YYYY-MM-DD');
             followUpTime = (obs.value.includes('Time:')) ? obs.value.split(', Time: ')[1].split(', Remark: ')[0] : null;
             followUpReason = (obs.value.split(', Remark: ')[1]) ? obs.value.split(', Remark: ')[1] : null;
+            followUpType = (obs.value.includes('Type:')) ? obs.value.split('Type: ')[1].split(', Time: ')[0] : null;
             wantFollowUp = 'Yes';
           } else {
             wantFollowUp = 'No';
@@ -1496,7 +1500,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
             followUpDate,
             followUpTime,
             followUpReason,
-            uuid: obs.uuid
+            uuid: obs.uuid,
+            followUpType
           });
         }
       });
@@ -1522,7 +1527,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         return;
       }
       body.value = (this.followUpForm.value.followUpReason) ?
-        `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')}, Time: ${this.followUpForm.value.followUpTime}, Remark: ${this.followUpForm.value.followUpReason}` : `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')}, Time: ${this.followUpForm.value.followUpTime}`;
+        `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')}, Time: ${this.followUpForm.value.followUpTime}, Remark: ${this.followUpForm.value.followUpReason},  Type: ${this.followUpForm.value.followUpType}` : `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')}, Time: ${this.followUpForm.value.followUpTime}`;
     }
     this.encounterService.postObs(body).subscribe((res: ObsModel) => {
       if (res) {
@@ -1540,7 +1545,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   */
   deleteFollowUp(): void {
     this.diagnosisService.deleteObs(this.followUpForm.value.uuid).subscribe(() => {
-      this.followUpForm.patchValue({ present: false, uuid: null, wantFollowUp: '', followUpDate: null, followUpTime: null, followUpReason: null });
+      this.followUpForm.patchValue({ present: false, uuid: null, wantFollowUp: '', followUpDate: null, followUpTime: null, followUpReason: null, followUpType: null });
       this.followUpDatetime = null;
     });
   }
@@ -1886,4 +1891,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     return subSection ? subSection.is_enabled : false;
   }
 
+  isFeatureAvailable(featureName: string): boolean {
+    return isFeaturePresent(featureName);
+  }
 }

@@ -526,7 +526,8 @@ export interface DiagnosisModel {
   diagnosisName?: string,
   diagnosisType?: string,
   diagnosisStatus?: string,
-  uuid?: string
+  uuid?: string,
+  diagnosisTNMStaging?: string
 }
 
 export interface DocImagesModel {
@@ -553,7 +554,8 @@ export interface FollowUpDataModel {
   wantFollowUp?: string,
   followUpDate?: string,
   followUpTime?: string,
-  followUpReason?: string
+  followUpReason?: string,
+  followUpType?: string
 }
 
 export interface HwModel {
