@@ -49,7 +49,7 @@
               </div>
             </div>
 
-            <div class="col-md-2 patient-info-section p-3" *ngIf="checkPatientRegField('Gender') && patient?.person.age">
+            <div class="col-md-2 patient-info-section p-3" *ngIf="checkPatientRegField('Gender') && patient?.person.gender">
               <div class="patient-info-item mb-3">
                 <h6 data-test-id="etPatientAge">{{'Gender'|translate}}</h6>
                 <p data-test-id="etPatient">{{ patient?.person.gender | translate }}</p>
@@ -956,7 +956,7 @@
                 </ul>
                 <div *ngIf="!patientInteractionForm.value.hwPresent && appConfigService?.patient_visit_summary?.hw_interaction && !isMCCUser" class="form-group">
                   <label for="note"
-                    ><b>{{'Comment'|translate}}*&nbsp;</b>
+                    ><b>{{'Discussion with Patient'|translate}}*&nbsp;</b>
                     </label
                   >
                   <textarea
@@ -1044,6 +1044,7 @@
                   <thead>
                     <tr>
                       <th scope="col">{{'Diagnosis'|translate}}</th>
+                      <th scope="col"  *ngIf="isFeatureAvailable('tnmStaging')">{{'TNM Staging'|translate}}</th>
                       <th scope="col">{{'Type'|translate}}</th>
                       <th scope="col">{{'Status'|translate}}</th>
                       <th scope="col"></th>
@@ -1053,6 +1054,7 @@
                     <ng-container *ngIf="existingDiagnosis.length">
                       <tr *ngFor="let d of existingDiagnosis; let i = index">
                         <td>{{ d.diagnosisName }}</td>
+                        <td  *ngIf="isFeatureAvailable('tnmStaging')">{{ d.diagnosisTNMStaging }}</td>
                         <td>{{ d.diagnosisType }}</td>
                         <td>{{ d.diagnosisStatus }}</td>
                         <td class="pr-0">
@@ -1120,6 +1122,18 @@
                           >
                           </ng-select>
                         </div>
+                      </div>
+                    </li>
+                    <li *ngIf="isFeatureAvailable('tnmStaging')">
+                      <div class="form-group">
+                        <label for="note">{{'TNM Staging'|translate}}</label>
+                        <textarea
+                          class="form-control"
+                          rows="3"
+                          placeholder="{{'Type here'|translate}}"
+                          formControlName="diagnosisTNMStaging"
+                          data-test-id="diagnosisTNMStaging"
+                        ></textarea>
                       </div>
                     </li>
                     <li>
@@ -1859,7 +1873,7 @@
                   <ng-container
                     *ngIf="followUpForm.value.wantFollowUp == 'Yes' || followUpForm.value.wantFollowUp == 'Да'"
                   >
-                  <li>
+                  <li *ngIf="isFeatureAvailable('followUpType')">
                     <div class="row">
                       <label for="follow-up" class="col-sm-3 col-form-label"
                         >{{'Follow-up type' | translate}}</label
@@ -1991,7 +2005,7 @@
                   <thead>
                     <tr>
                       <th scope="col">{{'Follow Up Requested'|translate}}</th>
-                      <th scope="col">{{'Type'|translate}}</th>
+                      <th scope="col" *ngIf="isFeatureAvailable('followUpType')">{{'Type'|translate}}</th>
                       <th scope="col">{{'Date'|translate}}</th>
                       <th scope="col">{{'Time'| translate}}</th>
                       <th scope="col">{{'Reason'|translate}}</th>
@@ -2001,7 +2015,7 @@
                   <tbody>
                     <tr>
                       <td>{{ followUpForm.value.wantFollowUp }}</td>
-                      <td>{{ (followUpForm.value.followUpType) ? followUpForm.value.followUpType : '-' }}</td>
+                      <td *ngIf="isFeatureAvailable('followUpType')">{{ (followUpForm.value.followUpType) ? followUpForm.value.followUpType : '-' }}</td>
                       <td>{{ (followUpForm.value.followUpDate) ? (followUpForm.value.followUpDate|date:'dd MMMM yyyy') : '-' }}</td>
                       <td>{{ (followUpForm.value.followUpTime) ? followUpForm.value.followUpTime : '-' }}</td>
                       <td>{{ (followUpForm.value.followUpReason) ? followUpForm.value.followUpReason : '-' }}</td>

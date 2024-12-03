@@ -526,7 +526,8 @@ export interface DiagnosisModel {
   diagnosisName?: string,
   diagnosisType?: string,
   diagnosisStatus?: string,
-  uuid?: string
+  uuid?: string,
+  diagnosisTNMStaging?: string
 }
 
 export interface DocImagesModel {
