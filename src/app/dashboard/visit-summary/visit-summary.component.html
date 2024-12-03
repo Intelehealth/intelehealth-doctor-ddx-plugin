@@ -125,13 +125,6 @@
               </div>
             </div>
 
-            <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('Relative Phone Number') && getPersonAttributeValue('Relative Phone Number') !== 'NA'">
-              <div class="patient-info-item mb-3">
-                <h6 data-test-id="etPatient">{{'Relative Phone Number' | translate}}</h6>
-                <p data-test-id="etPatient">{{ getPersonAttributeValue('Relative Phone Number') }}</p>
-              </div>
-            </div>
-
             <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('Email') && getPersonAttributeValue('Email') !== 'NA'">
               <div class="patient-info-item mb-3">
                 <h6 data-test-id="etPatient">{{'Email' | translate}}</h6>
@@ -265,6 +258,13 @@
                   <div class="patient-info-item mb-3">
                     <h6 data-test-id="etPatient">{{'Department' | translate}}</h6>
                     <p data-test-id="etPatient">{{ getPersonAttributeValue('Department') }}</p>
+                  </div>
+                </div>
+
+                <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('Relative Phone Number') && getPersonAttributeValue('Relative Phone Number') !== 'NA'">
+                  <div class="patient-info-item mb-3">
+                    <h6 data-test-id="etPatient">{{'Relative Phone Number' | translate}}</h6>
+                    <p data-test-id="etPatient">{{ getPersonAttributeValue('Relative Phone Number') }}</p>
                   </div>
                 </div>
               </div>

@@ -1226,9 +1226,6 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
         case 'Email':
           value = this.getPersonAttributeValue('Email');
           break;
-        case 'Relative Phone Number':
-          value = this.getPersonAttributeValue('Relative Phone Number');
-          break;
         default:
           break;
       }
@@ -1382,6 +1379,9 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
             break;
           case 'Department':
             value = this.getPersonAttributeValue('Department');
+            break;
+          case 'Relative Phone Number':
+            value = this.getPersonAttributeValue('Relative Phone Number');
             break;
           default:
             break;
