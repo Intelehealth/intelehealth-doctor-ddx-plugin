@@ -145,7 +145,8 @@ export function calculateBMI(vitals: any, vitalObs: any, _locale: string = 'en')
   return null;
 }
 
-export function isFeaturePresent(featureName: string): boolean {
-  const featureList = environment.featureList; // Extract from ENV file
+export function isFeaturePresent(featureName: string, notInclude = false): boolean {
+  const featureList = environment.featureList ?? []; // Extract from ENV file
+  if(notInclude) return !featureList.includes(featureName);
   return featureList.includes(featureName);
 }
