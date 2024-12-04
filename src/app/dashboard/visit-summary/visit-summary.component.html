@@ -1826,12 +1826,13 @@
                 </div>
               </form>
             </mat-expansion-panel>
-
+            <app-follow-up-instruction [title]="'Follow up Instructions'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded" [visit]="visit"
+              [visitNotePresent]="visitNotePresent" [isMCCUser]="isMCCUser" *ngIf="isFeatureAvailable('follow-up-instruction')"></app-follow-up-instruction>
             <mat-expansion-panel
               [expanded]="true"
               #panel8
               hideToggle
-              class="bg-gray"
+              
             >
               <mat-expansion-panel-header>
                 <mat-panel-title>
@@ -2044,7 +2045,7 @@
               </div>
             </mat-expansion-panel>
 
-            <mat-expansion-panel [expanded]="true" #panel9 hideToggle *ngIf="isSubSectionEnabled('patient_interaction','Patient')">
+            <mat-expansion-panel [expanded]="true" #panel9 hideToggle *ngIf="isSubSectionEnabled('patient_interaction','Patient')" class="bg-gray">
               <mat-expansion-panel-header>
                 <mat-panel-title>
                   <div class="intel-accordion-title">
