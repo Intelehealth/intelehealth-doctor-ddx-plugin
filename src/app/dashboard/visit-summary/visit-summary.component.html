@@ -1061,7 +1061,7 @@
                     <ng-container *ngIf="existingDiagnosis.length">
                       <tr *ngFor="let d of existingDiagnosis; let i = index">
                         <td>{{ d.diagnosisName }}</td>
-                        <td  *ngIf="isFeatureAvailable('tnmStaging')">{{ d.diagnosisTNMStaging }}</td>
+                        <td *ngIf="isFeatureAvailable('tnmStaging')">{{ d.diagnosisTNMStaging ?? '-' }}</td>
                         <td>{{ d.diagnosisType }}</td>
                         <td>{{ d.diagnosisStatus }}</td>
                         <td class="pr-0">
