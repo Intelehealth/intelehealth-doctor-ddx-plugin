@@ -1064,7 +1064,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
             diagnosisType: obs.value.split(':')[1].split('&')[0].trim(),
             diagnosisStatus: obs.value.split(':')[1].split('&')[1].trim(),
             uuid: obs.uuid,
-            diagnosisTNMStaging: obs.value.split(':')[1].split('&')[2].trim(),
+            diagnosisTNMStaging: obs.value.split(':')[1]?.split('&')[2]?.trim() !== 'null' ? obs.value.split(':')[1]?.split('&')[2]?.trim() : null,
           });
         }
       });
@@ -1487,7 +1487,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
           if (obs.value.includes('Time:')) {
             followUpDate = (obs.value.includes('Time:')) ? moment(obs.value.split(', Time: ')[0]).format('YYYY-MM-DD') : moment(obs.value.split(', Remark: ')[0]).format('YYYY-MM-DD');
             followUpTime = (obs.value.includes('Time:')) ? obs.value.split(', Time: ')[1].split(', Remark: ')[0] : null;
-            followUpReason = (obs.value.split(', Remark: ')[1]) ? obs.value.split(', Remark: ')[1] : null;
+            followUpReason = (obs.value.split(', Remark: ')[1]) ? obs.value.split(', Remark: ')[1].split(', ')[0] : null;
             followUpType = (obs.value.includes('Type:')) ? obs.value.split('Type: ')[1].split(', Time: ')[0] : null;
             wantFollowUp = 'Yes';
           } else {
