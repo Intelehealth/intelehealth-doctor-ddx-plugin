@@ -1066,7 +1066,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
             diagnosisType: obsValuesOne[0]?.trim(),
             diagnosisStatus: obsValuesOne[1]?.trim(),
             uuid: obs.uuid,
-            diagnosisTNMStaging: obsValuesOne[2]?.trim(),
+            diagnosisTNMStaging: obsValuesOne[2]?.trim() !== 'null' ? obsValuesOne[2]?.trim() : null,
           });
         }
       });
