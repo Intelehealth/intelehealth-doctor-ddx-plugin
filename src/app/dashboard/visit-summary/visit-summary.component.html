@@ -51,8 +51,8 @@
 
             <div class="col-md-2 patient-info-section p-3" *ngIf="checkPatientRegField('Gender') && patient?.person.gender">
               <div class="patient-info-item mb-3">
-                <h6 data-test-id="etPatientAge">{{'Gender'|translate}}</h6>
-                <p data-test-id="etPatient">{{ patient?.person.gender | translate }}</p>
+                <h6 data-test-id="etPatientGender">{{'Gender'|translate}}</h6>
+                <p data-test-id="etPatientGender">{{ patient?.person.gender | translate }}</p>
               </div>
             </div>
 
@@ -998,7 +998,7 @@
                       <tr>
                         <th scope="col">{{'Patient interaction'|translate}}</th>
                         <th scope="col">{{'Status'|translate}}</th>
-                        <th scope="col">{{'Comment'|translate}}</th>
+                        <th scope="col">{{'Discussion with Patient'|translate}}</th>
                         <th scope="col"></th>
                       </tr>
                     </thead>

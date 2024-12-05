@@ -38,21 +38,29 @@
                 <span>{{ patient?.person?.preferredName?.givenName }}</span>
                 <span *ngIf="checkPatientRegField('Middle Name') && patient?.person?.preferredName?.middleName">{{ ' ' + patient?.person?.preferredName?.middleName }}</span>
                 <span>{{ ' ' + patient?.person?.preferredName?.familyName }}</span>
-                <span *ngIf="checkPatientRegField('Gender')">{{ " (" + (patient?.person.gender | translate) + ") "}}</span>
+                <!-- <span *ngIf="checkPatientRegField('Gender')">{{ " (" + (patient?.person.gender | translate) + ") "}}</span> -->
               </h6>
-              <p data-test-id="etPatienOpenMRSId">{{ getPatientIdentifier("OpenMRS ID") }}</p>
+              <!-- <p data-test-id="etPatienOpenMRSId">{{ getPatientIdentifier("OpenMRS ID") }}</p> -->
+              <p data-test-id="etPatienOpenMRSId">{{ getPersonAttributeValue('TMH Case Number') !== 'NA' ? getPersonAttributeValue('TMH Case Number') : getPatientIdentifier('OpenMRS ID') }}</p>
             </div>
           </div>
         </div>
 
-        <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('Age') && patient?.person.age">
+        <div class="col-md-2 patient-info-section p-3" *ngIf="checkPatientRegField('Gender') && patient?.person.gender">
+          <div class="patient-info-item mb-3">
+            <h6 data-test-id="etPatientGender">{{'Gender'|translate}}</h6>
+            <p data-test-id="etPatientGender">{{ patient?.person.gender | translate }}</p>
+          </div>
+        </div>
+
+        <div class="col-md-2 patient-info-section p-3" *ngIf="checkPatientRegField('Age') && patient?.person.age">
           <div class="patient-info-item mb-3">
             <h6 data-test-id="etPatientAge">{{'Age'|translate}}</h6>
             <p data-test-id="etPatient">{{ patient?.person.birthdate ? getAge(patient?.person.birthdate) : patient?.person.age + ' years'  }}</p>
           </div>
         </div>
 
-        <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('Date of Birth') && patient?.person.birthdate !== 'NA'">
+        <div class="col-md-2 patient-info-section p-3" *ngIf="checkPatientRegField('Date of Birth') && patient?.person.birthdate !== 'NA'">
           <div class="patient-info-item mb-3">
             <h6 data-test-id="etPatientAge">{{'Date of Birth'|translate}}</h6>
             <p data-test-id="etPatient">{{ patient?.person.birthdate | date : "dd MMM, yyyy" }}</p>
@@ -210,12 +218,12 @@
               </div>
             </div>
 
-            <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('TMH Case Number') && getPersonAttributeValue('TMH Case Number') !== 'NA'">
+            <!-- <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('TMH Case Number') && getPersonAttributeValue('TMH Case Number') !== 'NA'">
               <div class="patient-info-item mb-3">
                 <h6 data-test-id="etPatient">{{'TMH Case Number' | translate}}</h6>
                 <p data-test-id="etPatient">{{ getPersonAttributeValue('TMH Case Number') }}</p>
               </div>
-            </div>
+            </div> -->
 
             <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('Request ID') && getPersonAttributeValue('Request ID') !== 'NA'">
               <div class="patient-info-item mb-3">
@@ -464,6 +472,7 @@
                   <thead>
                     <tr>
                       <th scope="col">{{'Diagnosis'|translate}}</th>
+                      <th scope="col"  *ngIf="isFeatureAvailable('tnmStaging')">{{'TNM Staging'|translate}}</th>
                       <th scope="col">{{'Type'|translate}}</th>
                       <th scope="col">{{'Status'|translate}}</th>
                     </tr>
@@ -471,6 +480,7 @@
                   <tbody>
                     <tr *ngFor="let d of existingDiagnosis; let i = index">
                       <td>{{ d.diagnosisName }}</td>
+                      <td *ngIf="isFeatureAvailable('tnmStaging')">{{ d.diagnosisTNMStaging ?? '-' }}</td>
                       <td>{{ d.diagnosisType }}</td>
                       <td>{{ d.diagnosisStatus }}</td>
                     </tr>
@@ -662,6 +672,7 @@
                   <thead>
                     <tr>
                       <th scope="col">{{'Follow-up suggested'|translate}}</th>
+                      <th scope="col" *ngIf="isFeatureAvailable('followUpType')">{{'Follow-up Type'|translate}}</th>
                       <th scope="col">{{'Follow-up Date'|translate}}</th>
                       <th scope="col">{{'Follow-up Time'|translate}}</th>
                       <th scope="col">{{'Reason for follow-up'|translate}}</th>
@@ -671,6 +682,7 @@
                     <ng-container *ngIf="followUp; else noFollowUp">
                       <tr>
                         <td> {{ followUp.wantFollowUp }}</td>
+                        <td *ngIf="isFeatureAvailable('followUpType')">{{ followUp.followUpType ? followUp.followUpType : '-' }}</td>
                         <td> {{ followUp.followUpDate ? (followUp.followUpDate|date : "mediumDate") : '-' }}</td>
                         <td> {{ followUp.followUpTime ? followUp.followUpTime : '-' }}</td>
                         <td> {{ followUp.followUpReason ? followUp.followUpReason : '-' }}</td>
