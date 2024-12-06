@@ -14,7 +14,7 @@ import { DiagnosisModel, EncounterModel, EncounterProviderModel, FollowUpDataMod
 (<any>pdfMake).vfs = pdfFonts.pdfMake.vfs;
 import { precription } from "../../utils/base64"
 import { AppConfigService } from 'src/app/services/app-config.service';
-import { calculateBMI, getFieldValueByLanguage } from 'src/app/utils/utility-functions';
+import { calculateBMI, getFieldValueByLanguage, isFeaturePresent } from 'src/app/utils/utility-functions';
 import { checkIsEnabled, VISIT_SECTIONS } from 'src/app/utils/visit-sections';
 
 @Component({
@@ -923,14 +923,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
                       [
                         {
                           colSpan: 2,
-                          table: {
-                            widths: ['30%', '30%', '10%', '30%'],
-                            headerRows: 1,
-                            body: [
-                              [{text: 'Referral to', style: 'tableHeader'}, {text: 'Referral facility', style: 'tableHeader'}, {text: 'Priority', style: 'tableHeader'}, {text: 'Referral for (Reason)', style: 'tableHeader'}],
-                              ...this.getRecords('referral')
-                            ]
-                          },
+                          table: this.renderReferralSectionPDF(),
                           layout: 'lightHorizontalLines'
                         }
                       ]
@@ -1099,8 +1092,14 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
         break;
       case 'referral':
         if (this.referrals.length) {
+          const referralFacility = this.isFeatureAvailable('referralFacility', true)
+          const priorityOfReferral = this.isFeatureAvailable('priorityOfReferral', true)
           this.referrals.forEach(r => {
-            records.push([r.speciality, r.facility, r.priority, r.reason? r.reason : '-' ]);
+            const referral = [r.speciality];
+            if(referralFacility) referral.push(r.facility)
+            if(priorityOfReferral) referral.push(r.priority)
+            referral.push(r.reason? r.reason : '-')
+            records.push(referral);
           });
         } else {
           records.push([{ text: 'No referrals added', colSpan: 4, alignment: 'center' }]);
@@ -1431,4 +1430,53 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     return getFieldValueByLanguage(element)
   }
 
+  isFeatureAvailable(featureName: string, notInclude = false): boolean {
+    return isFeaturePresent(featureName, notInclude);
+  }
+
+  renderReferralSectionPDF() {
+    const referralFacility = isFeaturePresent('referralFacility', true)
+    const priorityOfReferral = isFeaturePresent('priorityOfReferral', true)
+    if (!referralFacility && !priorityOfReferral) {
+      return {
+        widths: ['35%', '65%'],
+        headerRows: 1,
+        body: [
+          [{ text: 'Referral to', style: 'tableHeader' }, { text: 'Referral for (Reason)', style: 'tableHeader' }],
+          ...this.getRecords('referral')
+        ]
+      }
+    }
+
+    if (!priorityOfReferral) {
+      return {
+        widths: ['35%', '35%', '30%'],
+        headerRows: 1,
+        body: [
+          [{ text: 'Referral to', style: 'tableHeader' }, { text: 'Referral facility', style: 'tableHeader' }, { text: 'Referral for (Reason)', style: 'tableHeader' }],
+          ...this.getRecords('referral')
+        ]
+      }
+    }
+
+    if (!referralFacility) {
+      return {
+        widths: ['35%', '35%', '30%'],
+        headerRows: 1,
+        body: [
+          [{ text: 'Referral to', style: 'tableHeader' }, { text: 'Priority', style: 'tableHeader' }, { text: 'Referral for (Reason)', style: 'tableHeader' }],
+          ...this.getRecords('referral')
+        ]
+      }
+    }
+
+    return {
+      widths: ['30%', '30%', '10%', '30%'],
+      headerRows: 1,
+      body: [
+        [{ text: 'Referral to', style: 'tableHeader' }, { text: 'Referral facility', style: 'tableHeader' }, { text: 'Priority', style: 'tableHeader' }, { text: 'Referral for (Reason)', style: 'tableHeader' }],
+        ...this.getRecords('referral')
+      ]
+    }
+  }
 }
