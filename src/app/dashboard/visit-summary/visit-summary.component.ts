@@ -175,6 +175,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   reasonsList: { name: string }[] = [];
   patientInteraction: PatientVisitSection[] = [];
 
+  frequencyList = ["Once daily", "Twice daily", "Three times daily", "Four times daily", "Every 30 minutes", "Every hour", "Every four hours", "Every eight hours"];
+
   mainSearch = (text$: Observable<string>, list: string[]) =>
     text$.pipe(
       debounceTime(200),
@@ -252,6 +254,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       strength: new FormControl(null, [Validators.required]),
       days: new FormControl(null, [Validators.required]),
       timing: new FormControl(null, [Validators.required]),
+      frequency: new FormControl(null),
       remark: new FormControl(null, [Validators.required])
     });
 
@@ -1179,6 +1182,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
               days: obs.value?.split(':')[2],
               timing: obs.value?.split(':')[3],
               remark: obs.value?.split(':')[4],
+              frequency: obs.value?.split(':')[5] ? obs.value?.split(':')[5] : "",
               uuid: obs.uuid
             });
           } else {
@@ -1205,7 +1209,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       concept: conceptIds.conceptMed,
       person: this.visit.patient.uuid,
       obsDatetime: new Date(),
-      value: `${this.addMedicineForm.value.drug}:${this.addMedicineForm.value.strength}:${this.addMedicineForm.value.days}:${this.addMedicineForm.value.timing}:${this.addMedicineForm.value.remark}`,
+      value: `${this.addMedicineForm.value.drug}:${this.addMedicineForm.value.strength}:${this.addMedicineForm.value.days}:${this.addMedicineForm.value.timing}:${this.addMedicineForm.value.remark}:${this.addMedicineForm.value.frequency}`,
       encounter: this.visitNotePresent.uuid
     }).subscribe((response: ObsModel) => {
       this.medicines.push({ ...this.addMedicineForm.value, uuid: response.uuid });

@@ -509,6 +509,7 @@ export interface MedicineModel {
   days?: string,
   timing?: string,
   remark?: string,
+  frequency?: string,
   uuid?: string
 }
 

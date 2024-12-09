@@ -272,6 +272,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
               days: obs.value?.split(':')[2],
               timing: obs.value?.split(':')[3],
               remark: obs.value?.split(':')[4],
+              frequency: obs.value?.split(':')[5] ? obs.value?.split(':')[5] : '',
               uuid: obs.uuid
             });
           } else {
@@ -832,15 +833,15 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
                     widths: [30, '*'],
                     headerRows: 1,
                     body: [
-                      [ {image: 'medication', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Medication', style: 'sectionheader', border: [false, false, false, true] }],
+                      [ {image: 'medication', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Medications Advised', style: 'sectionheader', border: [false, false, false, true] }],
                       [
                         {
                           colSpan: 2,
                           table: {
-                            widths: ['*', 'auto', 'auto', 'auto', 'auto'],
+                            widths: ['*', 'auto', 'auto', 'auto', 'auto', 'auto'],
                             headerRows: 1,
                             body: [
-                              [{text: 'Drug name', style: 'tableHeader'}, {text: 'Strength', style: 'tableHeader'}, {text: 'No. of days', style: 'tableHeader'}, {text: 'Timing', style: 'tableHeader'}, {text: 'Remarks', style: 'tableHeader'}],
+                              [{text: 'Drug name', style: 'tableHeader'}, {text: 'Strength', style: 'tableHeader'}, {text: 'No. of days', style: 'tableHeader'}, {text: 'Timing', style: 'tableHeader'}, {text: 'Frequency', style: 'tableHeader'}, {text: 'Remarks', style: 'tableHeader'}],
                               ...this.getRecords('medication')
                             ]
                           },
@@ -900,7 +901,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
                     widths: [30, '*'],
                     headerRows: 1,
                     body: [
-                      [ {image: 'test', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Test', style: 'sectionheader', border: [false, false, false, true] }],
+                      [ {image: 'test', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Investigations Advised', style: 'sectionheader', border: [false, false, false, true] }],
                       [
                         {
                           colSpan: 2,
@@ -926,7 +927,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
                     widths: [30, '*'],
                     headerRows: 1,
                     body:  [
-                      [ {image: 'referral', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Referral Out', style: 'sectionheader', border: [false, false, false, true] }],
+                      [ {image: 'referral', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Referral Advise', style: 'sectionheader', border: [false, false, false, true] }],
                       [
                         {
                           colSpan: 2,
@@ -1069,6 +1070,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
       if(section[0].sectionName === 'advice' && !this.isFeatureAvailable('advice')) return false;
       return true;
     });
+    console.log(JSON.stringify(pdfObj))
     pdfMake.createPdf(pdfObj).download('e-prescription');
   }
 
@@ -1092,7 +1094,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
       case 'medication':
         if (this.medicines.length) {
           this.medicines.forEach(m => {
-            records.push([m.drug, m.strength, m.days, m.timing, m.remark]);
+            records.push([m.drug, m.strength, m.days, m.timing, m.frequency, m.remark]);
           });
         } else {
           records.push([{ text: 'No medicines added', colSpan: 5, alignment: 'center' }]);
