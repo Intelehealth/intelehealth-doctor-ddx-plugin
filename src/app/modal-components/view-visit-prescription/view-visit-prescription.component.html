@@ -556,7 +556,7 @@
           </div>
         </div>
 
-        <div class="col-md-12 px-3 mb-3">
+        <div class="col-md-12 px-3 mb-3" *ngIf="isFeatureAvailable('advice')">
           <div class="data-section">
             <div class="data-section-title">
               <img src="assets/svgs/advice.svg" alt="" />
@@ -649,7 +649,32 @@
             </div>
           </div>
         </div>
-
+        <div class="col-md-12 px-3 mb-3" *ngIf="isFeatureAvailable('follow-up-instruction')">
+          <div class="data-section">
+            <div class="data-section-title">
+              <img src="assets/svgs/test.svg" alt="" />
+              <h6>{{'Follow Up Instructions'|translate}}</h6>
+            </div>
+            <div class="data-section-content">
+              <ul *ngIf="followUpInstructions?.length; else noTests" class="items-list">
+                <li *ngFor="let t of followUpInstructions">
+                  <div
+                    class="d-flex justify-content-between align-items-center"
+                  >
+                    <span>{{ t.value }}</span>
+                  </div>
+                </li>
+              </ul>
+              <ng-template #noTests>
+                <tr>
+                  <td colspan="5" class="text-center">
+                   {{'No Follow Up Instructions added' | translate}}
+                  </td>
+                </tr>
+              </ng-template>
+            </div>
+          </div>
+        </div>
         <div class="col-md-12 px-3 mb-3">
           <div class="data-section">
             <div class="data-section-title">

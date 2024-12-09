@@ -9,12 +9,12 @@ import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { Observable, Subscription } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
-import { doctorDetails, visitTypes } from 'src/config/constant';
+import { conceptIds, doctorDetails, visitTypes } from 'src/config/constant';
 import { DiagnosisModel, EncounterModel, EncounterProviderModel, FollowUpDataModel, MedicineModel, ObsApiResponseModel, ObsModel, PatientIdentifierModel, PatientModel, PatientRegistrationFieldsModel, PatientVisitSection, PersonAttributeModel, ProviderAttributeModel, ReferralModel, TestModel, VisitAttributeModel, VisitModel, VitalModel } from 'src/app/model/model';
 (<any>pdfMake).vfs = pdfFonts.pdfMake.vfs;
 import { precription } from "../../utils/base64"
 import { AppConfigService } from 'src/app/services/app-config.service';
-import { calculateBMI, getFieldValueByLanguage } from 'src/app/utils/utility-functions';
+import { calculateBMI, getFieldValueByLanguage, isFeaturePresent } from 'src/app/utils/utility-functions';
 import { checkIsEnabled, VISIT_SECTIONS } from 'src/app/utils/visit-sections';
 
 @Component({
@@ -47,6 +47,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
   referrals: ReferralModel[] = [];
   followUp: FollowUpDataModel;
   consultedDoctor: any;
+  followUpInstructions: ObsModel[] = [];
 
   conceptDiagnosis = '537bb20d-d09d-4f88-930b-cc45c7d662df';
   conceptNote = '162169AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
@@ -55,6 +56,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
   conceptTest = '23601d71-50e6-483f-968d-aeef3031346d';
   conceptReferral = '605b6f15-8f7a-4c45-b06d-14165f6974be';
   conceptFollow = 'e8caffd6-5d22-41c4-8d6a-bc31a44d0c86';
+  conceptFollowUpInstruction = conceptIds.conceptFollowUpInstruction;
 
   signaturePicUrl: string = null;
   signatureFile = null;
@@ -135,6 +137,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
               this.checkIfTestPresent();
               this.checkIfReferralPresent();
               this.checkIfFollowUpPresent();
+              this.checkIfFollowUpInstructionsPresent();
             }
             this.getCheckUpReason(visit.encounters);
             this.getVitalObs(visit.encounters);
@@ -863,6 +866,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
               [
                 {
                   colSpan: 4,
+                  sectionName: "advice",
                   table: {
                     widths: [30, '*'],
                     headerRows: 1,
@@ -932,6 +936,32 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
                             ]
                           },
                           layout: 'lightHorizontalLines'
+                        }
+                      ]
+                    ]
+                  },
+                  layout: {
+                    defaultBorder: false
+                  }
+                },
+                '',
+                '',
+                ''
+              ],
+              [{
+                  colSpan: 4,
+                  sectionName:'followUpInstructions',
+                  table: {
+                    widths: [30, '*'],
+                    headerRows: 1,
+                    body: [
+                      [ {image: 'test', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Follow up Instructions', style: 'sectionheader', border: [false, false, false, true] }],
+                      [
+                        {
+                          colSpan: 2,
+                          ul: [
+                            ...this.getRecords('followUpInstructions')
+                          ]
                         }
                       ]
                     ]
@@ -1039,6 +1069,8 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     pdfObj.content[0].table.body = pdfObj.content[0].table.body.filter((section:any)=>{
       if(section[0].sectionName === 'vitals' && (!this.hasVitalsEnabled || !vitalsConfig?.is_enabled )) return false;
       if(section[0].sectionName === 'cheifComplaint' && !checkUpReasonConfig?.is_enabled) return false;
+      if(section[0].sectionName === 'followUpInstructions' && !this.isFeatureAvailable('follow-up-instruction')) return false;
+      if(section[0].sectionName === 'advice' && !this.isFeatureAvailable('advice')) return false;
       return true;
     });
     pdfMake.createPdf(pdfObj).download('e-prescription');
@@ -1124,6 +1156,15 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
       case visitTypes.VITALS:
         this.vitals.forEach((v: VitalModel) => {
           records.push({ text: [{ text: `${v.lang !== null ? this.getLanguageValue(v) : v.name } : `, bold: true }, `${this.getObsValue(v.uuid, v.key) ? this.getObsValue(v.uuid, v.key) : `No information`}`], margin: [0, 5, 0, 5] });        });
+        break;
+      case 'followUpInstructions':
+        if (this.followUpInstructions) {
+          this.followUpInstructions.forEach(t => {
+            records.push({ text: t.value, margin: [0, 5, 0, 5] });
+          });
+        } else {
+          records.push([{ text: 'No Follow Up Instructions added'}]);
+        }
         break;
     }
     return records;
@@ -1431,4 +1472,22 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     return getFieldValueByLanguage(element)
   }
 
+  isFeatureAvailable(featureName: string): boolean {
+    return isFeaturePresent(featureName);
+  }
+
+  /**
+   * Get followUpInstructions for the visit
+   * @returns {void}
+   */
+  checkIfFollowUpInstructionsPresent(): void {
+    this.followUpInstructions = [];
+    this.diagnosisService.getObs(this.visit.patient.uuid, this.conceptFollowUpInstruction).subscribe((response: ObsApiResponseModel) => {
+      response.results.forEach((obs: ObsModel) => {
+        if (obs.encounter.visit.uuid === this.visit.uuid) {
+          this.followUpInstructions.push(obs);
+        }
+      });
+    });
+  }
 }
