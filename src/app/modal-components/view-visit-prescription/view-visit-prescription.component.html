@@ -384,7 +384,7 @@
                   <!-- END Vitals -->
                       
                   <!-- Checkup Reasons -->
-                    <div class="data-section-content">
+                    <div class="data-section-content" *ngSwitchCase="pvsConstant['check_up_reason'].key">
                       <div class="cheif-complaint-wrapper">
                         <h6>{{'Chief complaint'|translate}}</h6>
                         <div class="complaint-chips">
