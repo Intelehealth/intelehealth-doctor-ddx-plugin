@@ -1006,7 +1006,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
             records.push([m.drug, m.strength, m.days, m.timing, m.frequency, m.remark]);
           });
         } else {
-          records.push([{ text: 'No medicines added', colSpan: 5, alignment: 'center' }]);
+          records.push([{ text: 'No medicines added', colSpan: 6, alignment: 'center' }]);
         }
         break;
       case 'additionalInstruction':
