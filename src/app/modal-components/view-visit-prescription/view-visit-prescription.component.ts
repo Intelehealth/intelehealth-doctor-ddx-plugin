@@ -829,47 +829,6 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
               [
                 {
                   colSpan: 4,
-                  table: {
-                    widths: [30, '*'],
-                    headerRows: 1,
-                    body: [
-                      [ {image: 'medication', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Medications Advised', style: 'sectionheader', border: [false, false, false, true] }],
-                      [
-                        {
-                          colSpan: 2,
-                          table: {
-                            widths: ['*', 'auto', 'auto', 'auto', 'auto', 'auto'],
-                            headerRows: 1,
-                            body: [
-                              [{text: 'Drug name', style: 'tableHeader'}, {text: 'Strength', style: 'tableHeader'}, {text: 'No. of days', style: 'tableHeader'}, {text: 'Timing', style: 'tableHeader'}, {text: 'Frequency', style: 'tableHeader'}, {text: 'Remarks', style: 'tableHeader'}],
-                              ...this.getRecords('medication')
-                            ]
-                          },
-                          layout: 'lightHorizontalLines'
-                        }
-                      ],
-                      [{ text: 'Additional Instructions:', style: 'sectionheader', colSpan: 2 }, ''],
-                      [
-                        {
-                          colSpan: 2,
-                          ul: [
-                            ...this.getRecords('additionalInstruction')
-                          ]
-                        }
-                      ]
-                    ]
-                  },
-                  layout: {
-                    defaultBorder: false
-                  }
-                },
-                '',
-                '',
-                ''
-              ],
-              [
-                {
-                  colSpan: 4,
                   sectionName: "advice",
                   table: {
                     widths: [30, '*'],
@@ -894,57 +853,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
                 '',
                 ''
               ],
-              [
-                {
-                  colSpan: 4,
-                  table: {
-                    widths: [30, '*'],
-                    headerRows: 1,
-                    body: [
-                      [ {image: 'test', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Investigations Advised', style: 'sectionheader', border: [false, false, false, true] }],
-                      [
-                        {
-                          colSpan: 2,
-                          ul: [
-                            ...this.getRecords('test')
-                          ]
-                        }
-                      ]
-                    ]
-                  },
-                  layout: {
-                    defaultBorder: false
-                  }
-                },
-                '',
-                '',
-                ''
-              ],
-              [
-                {
-                  colSpan: 4,
-                  table: {
-                    widths: [30, '*'],
-                    headerRows: 1,
-                    body:  [
-                      [ {image: 'referral', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Referral Advise', style: 'sectionheader', border: [false, false, false, true] }],
-                      [
-                        {
-                          colSpan: 2,
-                          table: this.renderReferralSectionPDF(),
-                          layout: 'lightHorizontalLines'
-                        }
-                      ]
-                    ]
-                  },
-                  layout: {
-                    defaultBorder: false
-                  }
-                },
-                '',
-                '',
-                ''
-              ],
+              ...this.getDoctorRecommandation(),
               [{
                   colSpan: 4,
                   sectionName:'followUpInstructions',
@@ -1539,5 +1448,126 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
         }
       });
     });
+  }
+
+  getDoctorRecommandation(){
+    let subFields = [[
+      {
+        colSpan: 4,
+        table: {
+          widths: [30, '*'],
+          headerRows: 1,
+          body: [
+            [ {image: 'medication', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Medications Advised', style: 'sectionheader', border: [false, false, false, true] }],
+            [
+              {
+                colSpan: 2,
+                table: {
+                  widths: ['*', 'auto', 'auto', 'auto', 'auto', 'auto'],
+                  headerRows: 1,
+                  body: [
+                    [{text: 'Drug name', style: 'tableHeader'}, {text: 'Strength', style: 'tableHeader'}, {text: 'No. of days', style: 'tableHeader'}, {text: 'Timing', style: 'tableHeader'}, {text: 'Frequency', style: 'tableHeader'}, {text: 'Remarks', style: 'tableHeader'}],
+                    ...this.getRecords('medication')
+                  ]
+                },
+                layout: 'lightHorizontalLines'
+              }
+            ],
+            [{ text: 'Additional Instructions:', style: 'sectionheader', colSpan: 2 }, ''],
+            [
+              {
+                colSpan: 2,
+                ul: [
+                  ...this.getRecords('additionalInstruction')
+                ]
+              }
+            ]
+          ]
+        },
+        layout: {
+          defaultBorder: false
+        }
+      },
+      '',
+      '',
+      ''
+    ],
+    [
+      {
+        colSpan: 4,
+        table: {
+          widths: [30, '*'],
+          headerRows: 1,
+          body: [
+            [ {image: 'test', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Investigations Advised', style: 'sectionheader', border: [false, false, false, true] }],
+            [
+              {
+                colSpan: 2,
+                ul: [
+                  ...this.getRecords('test')
+                ]
+              }
+            ]
+          ]
+        },
+        layout: {
+          defaultBorder: false
+        }
+      },
+      '',
+      '',
+      ''
+    ],
+    [
+      {
+        colSpan: 4,
+        table: {
+          widths: [30, '*'],
+          headerRows: 1,
+          body:  [
+            [ {image: 'referral', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Referral Advise', style: 'sectionheader', border: [false, false, false, true] }],
+            [
+              {
+                colSpan: 2,
+                table: this.renderReferralSectionPDF(),
+                layout: 'lightHorizontalLines'
+              }
+            ]
+          ]
+        },
+        layout: {
+          defaultBorder: false
+        }
+      },
+      '',
+      '',
+      ''
+    ]];
+
+    if(this.isFeatureAvailable('doctor-recommendation')){
+      return [
+        [
+          {
+            colSpan: 4,
+            table: {
+              widths: [30, '*','auto','auto'],
+              headerRows: 1,
+              body: [
+                [ {image: 'advice', width: 25, height: 25, border: [false, false, false, true]  }, {colSpan: 3, text: 'Doctor\'s Recommendation', style: 'sectionheader', border: [false, false, false, true] },'',''],
+                ...subFields
+              ]
+            },
+            layout: {
+              defaultBorder: false
+            }
+          },
+          '',
+          '',
+          ''
+        ]
+      ]
+    } else {
+      return subFields;
+    }
   }
 }
