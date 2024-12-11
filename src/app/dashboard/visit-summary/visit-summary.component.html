@@ -1344,7 +1344,9 @@
                 </mat-panel-title>
                 <mat-icon>{{ panelDoctorRcom.expanded ? "remove" : "add" }}</mat-icon>
               </mat-expansion-panel-header>
-              <ng-template *ngTemplateOutlet="tplDrRcom"></ng-template>
+              <ng-container *ngIf="panelDoctorRcom.expanded">
+                <ng-template *ngTemplateOutlet="tplDrRcom"></ng-template>
+              </ng-container>
             </mat-expansion-panel>
 
             <ng-container *ngIf="!isFeatureAvailable('doctor-recommendation')">
