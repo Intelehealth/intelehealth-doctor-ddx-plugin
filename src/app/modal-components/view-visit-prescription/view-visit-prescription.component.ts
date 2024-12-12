@@ -1037,18 +1037,22 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
         }
         break;
       case 'referral':
+        const referralFacility = this.isFeatureAvailable('referralFacility', true)
+        const priorityOfReferral = this.isFeatureAvailable('priorityOfReferral', true)
+        let length = 2;
         if (this.referrals.length) {
-          const referralFacility = this.isFeatureAvailable('referralFacility', true)
-          const priorityOfReferral = this.isFeatureAvailable('priorityOfReferral', true)
           this.referrals.forEach(r => {
             const referral = [r.speciality];
             if(referralFacility) referral.push(r.facility)
             if(priorityOfReferral) referral.push(r.priority)
             referral.push(r.reason? r.reason : '-')
             records.push(referral);
+            length = referral.length
           });
         } else {
-          records.push([{ text: 'No referrals added', colSpan: 4, alignment: 'center' }]);
+          if(referralFacility) length += 1;
+          if(priorityOfReferral) length += 1;
+          records.push([{ text: 'No referrals added', colSpan: length, alignment: 'center' }]);
         }
         break;
       case 'followUp':
