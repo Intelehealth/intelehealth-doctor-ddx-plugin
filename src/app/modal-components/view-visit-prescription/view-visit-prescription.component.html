@@ -62,14 +62,14 @@
 
         <div class="col-md-2 patient-info-section p-3" *ngIf="checkPatientRegField('Date of Birth') && patient?.person.birthdate !== 'NA'">
           <div class="patient-info-item mb-3">
-            <h6 data-test-id="etPatientAge">{{'Date of Birth'|translate}}</h6>
+            <h6 data-test-id="etPatientAge">{{'Date of birth'|translate}}</h6>
             <p data-test-id="etPatient">{{ patient?.person.birthdate | date : "dd MMM, yyyy" }}</p>
           </div>
         </div>
 
         <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('Phone Number') && getPersonAttributeValue('Telephone Number') !== 'NA'">
           <div class="patient-info-item">
-            <h6 data-test-id="etPatient">{{'Phone Number:'| translate}}</h6>
+            <h6 data-test-id="etPatient">{{'Phone Number'| translate}}:</h6>
             <div class="contact-info">
               <p>
                 <img src="assets/svgs/phone-black.svg" alt="" />
@@ -540,7 +540,7 @@
           <div class="data-section">
             <div class="data-section-title">
               <img src="assets/svgs/test.svg" alt="" />
-              <h6>{{'Doctor\'s Recommendation'|translate}}</h6>
+              <h6>{{'Doctor's Recommendation'|translate}}</h6>
             </div>
             <div class="data-section-content pt-3">
               <ng-template *ngTemplateOutlet="tplDrRcom"></ng-template>
@@ -631,7 +631,7 @@
                 <ng-template #noTests>
                   <tr>
                     <td colspan="5" class="text-center">
-                     {{'No tests added' | translate}}
+                     {{'No tests added!' | translate}}
                     </td>
                   </tr>
                 </ng-template>
