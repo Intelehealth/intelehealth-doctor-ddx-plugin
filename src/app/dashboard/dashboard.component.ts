@@ -312,6 +312,7 @@ export class DashboardComponent implements OnInit {
           visit.visit_created = visit?.date_created ? this.getCreatedAt(visit.date_created.replace('Z', '+0530')) : this.getEncounterCreated(visit, visitTypes.COMPLETED_VISIT);
           visit.person.age = this.calculateAge(visit.person.birthdate);
           visit.completed = visit?.date_created ? this.getCreatedAt(visit.date_created.replace('Z', '+0530')) : this.getEncounterCreated(visit, visitTypes.VISIT_COMPLETE);
+          visit.TMH_patient_id = this.getAttributeData(visit, "TMH Case Number");
           this.completedVisits.push(visit);
         }
         this.dataSource5.data = [...this.completedVisits];
@@ -471,15 +472,17 @@ export class DashboardComponent implements OnInit {
           visit.visit_created = visit?.date_created ? this.getCreatedAt(visit.date_created.replace('Z','+0530')) : this.getEncounterCreated(visit, visitTypes.ADULTINITIAL);
           visit.prescription_started = this.getEncounterCreated(visit, visitTypes.VISIT_NOTE);
           visit.person.age = this.calculateAge(visit.person.birthdate);
-          visit.TMH_patient_id = this.getAttribute(visit, "TMH Case Number");
+          visit.TMH_patient_id = this.getAttributeData(visit, "TMH Case Number");
           this.inProgressVisits.push(visit);
         }
         this.dataSource4.data = [...this.inProgressVisits];
-        this.dataSource4.data.sort((a, b) => {
-          const dateA = isNaN(new Date(a.prescription_started).getTime()) ? new Date(this.convertToDate(a.prescription_started)).getTime() : new Date(a.prescription_started).getTime();
-          const dateB = isNaN(new Date(b.prescription_started).getTime()) ? new Date(this.convertToDate(b.prescription_started)).getTime() : new Date(b.prescription_started).getTime();
-          return dateA - dateB;
-        });
+        if(environment.brandName === 'KCDO'){
+          this.dataSource4.data.sort((a, b) => {
+            const dateA = isNaN(new Date(a.prescription_started).getTime()) ? new Date(this.convertToDate(a.prescription_started)).getTime() : new Date(a.prescription_started).getTime();
+            const dateB = isNaN(new Date(b.prescription_started).getTime()) ? new Date(this.convertToDate(b.prescription_started)).getTime() : new Date(b.prescription_started).getTime();
+            return dateA - dateB;
+          });
+        }
         if (page == 1) {
           this.dataSource4.paginator = this.tempPaginator3;
           this.dataSource4.filterPredicate = (data, filter: string) => data?.patient.identifier.toLowerCase().indexOf(filter) != -1 || data?.patient_name.given_name.concat((data?.patient_name.middle_name && this.checkPatientRegField('Middle Name') ? ' ' + data?.patient_name.middle_name : '') + ' ' + data?.patient_name.family_name).toLowerCase().indexOf(filter) != -1;
@@ -491,7 +494,7 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  getAttribute(data: any, attributeName: string): { name: string; value: string } | null {
+  getAttributeData(data: any, attributeName: string): { name: string; value: string } | null {
     if (data?.person_attribute && Array.isArray(data.person_attribute)) {
       const attribute = data.person_attribute.find(
         (attr: any) => attr.person_attribute_type?.name === attributeName
@@ -544,6 +547,7 @@ export class DashboardComponent implements OnInit {
               appointment.cheif_complaint = this.getCheifComplaint(appointment.visit);
               appointment.starts_in = checkIfDateOldThanOneDay(appointment.slotJsDate);
               appointment.telephone = this.getTelephoneNumber(appointment?.visit?.person)
+              appointment.TMH_patient_id = this.getAttributeData(appointment.visit, "TMH Case Number");
               this.appointments.push(appointment);
             }
           }
