@@ -236,8 +236,9 @@ export interface AppointmentModel {
   visitStatus: string,
   cheif_complaint?: string[],
   starts_in?: string,
-  appointmentId?: number
-  telephone?: string
+  appointmentId?: number,
+  telephone?: string,
+  TMH_patient_id?: any
 }
 
 export interface CustomVisitModel {
