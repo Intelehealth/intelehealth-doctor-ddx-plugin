@@ -37,7 +37,7 @@
       [formGroup]="addInstructionForm"
       (ngSubmit)="addInstructions()"
     >
-      <div class="form-group" *ngIf="addMoreNote">
+      <div class="form-group" *ngIf="addMoreInstruction">
         <button
           type="button"
           class="add-more-btn"
@@ -45,7 +45,7 @@
           data-test-id="btnAddMoreNote"
         >
           <img src="assets/svgs/plus-circle.svg" alt="" />
-          <span class="ml-2">{{'Add more notes'|translate}}</span>
+          <span class="ml-2">{{'Add more Instructions'|translate}}</span>
         </button>
       </div>
       <ng-container *ngIf="!addMoreInstruction">
@@ -66,7 +66,7 @@
           <button
             type="button"
             class="white-btn mr-2"
-            (click)="toggleNote()"
+            (click)="toggleInstructions()"
             data-test-id="btnCancelNote"
           >
             {{'Cancel'|translate}}
