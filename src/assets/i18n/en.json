@@ -6087,7 +6087,7 @@
   "Doctor": "Doctor",
   "HW": "HW",
   "Username already exists. Please enter another Username." : "Username already exists. Please enter another Username.",
-  "Enter Alphanumric charactors only": "Enter Alphanumric charactors only",
+  "Enter Alphanumeric characters only": "Enter Alphanumeric characters only",
   "Enter password": "Enter password",
   "Minimum 8 charactors required":"Minimum 8 charactors required",
   "Minimum 3 charactors required":"Minimum 3 charactors required",
@@ -6103,5 +6103,6 @@
   "Follow Up Instructions": "Follow Up Instructions",
   "No Follow Up Instructions added": "No Follow Up Instructions added",
   "No followup added": "No followup added",
-  "Doctor's Recommendation": "Doctor's Recommendation"
+  "Doctor's Recommendation": "Doctor's Recommendation",
+  "No data available!": "No data available!"
 }
