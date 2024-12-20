@@ -241,7 +241,7 @@ export class PatientRegistrationComponent {
   /**
    * @return {void}
    */
-  updateRoosterQuestionnaireStatus(id: number, status: boolean): void {
+  updateRoosterQuestionnaireStatus(status: boolean): void {
     this.configService
       .updateFeatureEnabledStatus(this.rosterQuestionnaireId, status)
       .subscribe(
