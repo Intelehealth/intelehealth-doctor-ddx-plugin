@@ -32,6 +32,8 @@ import { AppConfigService } from 'src/app/services/app-config.service';
 import { checkIsEnabled, VISIT_SECTIONS } from 'src/app/utils/visit-sections';
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { NgxRolesService } from 'ngx-permissions';
+import diagnostics from '../../core/data/diagnostics';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 class PickDateAdapter extends NativeDateAdapter {
   format(date: Date, displayFormat: Object): string {
@@ -150,6 +152,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
 
   collapsed: boolean = true;
   isMCCUser: boolean = false;
+  brandName = environment.brandName === 'KCDO';
+  diagnosticList;
+  sanitizedValue: SafeHtml;
 
   reasons = {
     'Completed': [
@@ -207,7 +212,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     private visitSummaryService: VisitSummaryHelperService,
     private mindmapService: MindmapService,
     public appConfigService: AppConfigService,
-    private rolesService: NgxRolesService) {
+    private rolesService: NgxRolesService,
+    private sanitizer: DomSanitizer) {
     Object.keys(this.appConfigService.patient_registration).forEach(obj => {
       this.patientRegFields.push(...this.appConfigService.patient_registration[obj].filter((e: { is_enabled: any; }) => e.is_enabled).map((e: { name: any; }) => e.name));
     });
@@ -544,7 +550,27 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
                   for (let k = 1; k < splitByBr.length; k++) {
                     if (splitByBr[k].trim() && splitByBr[k].trim().length > 1) {
                       const splitByDash = splitByBr[k].split('-');
-                      obj1.data.push({ key: splitByDash[0].replace('• ', ''), value: splitByDash.slice(1, splitByDash.length).join('-') });
+                      const processedStrings = splitByDash.slice(1, splitByDash.length).join('-').split(".").map(itemList => {
+                        let arr = itemList.split(" - ");
+                        let value = arr.pop() || "";
+                        
+                        if(this.isValidUnitFormat(value)){
+                          if (this.checkTestUnitValues(diagnostics.testUnits, value)) {
+                            value = `<span class="green"> ${value} </span>`;
+                          } else if(this.checkTestNameValues(diagnostics.testNames, value)) {
+                            value = `<span class="green"> ${value} </span>`;
+                          } else {
+                            value = `<span class="red"> ${value} </span>`;
+                          }
+                          arr.push(value);
+                        } else {
+                          arr.push(value);
+                        }
+                        return arr.join(" - ");
+                      });
+                      const resultString = processedStrings.join(". ");
+                      this.sanitizedValue = this.sanitizer.bypassSecurityTrustHtml(resultString);
+                      obj1.data.push({ key: splitByDash[0].replace('• ', ''), value: this.sanitizedValue });
                     }
                   }
                   this.checkUpReasonData.push(obj1);
@@ -556,6 +582,36 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  isValidUnitFormat(unit) {
+    const unitRegex = /\b\d+(\.\d+)?\s*(g\/dL|%|million\/µL|mg\/dL|U\/L|seconds?|cells\/µL|\/µL|fL|pg\/cell|mL\/min\/1.73\s*m²|mEq\/L|ng\/mL)\b/;
+    return unitRegex.test(unit);
+  }
+
+  checkTestUnitValues(diagnostics, value) {
+    let [unitCount, unitType] = value.split(" ");
+    for (let unit = 0; unit < diagnostics.length; unit++) {
+      if(value.includes(diagnostics[unit].unit) && (diagnostics[unit].unit.length === unitType.length)){
+        if(unitCount >= diagnostics[unit].min && unitCount <= diagnostics[unit].max){
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+  }
+
+  checkTestNameValues(diagnostics, value) {
+    let unitName = value;
+    for (let name = 0; name < diagnostics.length; name++) {
+      if(diagnostics[name].testName.includes(unitName)){
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
 
   /**
   * Get physical examination details
@@ -982,7 +1038,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   * @returns {void}
   */
   savePatientInteraction(): void {
-    if (this.patientInteractionForm.invalid || !this.isVisitNoteProvider) {
+    if (this.patientInteractionForm.value.hwPresent || !this.isVisitNoteProvider) {
       return;
     }
 
