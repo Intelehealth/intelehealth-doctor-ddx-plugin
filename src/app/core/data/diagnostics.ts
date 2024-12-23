@@ -25,7 +25,7 @@ export default {
     { name: 'Lymphocytes', min: 1000, max: 4800, unit: 'cells/µL', percentageMin: 20, percentageMax: 40, percentageUnit: '%' },
     { name: 'Monocytes', min: 200, max: 1000, unit: 'cells/µL', percentageMin: 2, percentageMax: 8, percentageUnit: '%' },
     { name: 'Eosinophils', min: 0, max: 500, unit: 'cells/µL', percentageMin: 1, percentageMax: 4, percentageUnit: '%' },
-    { name: 'Basophils', min: 0, max: 100, unit: 'cells/µL', percentageMax: '<1', percentageUnit: '%' },
+    { name: 'Basophils', min: 0, max: 100, unit: 'cells/µL', percentageMax: 1, percentageUnit: '%' },
     { name: 'Platelets', min: 150000, max: 450000, unit: '/µL' },
     { name: 'MCV (Mean Corpuscular Volume)', min: 80, max: 100, unit: 'fL' },
     { name: 'MCH (Mean Corpuscular Hemoglobin)', min: 27, max: 33, unit: 'pg/cell' },

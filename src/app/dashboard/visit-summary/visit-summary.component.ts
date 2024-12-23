@@ -27,7 +27,7 @@ import { TranslationService } from 'src/app/services/translation.service';
 import { calculateBMI, deleteCacheData, getCacheData, getFieldValueByLanguage, setCacheData, isFeaturePresent } from 'src/app/utils/utility-functions';
 import { doctorDetails, languages, visitTypes, facility, refer_specialization, refer_prioritie, strength, days, timing, PICK_FORMATS, conceptIds } from 'src/config/constant';
 import { VisitSummaryHelperService } from 'src/app/services/visit-summary-helper.service';
-import { ApiResponseModel, DataItemModel, DiagnosisModel, DocImagesModel, EncounterModel, EncounterProviderModel, MedicineModel, ObsApiResponseModel, ObsModel, PatientHistoryModel, PatientIdentifierModel, PatientModel, PatientVisitSection, PatientVisitSummaryConfigModel, PersonAttributeModel, ProviderAttributeModel, ProviderModel, RecentVisitsApiResponseModel, ReferralModel, SpecializationModel, TestModel, VisitAttributeModel, VisitModel, VitalModel } from 'src/app/model/model';
+import { ApiResponseModel, DataItemModel, DiagnosisModel, DocImagesModel, EncounterModel, EncounterProviderModel, MedicineModel, ObsApiResponseModel, ObsModel, PatientHistoryModel, PatientIdentifierModel, PatientModel, PatientVisitSection, PatientVisitSummaryConfigModel, PersonAttributeModel, ProviderAttributeModel, ProviderModel, RecentVisitsApiResponseModel, ReferralModel, SpecializationModel, TestModel, VisitAttributeModel, VisitModel, VitalModel, DiagnosticUnit, DiagnosticName } from 'src/app/model/model';
 import { AppConfigService } from 'src/app/services/app-config.service';
 import { checkIsEnabled, VISIT_SECTIONS } from 'src/app/utils/visit-sections';
 import { NgSelectComponent } from '@ng-select/ng-select';
@@ -551,22 +551,22 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
                     if (splitByBr[k].trim() && splitByBr[k].trim().length > 1) {
                       const splitByDash = splitByBr[k].split('-');
                       const processedStrings = splitByDash.slice(1, splitByDash.length).join('-').split(".").map(itemList => {
-                        let arr = itemList.split(" - ");
-                        let value = arr.pop() || "";
-                        
+                        let splitByHyphen = itemList.split(" - ");
+                        let value = splitByHyphen.pop() || "";
                         if(this.isValidUnitFormat(value)){
-                          if (this.checkTestUnitValues(diagnostics.testUnits, value)) {
-                            value = `<span class="green"> ${value} </span>`;
-                          } else if(this.checkTestNameValues(diagnostics.testNames, value)) {
+                          if (this.checkTestUnitValues(diagnostics.testUnits, value, splitByHyphen)) {
                             value = `<span class="green"> ${value} </span>`;
                           } else {
                             value = `<span class="red"> ${value} </span>`;
                           }
-                          arr.push(value);
+                          splitByHyphen.push(value);
                         } else {
-                          arr.push(value);
+                          if(this.checkTestNameValues(diagnostics.testNames, value)) {
+                            value = `<span class="green"> ${value} </span>`;
+                          }
+                          splitByHyphen.push(value);
                         }
-                        return arr.join(" - ");
+                        return splitByHyphen.join(" - ");
                       });
                       const resultString = processedStrings.join(". ");
                       this.sanitizedValue = this.sanitizer.bypassSecurityTrustHtml(resultString);
@@ -583,35 +583,55 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     });
   }
 
-  isValidUnitFormat(unit) {
-    const unitRegex = /\b\d+(\.\d+)?\s*(g\/dL|%|million\/µL|mg\/dL|U\/L|seconds?|cells\/µL|\/µL|fL|pg\/cell|mL\/min\/1.73\s*m²|mEq\/L|ng\/mL)\b/;
+ /**
+ * Validates the format of a unit string.
+ * @param {string} unit - The unit string.
+ * @return {boolean} - True if valid, false otherwise.
+ */
+  isValidUnitFormat(unit: string): boolean {
+    const unitRegex = /(?:^|\s)\d+(\.\d+)?\s*(g\/dL|%|million\/µL|mg\/dL|U\/L|seconds?|cells\/µL|\/µL|fL|pg\/cell|mL\/min\/1.73\s*m²|mEq\/L|ng\/mL)(?:\s|$)/i;
     return unitRegex.test(unit);
   }
 
-  checkTestUnitValues(diagnostics, value) {
+ /**
+ * Checks if the value and unit are valid for a diagnostic unit.
+ * @param {DiagnosticUnit[]} diagnosticsUnit - List of diagnostic units.
+ * @param {string} value - The value and unit to check.
+ * @param {string[]} valueArray - Additional values (last item is the test name).
+ * @return {boolean} - True if valid, false otherwise.
+ */
+  checkTestUnitValues(diagnosticsUnit: DiagnosticUnit[], value: string, valueArray: string[]): boolean {
+    const popValue = valueArray.pop();
     let [unitCount, unitType] = value.split(" ");
-    for (let unit = 0; unit < diagnostics.length; unit++) {
-      if(value.includes(diagnostics[unit].unit) && (diagnostics[unit].unit.length === unitType.length)){
-        if(unitCount >= diagnostics[unit].min && unitCount <= diagnostics[unit].max){
-          return true;
-        } else {
-          return false;
+
+    for (let unit = 0; unit < diagnosticsUnit.length; unit++) {
+      if (diagnosticsUnit[unit].name.toLowerCase() === popValue.toLowerCase()){
+        if (value.includes(diagnosticsUnit[unit].unit.toLowerCase()) && (diagnosticsUnit[unit].unit.length === unitType.length)){
+          if (Number(unitCount) >= diagnosticsUnit[unit].min && Number(unitCount) <= diagnosticsUnit[unit].max){
+            return true;
+          } else {
+            return false;
+          }
         }
       }
     }
-  }
+    return false;
+  }  
 
-  checkTestNameValues(diagnostics, value) {
-    let unitName = value;
-    for (let name = 0; name < diagnostics.length; name++) {
-      if(diagnostics[name].testName.includes(unitName)){
+ /**
+ * Checks if a test name exists in the list of diagnostic names.
+ * @param {DiagnosticName[]} diagnosticsName - List of diagnostic names.
+ * @param {string} value - The test name to check.
+ * @return {boolean} - True if found, false otherwise.
+ */
+  checkTestNameValues(diagnosticsName: DiagnosticName[], value: string): boolean {
+    for (let name = 0; name < diagnosticsName.length; name++) {
+      if (diagnosticsName[name].testName.toLowerCase() === value.toLowerCase()){
         return true;
-      } else {
-        return false;
       }
     }
+    return false;
   }
-
 
   /**
   * Get physical examination details
