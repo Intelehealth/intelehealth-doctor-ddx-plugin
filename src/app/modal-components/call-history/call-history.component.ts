@@ -12,7 +12,7 @@ import * as moment from 'moment';
 export class CallHistoryComponent {
   callDurationHistory: any[];
   constructor(@Inject(MAT_DIALOG_DATA) public data,
-  private dialogRef: MatDialogRef<CallHistoryComponent>) { 
+  public dialogRef: MatDialogRef<CallHistoryComponent>) { 
     console.log(data)
     this.callDurationHistory = data;
   }
