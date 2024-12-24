@@ -13,7 +13,6 @@ export class CallHistoryComponent {
   callDurationHistory: any[];
   constructor(@Inject(MAT_DIALOG_DATA) public data,
   public dialogRef: MatDialogRef<CallHistoryComponent>) { 
-    console.log(data)
     this.callDurationHistory = data;
   }
 
