@@ -82,6 +82,7 @@
                       target="_blank"
                       class="icon-btn"
                       data-test-id="linkWhatsApp"
+                      (click)="startWhatsAppCall(true)"
                     >
                       <img src="assets/svgs/whatsapp-icon.svg" alt="" />
                     </a>
@@ -865,7 +866,7 @@
             <app-notes *ngIf="appConfigService?.patient_visit_summary?.past_medical_history_notes" [title]="'Past Medical History Notes'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded"
             [visit]="visit" [visitNotePresent]="visitNotePresent"></app-notes>
 
-            <mat-expansion-panel [expanded]="true" #panel1 hideToggle *ngIf="isSubSectionEnabled('patient_interaction','HW')">
+            <mat-expansion-panel [expanded]="true" #panel1 hideToggle *ngIf="isSubSectionEnabled('patient_interaction','HW')" id="patientInteractionFormTemplate">
               <mat-expansion-panel-header>
                 <mat-panel-title>
                   <div class="intel-accordion-title">
@@ -913,6 +914,7 @@
                             target="_blank"
                             class="icon-btn m-0 mr-2"
                             data-test-id="linkPatientWhatsApp"
+                            (click)="startWhatsAppCall()"
                           >
                             <img src="assets/svgs/whatsapp-green.svg" alt="" />
                           </a>
@@ -928,6 +930,30 @@
                           >
                         </div>
                       </ng-template>
+                    </div>
+                  </li>
+                  <li *ngIf="isFeatureAvailable('callDuration')">
+                    <div class="row">
+                      <label class="col-sm-3 col-form-label"
+                        >{{'Call Duration'|translate}}</label
+                      >
+                      <div
+                        class="col-sm-9 d-flex align-items-center"
+                      >
+                        <div class="d-flex align-items-center">
+                          <span class="text-muted">{{getCallDuration(callDuration)|translate}}</span>
+                          <button type="button" *ngIf="!isCallInProgress && arrCallDurations.length > 1" class="info_icon" (click)="openPatientCallHistory()" matTooltip="Open call history"><mat-icon *ngIf="!isCallInProgress" matTooltipPosition="right" data-test-id="matIcoHelpSent">info_outline</mat-icon></button>
+                          <button
+                              *ngIf="isCallInProgress"
+                              type="button"
+                              class="video-ctrl-btn red"
+                              (click)="endWhatsAppCall()"
+                              data-test-id="btnEnd"
+                            >
+                              <img src="assets/svgs/call-end.svg" alt="" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </li>
                   <li *ngIf="!patientInteractionForm.value.hwPresent && appConfigService?.patient_visit_summary?.hw_interaction">
@@ -2141,6 +2167,7 @@
                             target="_blank"
                             class="icon-btn m-0 mr-2"
                             data-test-id="linkPatientWhatsApp"
+                            (click)="startWhatsAppCall(true)"
                           >
                             <img src="assets/svgs/whatsapp-green.svg" alt="" />
                           </a>
