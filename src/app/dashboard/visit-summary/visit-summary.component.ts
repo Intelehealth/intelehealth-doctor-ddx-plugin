@@ -13,7 +13,7 @@ import { EncounterService } from 'src/app/services/encounter.service';
 import { MindmapService } from 'src/app/services/mindmap.service';
 import { MatAccordion } from '@angular/material/expansion';
 import medicines from '../../core/data/medicines';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, interval, Observable, Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
 import { DateAdapter, MAT_DATE_FORMATS, NativeDateAdapter } from '@angular/material/core';
@@ -24,8 +24,8 @@ import { ChatBoxComponent } from 'src/app/modal-components/chat-box/chat-box.com
 import { VideoCallComponent } from 'src/app/modal-components/video-call/video-call.component';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslationService } from 'src/app/services/translation.service';
-import { calculateBMI, deleteCacheData, getCacheData, getFieldValueByLanguage, setCacheData, isFeaturePresent } from 'src/app/utils/utility-functions';
-import { doctorDetails, languages, visitTypes, facility, refer_specialization, refer_prioritie, strength, days, timing, PICK_FORMATS, conceptIds } from 'src/config/constant';
+import { calculateBMI, deleteCacheData, getCacheData, getFieldValueByLanguage, setCacheData, isFeaturePresent, getCallDuration } from 'src/app/utils/utility-functions';
+import { doctorDetails, languages, visitTypes, facility, refer_specialization, refer_prioritie, strength, days, timing, PICK_FORMATS, conceptIds, visitAttributeTypes } from 'src/config/constant';
 import { VisitSummaryHelperService } from 'src/app/services/visit-summary-helper.service';
 import { ApiResponseModel, DataItemModel, DiagnosisModel, DocImagesModel, EncounterModel, EncounterProviderModel, MedicineModel, ObsApiResponseModel, ObsModel, PatientHistoryModel, PatientIdentifierModel, PatientModel, PatientVisitSection, PatientVisitSummaryConfigModel, PersonAttributeModel, ProviderAttributeModel, ProviderModel, RecentVisitsApiResponseModel, ReferralModel, SpecializationModel, TestModel, VisitAttributeModel, VisitModel, VitalModel } from 'src/app/model/model';
 import { AppConfigService } from 'src/app/services/app-config.service';
@@ -150,6 +150,13 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
 
   collapsed: boolean = true;
   isMCCUser: boolean = false;
+
+  isCallInProgress: boolean = false;
+  callTimerInterval: Subscription; 
+  callDuration: number = 0; 
+  arrCallDurations: any[] = [];
+  callDurationTimeStamp: number;
+  callDurationsUuid: string;
 
   reasons = {
     'Completed': [
@@ -404,6 +411,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
               this.checkIfTestPresent();
               this.checkIfReferralPresent();
               this.checkIfFollowUpPresent();
+              this.checkIfPatientCallDurationPresent(visit.attributes)
             }
             if (this.patientVisitSummary.notes_section) {
               this.getAdditionalNote(visit.attributes);
@@ -1760,6 +1768,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     deleteCacheData(visitTypes.PATIENT_VISIT_PROVIDER);
     if (this.dialogRef1) this.dialogRef1.close();
+    this.endWhatsAppCall();
   }
 
   /**
@@ -1899,5 +1908,63 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
 
   isFeatureAvailable(featureName: string, notInclude = false): boolean {
     return isFeaturePresent(featureName, notInclude);
+  }
+
+  /**
+  * End WhatsApp Call
+  * @returns {void}
+  */
+  endWhatsAppCall(){
+    this.isCallInProgress = false;
+    this.callTimerInterval.unsubscribe();
+    this.arrCallDurations.push({callDuration:this.callDuration,timestamp:this.callDurationTimeStamp})
+    if(this.callDurationsUuid) 
+      this.visitService.updateAttribute(this.visit.uuid, this.callDurationsUuid, { attributeType : visitAttributeTypes.patientCallDuration, value: JSON.stringify(this.arrCallDurations) }).subscribe();
+    else
+      this.visitService.postAttribute(this.visit.uuid, { attributeType : visitAttributeTypes.patientCallDuration, value: JSON.stringify(this.arrCallDurations) }).subscribe();
+  }
+
+  /**
+  * Start WhatsApp Call
+  * @param {boolean} isScroll - Array of visit attributes
+  * @returns {void}
+  */
+  startWhatsAppCall(isScroll:boolean = false){
+    if(this.isFeatureAvailable('callDuration') && this.isVisitNoteProvider){
+      if(isScroll) document.getElementById('patientInteractionFormTemplate').scrollIntoView({behavior: 'smooth'})
+      if(!this.isCallInProgress){
+          this.isCallInProgress = true;
+          this.callDurationTimeStamp = Date.now()
+          this.callTimerInterval = interval(1000).subscribe(val=>{
+            this.callDuration = val;
+        })
+      }
+    }
+  }
+
+  /**
+  * Check if patient call durations visit attrubute present or not
+  * @param {VisitAttributeModel[]} attributes - Array of visit attributes
+  * @returns {void}
+  */
+  checkIfPatientCallDurationPresent(attributes: VisitAttributeModel[]): void {
+    this.callDuration = 0;
+    attributes.forEach((attr: VisitAttributeModel) => {
+      if (attr.attributeType.uuid === visitAttributeTypes.patientCallDuration && attr.value) {
+        this.arrCallDurations = JSON.parse(attr.value);
+        this.callDuration = this.arrCallDurations?.slice(-1).pop()?.callDuration   
+        this.callDurationsUuid = attr.uuid    
+      }
+    });
+  }
+
+  openPatientCallHistory(){
+    this.coreService.openPatientCallDurationHistoryModel({
+      data:this.arrCallDurations?.slice(0, -1)
+    })
+  }
+
+  getCallDuration(val:number){
+    return getCallDuration(val)
   }
 }
