@@ -555,17 +555,17 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
                         let value = splitByHyphen.pop() || "";
                         if(this.isValidUnitFormat(value)){
                           if (this.checkTestUnitValues(diagnostics.testUnits, value, splitByHyphen)) {
-                            value = `<span class="green"> ${value} </span>`;
+                            value = `<span class="light-green"> ${value} </span>`;
                           } else {
-                            value = `<span class="red"> ${value} </span>`;
+                            value = `<span class="red-color"> ${value} </span>`;
                           }
-                          splitByHyphen.push(value);
+                          
                         } else {
                           if(this.checkTestNameValues(diagnostics.testNames, value)) {
-                            value = `<span class="green"> ${value} </span>`;
+                            value = `<span class="light-green"> ${value} </span>`;
                           }
-                          splitByHyphen.push(value);
                         }
+                        splitByHyphen.push(value);
                         return splitByHyphen.join(" - ");
                       });
                       const resultString = processedStrings.join(". ");
