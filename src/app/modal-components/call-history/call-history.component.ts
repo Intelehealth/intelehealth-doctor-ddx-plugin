@@ -13,7 +13,7 @@ export class CallHistoryComponent {
   callDurationHistory: any[];
   constructor(@Inject(MAT_DIALOG_DATA) public data,
   public dialogRef: MatDialogRef<CallHistoryComponent>) { 
-    this.callDurationHistory = data;
+    this.callDurationHistory = data.reverse();
   }
 
   getCallDuration(val:number){
