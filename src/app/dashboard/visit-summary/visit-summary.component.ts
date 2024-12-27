@@ -1768,7 +1768,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     deleteCacheData(visitTypes.PATIENT_VISIT_PROVIDER);
     if (this.dialogRef1) this.dialogRef1.close();
-    this.endWhatsAppCall();
+    if(this.callTimerInterval && !this.callTimerInterval.closed) this.callTimerInterval.unsubscribe();
   }
 
   /**
