@@ -244,3 +244,7 @@ export const conceptIds = {
 export const WEBRTC = {
   CHAT_TEXT_LIMIT: 1000
 }
+
+export const visitAttributeTypes = {
+  patientCallDuration : '35e64f4a-d0a5-40bc-8010-8c61d52cc4b1'
+}

@@ -272,12 +272,7 @@
                 <input
                   type="checkbox"
                   [(ngModel)]="rosterQuestionnairefeatures.is_enabled"
-                  (change)="
-                    updateRoosterQuestionnaireStatus(
-                      sectionData?.id,
-                      $event.target.checked
-                    )
-                  "
+                  (change)="updateRoosterQuestionnaireStatus($event.target.checked)"
                 />
                 <div class="state">
                   <label></label>
