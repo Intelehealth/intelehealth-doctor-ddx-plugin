@@ -563,14 +563,13 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
                         let value = splitByHyphen.pop() || "";
                         if(this.isValidUnitFormat(value)){
                           if (this.checkTestUnitValues(diagnostics.testUnits, value, splitByHyphen)) {
-                            value = `<span class="light-green"> ${value} </span>`;
+                            value = `<span class="light-green">${value}</span>`;
                           } else {
-                            value = `<span class="red-color"> ${value} </span>`;
+                            value = `<span class="red-color">${value}</span>`;
                           }
-                          
                         } else {
                           if(this.checkTestNameValues(diagnostics.testNames, value)) {
-                            value = `<span class="light-green"> ${value} </span>`;
+                            value = `<span class="light-green">${value}</span>`;
                           }
                         }
                         splitByHyphen.push(value);
@@ -609,7 +608,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
  * @return {boolean} - True if valid, false otherwise.
  */
   checkTestUnitValues(diagnosticsUnit: DiagnosticUnit[], value: string, valueArray: string[]): boolean {
-    const popValue = valueArray.pop();
+    const popValue = valueArray.slice(-1)[0];
     let [unitCount, unitType] = value.split(" ");
 
     for (let unit = 0; unit < diagnosticsUnit.length; unit++) {
