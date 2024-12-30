@@ -473,7 +473,7 @@ export class DashboardComponent implements OnInit {
           visit.prescription_started = this.getEncounterCreated(visit, visitTypes.VISIT_NOTE);
           visit.person.age = this.calculateAge(visit.person.birthdate);
           visit.TMH_patient_id = this.getAttributeData(visit, "TMH Case Number");
-          this.inProgressVisits.unshift(visit);
+          this.inProgressVisits.push(visit);
         }
         this.dataSource4.data = [...this.inProgressVisits];
         if (page == 1) {

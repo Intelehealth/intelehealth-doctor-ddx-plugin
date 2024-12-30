@@ -27,11 +27,13 @@ import { TranslationService } from 'src/app/services/translation.service';
 import { calculateBMI, deleteCacheData, getCacheData, getFieldValueByLanguage, setCacheData, isFeaturePresent, getCallDuration } from 'src/app/utils/utility-functions';
 import { doctorDetails, languages, visitTypes, facility, refer_specialization, refer_prioritie, strength, days, timing, PICK_FORMATS, conceptIds, visitAttributeTypes } from 'src/config/constant';
 import { VisitSummaryHelperService } from 'src/app/services/visit-summary-helper.service';
-import { ApiResponseModel, DataItemModel, DiagnosisModel, DocImagesModel, EncounterModel, EncounterProviderModel, MedicineModel, ObsApiResponseModel, ObsModel, PatientHistoryModel, PatientIdentifierModel, PatientModel, PatientVisitSection, PatientVisitSummaryConfigModel, PersonAttributeModel, ProviderAttributeModel, ProviderModel, RecentVisitsApiResponseModel, ReferralModel, SpecializationModel, TestModel, VisitAttributeModel, VisitModel, VitalModel } from 'src/app/model/model';
+import { ApiResponseModel, DataItemModel, DiagnosisModel, DocImagesModel, EncounterModel, EncounterProviderModel, MedicineModel, ObsApiResponseModel, ObsModel, PatientHistoryModel, PatientIdentifierModel, PatientModel, PatientVisitSection, PatientVisitSummaryConfigModel, PersonAttributeModel, ProviderAttributeModel, ProviderModel, RecentVisitsApiResponseModel, ReferralModel, SpecializationModel, TestModel, VisitAttributeModel, VisitModel, VitalModel, DiagnosticUnit, DiagnosticName } from 'src/app/model/model';
 import { AppConfigService } from 'src/app/services/app-config.service';
 import { checkIsEnabled, VISIT_SECTIONS } from 'src/app/utils/visit-sections';
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { NgxRolesService } from 'ngx-permissions';
+import diagnostics from '../../core/data/diagnostics';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 class PickDateAdapter extends NativeDateAdapter {
   format(date: Date, displayFormat: Object): string {
@@ -150,6 +152,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
 
   collapsed: boolean = true;
   isMCCUser: boolean = false;
+  brandName = environment.brandName === 'KCDO';
+  diagnosticList;
+  sanitizedValue: SafeHtml;
 
   isCallInProgress: boolean = false;
   callTimerInterval: Subscription; 
@@ -214,7 +219,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     private visitSummaryService: VisitSummaryHelperService,
     private mindmapService: MindmapService,
     public appConfigService: AppConfigService,
-    private rolesService: NgxRolesService) {
+    private rolesService: NgxRolesService,
+    private sanitizer: DomSanitizer) {
     Object.keys(this.appConfigService.patient_registration).forEach(obj => {
       this.patientRegFields.push(...this.appConfigService.patient_registration[obj].filter((e: { is_enabled: any; }) => e.is_enabled).map((e: { name: any; }) => e.name));
     });
@@ -552,7 +558,26 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
                   for (let k = 1; k < splitByBr.length; k++) {
                     if (splitByBr[k].trim() && splitByBr[k].trim().length > 1) {
                       const splitByDash = splitByBr[k].split('-');
-                      obj1.data.push({ key: splitByDash[0].replace('• ', ''), value: splitByDash.slice(1, splitByDash.length).join('-') });
+                      const processedStrings = splitByDash.slice(1, splitByDash.length).join('-').split(".").map(itemList => {
+                        let splitByHyphen = itemList.split(" - ");
+                        let value = splitByHyphen.pop() || "";
+                        if(this.isValidUnitFormat(value)){
+                          if (this.checkTestUnitValues(diagnostics.testUnits, value, splitByHyphen)) {
+                            value = `<span class="light-green">${value}</span>`;
+                          } else {
+                            value = `<span class="red-color">${value}</span>`;
+                          }
+                        } else {
+                          if(this.checkTestNameValues(diagnostics.testNames, value)) {
+                            value = `<span class="light-green">${value}</span>`;
+                          }
+                        }
+                        splitByHyphen.push(value);
+                        return splitByHyphen.join(" - ");
+                      });
+                      const resultString = processedStrings.join(". ");
+                      this.sanitizedValue = this.sanitizer.bypassSecurityTrustHtml(resultString);
+                      obj1.data.push({ key: splitByDash[0].replace('• ', ''), value: this.sanitizedValue });
                     }
                   }
                   this.checkUpReasonData.push(obj1);
@@ -563,6 +588,56 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         });
       }
     });
+  }
+
+ /**
+ * Validates the format of a unit string.
+ * @param {string} unit - The unit string.
+ * @return {boolean} - True if valid, false otherwise.
+ */
+  isValidUnitFormat(unit: string): boolean {
+    const unitRegex = /(?:^|\s)\d+(\.\d+)?\s*(g\/dL|%|million\/µL|mg\/dL|U\/L|seconds?|cells\/µL|\/µL|fL|pg\/cell|mL\/min\/1.73\s*m²|mEq\/L|ng\/mL)(?:\s|$)/i;
+    return unitRegex.test(unit);
+  }
+
+ /**
+ * Checks if the value and unit are valid for a diagnostic unit.
+ * @param {DiagnosticUnit[]} diagnosticsUnit - List of diagnostic units.
+ * @param {string} value - The value and unit to check.
+ * @param {string[]} valueArray - Additional values (last item is the test name).
+ * @return {boolean} - True if valid, false otherwise.
+ */
+  checkTestUnitValues(diagnosticsUnit: DiagnosticUnit[], value: string, valueArray: string[]): boolean {
+    const popValue = valueArray.slice(-1)[0];
+    let [unitCount, unitType] = value.split(" ");
+
+    for (let unit = 0; unit < diagnosticsUnit.length; unit++) {
+      if (diagnosticsUnit[unit].name.toLowerCase() === popValue.toLowerCase()){
+        if (value.includes(diagnosticsUnit[unit].unit.toLowerCase()) && (diagnosticsUnit[unit].unit.length === unitType.length)){
+          if (Number(unitCount) >= diagnosticsUnit[unit].min && Number(unitCount) <= diagnosticsUnit[unit].max){
+            return true;
+          } else {
+            return false;
+          }
+        }
+      }
+    }
+    return false;
+  }  
+
+ /**
+ * Checks if a test name exists in the list of diagnostic names.
+ * @param {DiagnosticName[]} diagnosticsName - List of diagnostic names.
+ * @param {string} value - The test name to check.
+ * @return {boolean} - True if found, false otherwise.
+ */
+  checkTestNameValues(diagnosticsName: DiagnosticName[], value: string): boolean {
+    for (let name = 0; name < diagnosticsName.length; name++) {
+      if (diagnosticsName[name].testName.toLowerCase() === value.toLowerCase()){
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -990,7 +1065,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   * @returns {void}
   */
   savePatientInteraction(): void {
-    if (this.patientInteractionForm.invalid || !this.isVisitNoteProvider) {
+    if (this.patientInteractionForm.value.hwPresent || !this.isVisitNoteProvider) {
       return;
     }
 

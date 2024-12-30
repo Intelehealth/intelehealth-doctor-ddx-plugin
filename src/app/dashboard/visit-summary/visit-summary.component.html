@@ -464,10 +464,16 @@
                                         <div
                                           class="list-item-content"
                                           [class.text-muted]="!ckri.value"
-                                          [attr.data-test-id]="'etValue'+ckri.value.slice(0,4).trim()+'Checkup'"
+                                          [attr.data-test-id]="'etValue'+ckri.value.changingThisBreaksApplicationSecurity.slice(0,4).trim()+'Checkup'"
+                                          [innerHTML]="ckri.value ? ckri.value : ('None' | translate)">
+                                        </div>
+                                        <!-- <div
+                                          class="list-item-content"
+                                          [class.text-muted]="!ckri.value"
+                                          [attr.data-test-id]="'etValue'+ckri.value.changingThisBreaksApplicationSecurity.slice(0,4).trim()+'Checkup'"
                                         >
                                           {{ ckri.value ? ckri.value : ('None'|translate) }}
-                                        </div>
+                                        </div> -->
                                       </div>
                                     </li>
                                   </ul>
@@ -875,7 +881,7 @@
                       alt=""
                       width="44px"
                     />
-                    <h6 class="mb-0 ml-2">{{'Patient interaction'|translate}}</h6>
+                    <h6 class="mb-0 ml-2">{{'Discussion with Patient'|translate}}</h6>
                   </div>
                 </mat-panel-title>
                 <mat-icon>{{ panel1.expanded ? "remove" : "add" }}</mat-icon>
@@ -958,9 +964,8 @@
                   </li>
                   <li *ngIf="!patientInteractionForm.value.hwPresent && appConfigService?.patient_visit_summary?.hw_interaction">
                     <div class="row">
-                      <label class="col-sm-3 col-form-label"
-                        >{{'Have you spoken with the healthcare worker directly?'|translate}}*</label
-                      >
+                      <label class="col-sm-3 col-form-label"*ngIf="!brandName">{{'Have you spoken with the healthcare worker directly?'|translate}}*</label>
+                      <label class="col-sm-3 col-form-label" *ngIf="brandName">{{'Have you spoken with the patient directly?'|translate}}*</label>
                       <div class="col-sm-9 d-flex align-items-center">
                         <div class="pretty p-default p-round">
                           <input
@@ -990,7 +995,7 @@
                 </ul>
                 <div *ngIf="!patientInteractionForm.value.hwPresent && appConfigService?.patient_visit_summary?.hw_interaction && !isMCCUser" class="form-group">
                   <label for="note"
-                    ><b>{{'Discussion with Patient'|translate}}*&nbsp;</b>
+                    ><b>{{'Comment'|translate}}&nbsp;</b>
                     </label
                   >
                   <textarea
@@ -1013,7 +1018,7 @@
                   <button
                     type="submit"
                     class="gray-btn"
-                    [disabled]="patientInteractionForm.invalid"
+                    [disabled]="!patientInteractionForm.value.hwSpoken"
                     data-test-id="btnSubmitPatientInteraction"
                   >
                     {{'Save'|translate}}
@@ -1025,7 +1030,7 @@
                       <tr>
                         <th scope="col">{{'Patient interaction'|translate}}</th>
                         <th scope="col">{{'Status'|translate}}</th>
-                        <th scope="col">{{'Discussion with Patient'|translate}}</th>
+                        <th scope="col">{{'Comment'|translate}}</th>
                         <th scope="col"></th>
                       </tr>
                     </thead>
@@ -1033,7 +1038,7 @@
                       <tr *ngIf="patientInteractionForm.value.hwPresent && appConfigService?.patient_visit_summary?.hw_interaction">
                         <td>{{'Spoken with the healthcare worker directly?'|translate}}</td>
                         <td>{{ patientInteractionForm.value.hwSpoken.split(',')[0] }}</td>
-                        <td>{{ patientInteractionForm.value.hwSpoken.split(':')[1] }}</td>
+                        <td>{{ patientInteractionForm.value.hwSpoken.split(':')[1] ?? '-' }}</td>
                         <td class="pr-0">
                           <button
                             type="button"
@@ -1078,9 +1083,9 @@
                   <thead>
                     <tr>
                       <th scope="col">{{'Diagnosis'|translate}}</th>
-                      <th scope="col"  *ngIf="isFeatureAvailable('tnmStaging')">{{'TNM Staging'|translate}}</th>
                       <th scope="col">{{'Type'|translate}}</th>
                       <th scope="col">{{'Status'|translate}}</th>
+                      <th scope="col"  *ngIf="isFeatureAvailable('tnmStaging')">{{'TNM Staging'|translate}}</th>
                       <th scope="col"></th>
                     </tr>
                   </thead>
@@ -1088,9 +1093,9 @@
                     <ng-container *ngIf="existingDiagnosis.length">
                       <tr *ngFor="let d of existingDiagnosis; let i = index">
                         <td>{{ d.diagnosisName }}</td>
-                        <td *ngIf="isFeatureAvailable('tnmStaging')">{{ d.diagnosisTNMStaging ?? '-' }}</td>
                         <td>{{ d.diagnosisType }}</td>
                         <td>{{ d.diagnosisStatus }}</td>
+                        <td *ngIf="isFeatureAvailable('tnmStaging')">{{ d.diagnosisTNMStaging ?? '-' }}</td>
                         <td class="pr-0">
                           <button
                             mat-icon-button
@@ -1156,18 +1161,6 @@
                           >
                           </ng-select>
                         </div>
-                      </div>
-                    </li>
-                    <li *ngIf="isFeatureAvailable('tnmStaging')">
-                      <div class="form-group">
-                        <label for="note">{{'TNM Staging'|translate}}</label>
-                        <textarea
-                          class="form-control"
-                          rows="3"
-                          placeholder="{{'Type here'|translate}}"
-                          formControlName="diagnosisTNMStaging"
-                          data-test-id="diagnosisTNMStaging"
-                        ></textarea>
                       </div>
                     </li>
                     <li>
@@ -1239,6 +1232,18 @@
                             </div>
                           </div>
                         </div>
+                      </div>
+                    </li>
+                    <li *ngIf="isFeatureAvailable('tnmStaging')">
+                      <div class="form-group">
+                        <label for="note">{{'TNM Staging'|translate}}</label>
+                        <textarea
+                          class="form-control"
+                          rows="3"
+                          placeholder="{{'Type here'|translate}}"
+                          formControlName="diagnosisTNMStaging"
+                          data-test-id="diagnosisTNMStaging"
+                        ></textarea>
                       </div>
                     </li>
                   </ul>
@@ -1716,7 +1721,7 @@
                           [disabled]="addTestForm.invalid"
                           data-test-id="btnSubmitTest"
                         >
-                          {{'Add test'|translate}}
+                          {{'Add Test'|translate}}
                         </button>
                       </div>
                     </form>
