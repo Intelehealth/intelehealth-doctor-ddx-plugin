@@ -964,7 +964,7 @@
                   </li>
                   <li *ngIf="!patientInteractionForm.value.hwPresent && appConfigService?.patient_visit_summary?.hw_interaction">
                     <div class="row">
-                      <label class="col-sm-3 col-form-label"*ngIf="!brandName">{{'Have you spoken with the healthcare worker directly?'|translate}}*</label>
+                      <label class="col-sm-3 col-form-label" *ngIf="!brandName">{{'Have you spoken with the healthcare worker directly?'|translate}}*</label>
                       <label class="col-sm-3 col-form-label" *ngIf="brandName">{{'Have you spoken with the patient directly?'|translate}}*</label>
                       <div class="col-sm-9 d-flex align-items-center">
                         <div class="pretty p-default p-round">
@@ -1036,7 +1036,8 @@
                     </thead>
                     <tbody>
                       <tr *ngIf="patientInteractionForm.value.hwPresent && appConfigService?.patient_visit_summary?.hw_interaction">
-                        <td>{{'Spoken with the healthcare worker directly?'|translate}}</td>
+                        <td *ngIf="!brandName">{{'Spoken with the healthcare worker directly?'|translate}}</td>
+                        <td *ngIf="brandName">{{'Spoken with the patient directly?'|translate}}</td>
                         <td>{{ patientInteractionForm.value.hwSpoken.split(',')[0] }}</td>
                         <td>{{ patientInteractionForm.value.hwSpoken.split(':')[1] ?? '-' }}</td>
                         <td class="pr-0">
@@ -1535,7 +1536,7 @@
                                   formControlName="remark"
                                   type="text"
                                   class="form-control"
-                                  placeholder="{{'Enter Remark'|translate}}*"
+                                  placeholder="{{'Enter Remark'|translate}}"
                                   data-test-id="etRemarkMed"
                                 />
                               </div>
