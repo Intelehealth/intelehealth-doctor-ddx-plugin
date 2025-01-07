@@ -27,7 +27,7 @@ import { TranslationService } from 'src/app/services/translation.service';
 import { calculateBMI, deleteCacheData, getCacheData, getFieldValueByLanguage, setCacheData, isFeaturePresent, getCallDuration } from 'src/app/utils/utility-functions';
 import { doctorDetails, languages, visitTypes, facility, refer_specialization, refer_prioritie, strength, days, timing, PICK_FORMATS, conceptIds, visitAttributeTypes } from 'src/config/constant';
 import { VisitSummaryHelperService } from 'src/app/services/visit-summary-helper.service';
-import { ApiResponseModel, DataItemModel, DiagnosisModel, DocImagesModel, EncounterModel, EncounterProviderModel, MedicineModel, ObsApiResponseModel, ObsModel, PatientHistoryModel, PatientIdentifierModel, PatientModel, PatientVisitSection, PatientVisitSummaryConfigModel, PersonAttributeModel, ProviderAttributeModel, ProviderModel, RecentVisitsApiResponseModel, ReferralModel, SpecializationModel, TestModel, VisitAttributeModel, VisitModel, VitalModel } from 'src/app/model/model';
+import { ApiResponseModel, DataItemModel, DiagnosisModel, DiagnosticModel, DocImagesModel, EncounterModel, EncounterProviderModel, MedicineModel, ObsApiResponseModel, ObsModel, PatientHistoryModel, PatientIdentifierModel, PatientModel, PatientVisitSection, PatientVisitSummaryConfigModel, PersonAttributeModel, ProviderAttributeModel, ProviderModel, RecentVisitsApiResponseModel, ReferralModel, SpecializationModel, TestModel, VisitAttributeModel, VisitModel, VitalModel } from 'src/app/model/model';
 import { AppConfigService } from 'src/app/services/app-config.service';
 import { checkIsEnabled, VISIT_SECTIONS } from 'src/app/utils/visit-sections';
 import { NgSelectComponent } from '@ng-select/ng-select';
@@ -137,6 +137,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
 
   patientRegFields: string[] = [];
   vitals: VitalModel[] = [];
+  diagnostics: DiagnosticModel[] = [];
   patientVisitSummary: PatientVisitSummaryConfigModel;
   pvsConfigs: PatientVisitSection[] = [];
   pvsConstant = VISIT_SECTIONS;
@@ -220,6 +221,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     });
 
     this.vitals = [...this.appConfigService.patient_vitals];
+    this.diagnostics = [...this.appConfigService.patient_diagnostics];
     this.specializations = [...this.appConfigService.specialization];
     this.patientVisitSummary = { ...this.appConfigService.patient_visit_summary };
     this.openChatFlag = this.router.getCurrentNavigation()?.extras?.state?.openChat;
@@ -241,7 +243,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       callStatus: new FormControl(null, [Validators.required]),
     });
 
-    if(this.appConfigService.patient_visit_summary.hw_interaction){
+    if (this.appConfigService.patient_visit_summary.hw_interaction) {
       this.patientInteractionForm.addControl('hwIntUuid', new FormControl(""));
       this.patientInteractionForm.addControl('hwPresent', new FormControl(false, [Validators.required]));
       this.patientInteractionForm.addControl('hwSpoken', new FormControl("", [Validators.required]));
@@ -509,7 +511,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     const v = this.vitalObs.find(e => e.concept.uuid === uuid);
     const value = v?.value ? ( typeof v.value == 'object') ? v.value?.display : v.value : null;
     if(!value && key === 'bmi') {
-     return calculateBMI(this.vitals, this.vitalObs);
+      return calculateBMI(this.vitals, this.vitalObs);
     }
     return value
   }
@@ -964,7 +966,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   checkIfPatientInteractionPresent(attributes: VisitAttributeModel[]): void {
     attributes.forEach((attr: VisitAttributeModel) => {
       if (attr.attributeType.display === visitTypes.PATIENT_INTERACTION) {
-        this.patientCallStatusForm.patchValue({ patientPresent: true, spoken: attr.value, uuid: attr.uuid });        
+        this.patientCallStatusForm.patchValue({ patientPresent: true, spoken: attr.value, uuid: attr.uuid });
       }
       if (attr.attributeType.display === visitTypes.HW_INTERACTION) {
         this.patientInteractionForm.patchValue({ hwPresent: true, hwSpoken: attr.value, hwIntUuid: attr.uuid });
@@ -1001,11 +1003,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
           value: this.patientInteractionForm.value.comment?.trim().length > 0 ? `${this.patientInteractionForm.value.hwSpoken}, ${this.translateService.instant("Comment")}: ${this.patientInteractionForm.value.comment}` : this.patientInteractionForm.value.hwSpoken,
         };
         this.visitService.postAttribute(this.visit.uuid, payload)
-        .subscribe((res: VisitAttributeModel) => {
-          if (res) {
-            this.patientInteractionForm.patchValue({ hwPresent: true, hwIntUuid: res.uuid, hwSpoken: res.value });
-          }
-        });
+          .subscribe((res: VisitAttributeModel) => {
+            if (res) {
+              this.patientInteractionForm.patchValue({ hwPresent: true, hwIntUuid: res.uuid, hwSpoken: res.value });
+            }
+          });
       }
     }
   };
@@ -1024,11 +1026,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
         value: this.patientCallStatusForm.value.callStatus?.trim().length > 0 ? `${this.patientCallStatusForm.value.spoken}, ${this.translateService.instant("Call status")}: ${this.patientCallStatusForm.value.callStatus}, ${this.translateService.instant("Reason")}: ${this.patientCallStatusForm.value.reason}` :  this.patientCallStatusForm.value.spoken,
       };
       this.visitService.postAttribute(this.visit.uuid, payload)
-      .subscribe((res: VisitAttributeModel) => {
-        if (res) {
-          this.patientCallStatusForm.patchValue({ patientPresent: true, uuid: res.uuid, spoken: res.value });
-        }
-      });
+        .subscribe((res: VisitAttributeModel) => {
+          if (res) {
+            this.patientCallStatusForm.patchValue({ patientPresent: true, uuid: res.uuid, spoken: res.value });
+          }
+        });
     }
   };
 
@@ -1856,7 +1858,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   }
 
   checkIsVisibleSection(pvsConfig: { key: string; is_enabled: boolean; }) {
-    return checkIsEnabled(pvsConfig.key, 
+    return checkIsEnabled(pvsConfig.key,
       pvsConfig.is_enabled, {
       visitCompleted: this.visitCompleted,
       visitEnded: this.visitEnded,
@@ -1884,10 +1886,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
    */
   onCallStatusChange(event: Event): void {
     const status = (event.target as HTMLInputElement).getAttribute('data-value');
-  
+
     this.reasonsList = this.reasons[status] || [];
     this.patientCallStatusForm.patchValue({ reason: null });
-  
+
     setTimeout(() => this.reasonSelectComponent?.open(), 0);
   }
 
@@ -1898,10 +1900,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
    */
   isSubSectionEnabled(sectionKey: string, subSectionName?: string): boolean {
     const section = this.patientInteraction.find(sec => sec.key === sectionKey);
-    
+
     if (!section || !section.is_enabled) return false;
     if (!subSectionName) return true;
-    
+
     const subSection = section.sub_sections?.find(sub => sub.name === subSectionName);
     return subSection ? subSection.is_enabled : false;
   }
