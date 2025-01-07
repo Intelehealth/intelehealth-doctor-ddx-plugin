@@ -732,3 +732,19 @@ export interface PatientVisitSection {
   updatedAt?: string;
   createdAt?: string
 }
+
+export interface DiagnosticUnit {
+  name: string;
+  unit: string;
+  min: number;
+  max?: number;
+  percentageMin?: number;
+  percentageMax?: number;
+  percentageUnit?: string;
+  gender?: string;
+}
+
+export interface DiagnosticName {
+  name: string;
+  testName: string;
+}
