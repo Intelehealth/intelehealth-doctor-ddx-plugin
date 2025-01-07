@@ -16,6 +16,7 @@ export class AppConfigService {
   public patient_registration: PatientRegistrationFieldsConfigModel;
   public theme_config: any[];
   public patient_vitals: VitalModel[];
+  public patient_diagnostics:any[];
   public webrtc_section: boolean;
   public webrtc: WebRTCConfigModel;
   public patient_visit_summary: PatientVisitSummaryConfigModel;
@@ -73,3 +74,4 @@ export class AppConfigService {
   }
 
 }
+    
