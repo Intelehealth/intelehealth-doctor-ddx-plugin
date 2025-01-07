@@ -642,6 +642,14 @@ export interface VitalModel {
   lang: object;
 }
 
+export interface DiagnosticModel {
+  name: string,
+  key: string,
+  uuid: string,
+  is_mandatory: boolean,
+  lang: object;
+}
+
 export interface FeatureModel extends BaseModel {}
 export interface WebrtcModel extends BaseModel {}
 export interface WebrtcDataModel {

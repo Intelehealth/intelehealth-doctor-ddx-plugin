@@ -150,6 +150,16 @@
             <mat-tab label="{{'Address'| translate}}" *ngIf="hasPatientAddressEnabled">
               <div class="rows patient-info-wrapper">
 
+
+                <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('Household Number') && patient?.person?.preferredAddress?.address1">
+                  <div class="patient-info-item">
+                    <h6 data-test-id="etPatient">{{'Household Number' | translate}}</h6>
+                    <p data-test-id="etPatient">
+                      {{ patient?.person?.preferredAddress?.address1 }}
+                    </p>
+                  </div>
+                </div>
+
                 <div class="col-md-3 patient-info-section p-3" *ngIf="checkPatientRegField('Corresponding Address 1') && patient?.person?.preferredAddress?.address1">
                   <div class="patient-info-item">
                     <h6 data-test-id="etPatient">{{'Corresponding address 1' | translate}}</h6>
@@ -421,6 +431,23 @@
                         </ng-container>
                       <!-- END Consultation details  -->
 
+                      <!-- Diagnosis -->
+                      <ng-container *ngSwitchCase="pvsConstant['diagnostics'].key">
+                        <ul class="items-list">
+                          <li *ngFor="let d of diagnostics">
+                            <div class="list-item">
+                              <label data-test-id="etDiagnosisConDets">{{ d?.name|translate}}</label>
+                              <div class="list-item-content" data-test-id="etDiagnosisDataConDets">
+                                <span> {{
+                                  getObsValue(d.uuid, d.key)
+                                    ? getObsValue(d.uuid, d.key)
+                                    : ('No information'|translate)
+                                }}</span>
+                              </div>
+                            </div>
+                          </li>
+                        </ul>
+                      </ng-container>
                       <!-- Vitals -->
                         <ng-container *ngSwitchCase="pvsConstant['vitals'].key">
                           <ul class="items-list">
