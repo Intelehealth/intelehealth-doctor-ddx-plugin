@@ -564,13 +564,13 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
                         let splitByHyphen = itemList.split(" - ");
                         let value = splitByHyphen.pop() || "";
                         if(this.isValidUnitFormat(value)){
-                          if (this.checkTestUnitValues(diagnostics.testUnits, value, splitByHyphen)) {
+                          if (this.checkTestUnitValues(diagnostics?.testUnits, value, splitByHyphen)) {
                             value = `<span class="light-green">${value}</span>`;
                           } else {
                             value = `<span class="red-color">${value}</span>`;
                           }
                         } else {
-                          if(this.checkTestNameValues(diagnostics.testNames, value)) {
+                          if(this.checkTestNameValues(diagnostics?.testNames, value)) {
                             value = `<span class="light-green">${value}</span>`;
                           }
                         }
@@ -614,8 +614,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
     let [unitCount, unitType] = value.split(" ");
 
     for (let unit = 0; unit < diagnosticsUnit.length; unit++) {
-      if (diagnosticsUnit[unit].name.toLowerCase() === popValue.toLowerCase()){
-        if (value.includes(diagnosticsUnit[unit].unit.toLowerCase()) && (diagnosticsUnit[unit].unit.length === unitType.length)){
+      if (diagnosticsUnit[unit]?.name?.toLowerCase() === popValue?.toLowerCase()){
+        if (value.includes(diagnosticsUnit[unit]?.unit?.toLowerCase()) && (diagnosticsUnit[unit]?.unit?.length === unitType?.length)){
           if (Number(unitCount) >= diagnosticsUnit[unit].min && Number(unitCount) <= diagnosticsUnit[unit].max){
             return true;
           } else {
@@ -635,7 +635,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
  */
   checkTestNameValues(diagnosticsName: DiagnosticName[], value: string): boolean {
     for (let name = 0; name < diagnosticsName.length; name++) {
-      if (diagnosticsName[name].testName.toLowerCase() === value.toLowerCase()){
+      if (diagnosticsName[name]?.testName?.toLowerCase() === value?.toLowerCase()){
         return true;
       }
     }
