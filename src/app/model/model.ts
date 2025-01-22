@@ -345,6 +345,8 @@ export interface PatientModel {
     gender?: string,
     attributes?: PersonAttributeModel[],
     preferredAddress?: {
+      address6: string,
+      address3: string,
       address2: string,
       address1: string,
       cityVillage?: string,

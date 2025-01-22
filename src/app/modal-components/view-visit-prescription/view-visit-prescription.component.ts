@@ -981,7 +981,6 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
       if(section[0].sectionName === 'advice' && !this.isFeatureAvailable('advice')) return false;
       return true;
     });
-    console.log(JSON.stringify(pdfObj))
     pdfMake.createPdf(pdfObj).download('e-prescription');
   }
 
@@ -1238,11 +1237,17 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
       this.appConfigService.patient_registration['address'].forEach((e: PatientRegistrationFieldsModel) => {
         let value: any;
         switch (e.name) {
+          case 'Household Number':
+            value = this.patient?.person?.preferredAddress?.address6;
+            break;
           case 'Corresponding Address 1':
             value = this.patient?.person?.preferredAddress?.address1;
             break;
           case 'Corresponding Address 2':
             value = this.patient?.person?.preferredAddress?.address2;
+            break;
+          case 'Block':
+            value = this.patient?.person?.preferredAddress?.address3;
             break;
           case 'Village/Town/City':
             value = this.patient?.person.preferredAddress.cityVillage;
