@@ -597,6 +597,7 @@ export interface PatientRegistrationFieldsModel {
   is_mandatory: boolean,
   is_editable: boolean,
   is_locked: boolean
+  validations?: any
 }
 
 export interface SpecializationModel {
