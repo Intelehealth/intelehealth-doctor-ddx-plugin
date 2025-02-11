@@ -18,7 +18,8 @@ import * as moment from "moment";
 })
 export class PatientVisitDropdownComponent {
    displayedColumns : string[] = ['id', 'name', 'updatedAt','is_enabled'];
-    tabList = ['Advice','Diagnosis', 'Medication','Refer Specialisation','Referral Facility','Test'];
+    //tabList = ['Advice','Diagnosis', 'Medication','Refer Specialisation','Referral Facility','Test'];
+    tabList = ['Advice','Medication','Refer Specialisation','Referral Facility','Test'];
     currentTabIndex = 0; 
     dataSource = new MatTableDataSource<any>();
     @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -65,7 +66,7 @@ export class PatientVisitDropdownComponent {
         this.patientFieldsData = res.dropdown
          this.allSectionData['advice'] = res.dropdown.advice;
         //  this.allSectionData['advice'] = { id:0 , is_enabled:true };
-        this.allSectionData['diagnosis'] = res.dropdown.diagnosis;
+        //this.allSectionData['diagnosis'] = res.dropdown.diagnosis;
         this.allSectionData['medication'] = res.dropdown.medication;
         this.allSectionData['refer specialisation'] = res.dropdown['refer specialisation'];
         this.allSectionData['referral facility'] = res.dropdown['referral facility'];
