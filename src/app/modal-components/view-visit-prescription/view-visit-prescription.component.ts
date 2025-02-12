@@ -877,6 +877,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
               [
                 {
                   colSpan: 4,
+                  sectionName:'visitFollowUp',
                   table: {
                     widths: [30, '*'],
                     headerRows: 1,
@@ -970,6 +971,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
       if(section[0].sectionName === 'vitals' && (!this.hasVitalsEnabled || !vitalsConfig?.is_enabled )) return false;
       if(section[0].sectionName === 'cheifComplaint' && !checkUpReasonConfig?.is_enabled) return false;
       if(section[0].sectionName === 'followUpInstructions' && !this.isFeatureAvailable('follow-up-instruction')) return false;
+      if(section[0].sectionName === 'visitFollowUp' && !this.isFeatureAvailable('visitFollowUp')) return false;
       if(section[0].sectionName === 'advice' && !this.isFeatureAvailable('advice')) return false;
       return true;
     });

@@ -151,7 +151,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   hasPatientAddressEnabled: boolean = false;
   hasPatientOtherEnabled: boolean = false;
 
-  collapsed: boolean = true;
+  collapsed: boolean = false;
   isMCCUser: boolean = false;
   brandName = environment.brandName === 'KCDO';
   diagnosticList;
@@ -1652,7 +1652,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
       this.toastr.warning(this.translateService.instant('Diagnosis not added'), this.translateService.instant('Diagnosis Required'));
       return false;
     }
-    if (!this.followUpForm.value.present) {
+    if (this.isFeatureAvailable('visitFollowUp') && !this.followUpForm.value.present) {
       this.toastr.warning(this.translateService.instant('Follow-up not added'), this.translateService.instant('Follow-up Required'));
       return false;
     }
