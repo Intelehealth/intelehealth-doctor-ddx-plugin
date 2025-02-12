@@ -61,7 +61,7 @@ export class DashboardComponent implements OnInit {
     anchorId: "anchor-awaiting",
     pluginConfigObsFlag: "Awaiting",
     baseURL: "https://dev.intelehealth.org/openmrs/ws/rest/v1",
-    mindmapURL: "https://dev.intelehealth.org:3004/api",
+    mindmapURL: "http://localhost:3004/api",
     tableHeader: "Awaiting visits",
     tooltipLabel: "General uploaded visits",
     searchPlaceHolder: "Search Awaiting Visits",
@@ -133,7 +133,7 @@ export class DashboardComponent implements OnInit {
     anchorId: "anchor-priority",
     pluginConfigObsFlag: "Priority",
     baseURL: "https://dev.intelehealth.org/openmrs/ws/rest/v1",
-    mindmapURL: "https://dev.intelehealth.org:3004/api",
+    mindmapURL: "http://localhost:3004/api",
     tableHeader: "Priority visits",
     tooltipLabel: "High priority visit",
     searchPlaceHolder: "Search Priority Visits",
@@ -193,7 +193,7 @@ export class DashboardComponent implements OnInit {
     anchorId: "anchor-completed",
     pluginConfigObsFlag: "Completed",
     baseURL: "https://dev.intelehealth.org/openmrs/ws/rest/v1",
-    mindmapURL: "https://dev.intelehealth.org:3004/api",
+    mindmapURL: "http://localhost:3004/api",
     tableHeader: "Completed visits",
     tooltipLabel: "Ended visits after prescription",
     searchPlaceHolder: "Search Completed Visits",
@@ -260,7 +260,7 @@ export class DashboardComponent implements OnInit {
     anchorId: "anchor-follow up",
     pluginConfigObsFlag: "FollowUp",
     baseURL: "https://dev.intelehealth.org/openmrs/ws/rest/v1",
-    mindmapURL: "https://dev.intelehealth.org:3004/api",
+    mindmapURL: "http://localhost:3004/api",
     tableHeader: "Follow up visits",
     tooltipLabel: "Ended visits after prescription",
     searchPlaceHolder: "Search Follow Up Visits",
@@ -316,7 +316,7 @@ export class DashboardComponent implements OnInit {
     anchorId: "anchor-appointment",
     pluginConfigObsFlag: "Appointment",
     baseURL: "https://dev.intelehealth.org/openmrs/ws/rest/v1",
-    mindmapURL: "https://dev.intelehealth.org:3004/api",
+    mindmapURL: "http://localhost:3004/api",
     tableHeader: "Appointments",
     tooltipLabel: "Scheduled appointments",
     searchPlaceHolder: "Search Appointments",
@@ -403,7 +403,7 @@ export class DashboardComponent implements OnInit {
     anchorId: "anchor-inprogress",
     pluginConfigObsFlag: "InProgress",
     baseURL: "https://dev.intelehealth.org/openmrs/ws/rest/v1",
-    mindmapURL: "https://dev.intelehealth.org:3004/api",
+    mindmapURL: "http://localhost:3004/api",
     tableHeader: "In-progress visits",
     tooltipLabel: "Visits going through the consultation",
     searchPlaceHolder: "Search In-progress Visits",
@@ -874,6 +874,23 @@ export class DashboardComponent implements OnInit {
           visit.TMH_patient_id = this.getAttributeData(visit, "TMH Case Number");
           this.inProgressVisits.push(visit);
         }
+         // **Sort by prescription_started in descending order**
+          this.inProgressVisits.sort((a, b) => {
+          const momentA = moment(a.prescription_started, ["HH [Hours ago]", "mm [Minutes ago]", "DD MMM, YYYY"], true);
+          const momentB = moment(b.prescription_started, ["HH [Hours ago]", "mm [Minutes ago]", "DD MMM, YYYY"], true);
+
+          // Check if both values are relative times (like "9 Hours ago")
+          const isRelativeA = a.prescription_started.includes("Hours ago") || a.prescription_started.includes("Minutes ago");
+          const isRelativeB = b.prescription_started.includes("Hours ago") || b.prescription_started.includes("Minutes ago");
+
+          if (isRelativeA && !isRelativeB) return -1; // Relative time comes first
+          if (!isRelativeA && isRelativeB) return 1;  // Date comes after relative time
+
+          // If both are relative times or both are dates, sort by moment.js time
+          return momentB.diff(momentA);
+        });
+
+            
         this.dataSource4.data = [...this.inProgressVisits];
         if (page == 1) {
           this.dataSource4.paginator = this.tempPaginator3;
