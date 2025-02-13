@@ -875,26 +875,42 @@ export class DashboardComponent implements OnInit {
           this.inProgressVisits.push(visit);
         }
          // **Sort by prescription_started in descending order**
-         this.inProgressVisits.sort((a, b) => {
-          const momentA = moment(a.prescription_started, ["HH [Hours ago]", "mm [Minutes ago]", "DD MMM, YYYY"], true);
-          const momentB = moment(b.prescription_started, ["HH [Hours ago]", "mm [Minutes ago]", "DD MMM, YYYY"], true);
-      
-          const isRelativeA = a.prescription_started.includes("Hours ago") || a.prescription_started.includes("Minutes ago");
-          const isRelativeB = b.prescription_started.includes("Hours ago") || b.prescription_started.includes("Minutes ago");
-      
-          if (isRelativeA && isRelativeB) {
-              // Sort relative times in ASCENDING order (earliest first)
-              return momentA.diff(momentB);
-          } else if (!isRelativeA && !isRelativeB) {
-              // Sort absolute dates in DESCENDING order (latest first)
-              return momentB.diff(momentA);
-          } else {
-              // Relative times should come first
-              return isRelativeA ? -1 : 1;
-          }
-      });
-      
             
+         this.inProgressVisits.sort((a, b) => {
+          const parseTime = (value: string) => {
+              if (value.includes("minutes ago")) {
+                  return { type: "minutes", time: moment().subtract(parseInt(value), "minutes").valueOf() };
+              }
+              if (value.includes("Hours ago")) {
+                  return { type: "hours", time: moment().subtract(parseInt(value), "hours").valueOf() };
+              }
+              return { type: "date", time: moment(value, "DD MMM, YYYY").valueOf() };
+          };
+      
+          const visitA = parseTime(a.prescription_started);
+          const visitB = parseTime(b.prescription_started);
+      
+          // Sort minutes first (ascending), then hours (ascending), then dates (descending)
+          if (visitA.type === "minutes" && visitB.type === "minutes") {
+              return visitA.time - visitB.time; // Ascending order for minutes
+          }
+          if (visitA.type === "hours" && visitB.type === "hours") {
+              return visitA.time - visitB.time; // Ascending order for hours
+          }
+          if (visitA.type === "date" && visitB.type === "date") {
+              return visitB.time - visitA.time; // Descending order for dates
+          }
+      
+          // Ensure minutes appear before hours, and hours before dates
+          if (visitA.type === "minutes") return -1;
+          if (visitB.type === "minutes") return 1;
+          if (visitA.type === "hours") return -1;
+          if (visitB.type === "hours") return 1;
+          
+          return 0;
+      });      
+
+    
         this.dataSource4.data = [...this.inProgressVisits];
         if (page == 1) {
           this.dataSource4.paginator = this.tempPaginator3;
