@@ -878,7 +878,7 @@
       </div>
     </div>
 
-    <div class="col-md-12 p-0 mb-5" *ngIf="selectedTabIndex == 0">
+    <div class="col-md-12 p-0 mb-5" *ngIf="selectedTabIndex == 0 && isFeatureAvailable('visitHistoryNote')" >
       <div class="intel-card">
         <div class="card-body">
           <p class="note-con">
@@ -1029,7 +1029,7 @@
                     </div>
                   </li>
                 </ul>
-                <div *ngIf="!patientInteractionForm.value.hwPresent && appConfigService?.patient_visit_summary?.hw_interaction && !isMCCUser" class="form-group">
+                <div *ngIf="!patientInteractionForm.value.hwPresent && appConfigService?.patient_visit_summary?.hw_interaction && !isMCCUser" class="form-group" style="display: none;">
                   <label for="note"
                     ><b>{{'Comment'|translate}}&nbsp;</b>
                     </label
@@ -1408,7 +1408,7 @@
                 <mat-panel-title>
                   <div class="intel-accordion-title">
                     <img src="assets/svgs/advice.svg" alt="" width="44px" />
-                    <h6 class="mb-0 ml-2">{{'Doctor\'s Recommendation'| translate}}</h6>
+                    <h6 class="mb-0 ml-2">{{'Recommendation'| translate}}</h6>
                   </div>
                 </mat-panel-title>
                 <mat-icon>{{ panelDoctorRcom.expanded ? "remove" : "add" }}</mat-icon>
@@ -1434,7 +1434,7 @@
                   <mat-panel-title>
                     <div class="intel-accordion-title">
                       <img src="assets/svgs/medication.svg" alt="" width="44px" />
-                      <h6 class="mb-0 ml-2">{{'Medications Advised'|translate}}</h6>
+                      <h6 class="mb-0 ml-2">{{'Medications'|translate}}</h6>
                     </div>
                   </mat-panel-title>
                   <mat-icon>{{ panel4.expanded ? "remove" : "add" }}</mat-icon>
@@ -1688,7 +1688,7 @@
                     <mat-panel-title>
                       <div class="intel-accordion-title">
                         <img src="assets/svgs/test.svg" alt="" width="44px" />
-                        <h6 class="mb-0 ml-2">{{'Investigations Advised'|translate}}</h6>
+                        <h6 class="mb-0 ml-2">{{'Investigations'|translate}}</h6>
                       </div>
                     </mat-panel-title>
                     <mat-icon>{{ panel6.expanded ? "remove" : "add" }}</mat-icon>
@@ -1765,7 +1765,7 @@
                   </ng-container>
                 </mat-expansion-panel>
 
-                <app-follow-up-instruction [title]="'Follow up Instructions'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded" [visit]="visit"
+                <app-follow-up-instruction [title]="'Follow up'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded" [visit]="visit"
               [visitNotePresent]="visitNotePresent" [isMCCUser]="isMCCUser" *ngIf="isFeatureAvailable('follow-up-instruction')">
                 </app-follow-up-instruction>    
             </ng-template>
