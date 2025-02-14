@@ -55,10 +55,27 @@ export class DiagnosisService {
   * @return {Observable<any>}
   */
   getDiagnosisList(term: string): Observable<any> {
-    const url = `${environment.baseURL}/concept?class=${conceptIds.conceptDiagnosisClass}&source=ICD10&q=${term}`;
+    const url = `${environment.baseURL}/concept?class=${conceptIds.conceptDiagnosisClass}&source=SNOMED&q=${term}&v=custom:(uuid,name:(name,display),mappings:(display))`;
     return this.http.get(url);
   }
 
+  getSnomedDiagnosisList(term: string): Observable<any> {
+    const url = `${environment.base}/getdiags/${term}`;
+    return this.http.get(url);
+  }
+
+  /**
+  * Add SNOMED diagnosis
+  * @param {string} conceptName - Concept name
+  * @param {string} snomedCode - SNOMED CT code
+  * @return {Observable<any>}
+  */
+  addSnomedDiagnosis(conceptName: string, snomedCode: string): Observable<any> {
+    const url = `${environment.base}/snomed`;
+    const data = { conceptName, snomedCode };
+    return this.http.post(url, data);
+  }
+  
   /**
   * Check if logged-in doctor is same for the encounter provider
   * @return {boolean} - True if same doctor else false
