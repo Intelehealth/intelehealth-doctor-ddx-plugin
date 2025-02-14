@@ -1080,7 +1080,7 @@
                           <button
                             type="button"
                             mat-icon-button
-                            class="float-right"
+                            class="float-right"     
                             *ngIf="!isMCCUser && isVisitNoteProvider && !visitEnded"
                             (click)="deleteHWInteraction()"
                             data-test-id="btnDeleteHWtInteraction"
@@ -1097,7 +1097,7 @@
                   {{ "Patient Interaction not present" | translate }}
                 </div>
               </form>
-            </mat-expansion-panel>
+            </mat-expansion-panel>  
 
             <mat-expansion-panel
               [expanded]="true"
@@ -1187,6 +1187,7 @@
                             class="visit-select custom"
                             formControlName="diagnosisName"
                             (search)="onKeyUp($event)"
+                            (change)="onDiagnosisChange($event)"
                             [items]="diagnosis$ | async"
                             bindLabel="name"
                             bindValue="name"
