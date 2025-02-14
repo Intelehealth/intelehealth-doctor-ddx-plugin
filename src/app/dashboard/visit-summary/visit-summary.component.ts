@@ -1176,7 +1176,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   */
   searchDiagnosis(val: string): void {
     if (val && val.length >= 3) {
-      this.diagnosisService.getDiagnosisList(val).subscribe({
+      this.diagnosisService.getDiagnosisList(val, isFeaturePresent("snomedCtDiagnosis") ? 'SNOMED' : 'ICD10').subscribe({
         next: (response) => {
           if (response.results && response.results.length) {
             const data = [];

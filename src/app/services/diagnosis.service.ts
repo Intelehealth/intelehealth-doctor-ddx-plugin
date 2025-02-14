@@ -54,8 +54,8 @@ export class DiagnosisService {
   * @param {string} term - Search term
   * @return {Observable<any>}
   */
-  getDiagnosisList(term: string): Observable<any> {
-    const url = `${environment.baseURL}/concept?class=${conceptIds.conceptDiagnosisClass}&source=SNOMED&q=${term}&v=custom:(uuid,name:(name,display),mappings:(display))`;
+  getDiagnosisList(term: string, source = 'SNOMED'): Observable<any> {
+    const url = `${environment.baseURL}/concept?class=${conceptIds.conceptDiagnosisClass}&source=${source}&q=${term}&v=custom:(uuid,name:(name,display),mappings:(display))`;
     return this.http.get(url);
   }
 
@@ -75,7 +75,7 @@ export class DiagnosisService {
     const data = { conceptName, snomedCode };
     return this.http.post(url, data);
   }
-  
+
   /**
   * Check if logged-in doctor is same for the encounter provider
   * @return {boolean} - True if same doctor else false
