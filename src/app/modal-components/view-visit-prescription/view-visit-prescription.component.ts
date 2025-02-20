@@ -225,8 +225,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
             diagnosisName: obs.value.split(':')[0].trim(),
             diagnosisType: obs.value.split(':')[1].split('&')[0].trim(),
             diagnosisStatus: obs.value.split(':')[1].split('&')[1].trim(),
-            uuid: obs.uuid,
-            diagnosisTNMStaging: obs.value.split(':')[1]?.split('&')[2]?.trim() !== 'null' ? obs.value.split(':')[1]?.split('&')[2]?.trim() : null,
+            uuid: obs.uuid
           });
         }
       });
@@ -803,7 +802,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
                             widths: ['*', '*', '*', '*'],
                             headerRows: 1,
                             body: [
-                              [{text: 'Diagnosis', style: 'tableHeader'}, (this.isFeatureAvailable('tnmStaging') ? {text: 'TNM Staging', style: 'tableHeader'} : []), {text: 'Type', style: 'tableHeader'}, {text: 'Status', style: 'tableHeader'}],
+                              [{text: 'Diagnosis', style: 'tableHeader'}, {text: 'Type', style: 'tableHeader'}, {text: 'Status', style: 'tableHeader'}],
                               ...this.getRecords('diagnosis')
                             ]
                           },
@@ -988,7 +987,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
       case 'diagnosis':
         if (this.existingDiagnosis.length) {
           this.existingDiagnosis.forEach(d => {
-            records.push([d.diagnosisName, (this.isFeatureAvailable('tnmStaging') ? d.diagnosisTNMStaging ?? '-' : []), d.diagnosisType, d.diagnosisStatus]);
+            records.push([d.diagnosisName, d.diagnosisType, d.diagnosisStatus]);
           });
         } else {
           records.push([{ text: 'No diagnosis added', colSpan: 3, alignment: 'center' }]);
