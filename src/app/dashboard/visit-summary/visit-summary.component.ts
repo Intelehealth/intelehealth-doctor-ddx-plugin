@@ -175,6 +175,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('familyHistoryNote') familyHistoryNoteRef: NotesComponent;
   @ViewChild('pastMedicalHistoryNote') pastMedicalHistoryNoteRef: NotesComponent;
   @ViewChild('notes') notesRef: NotesComponent;
+  genderData: any = {"M":"Male", "F":"Female", "O":"Other"}
 
   reasons = {
     'Completed': [
@@ -186,7 +187,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       { name: 'Could not connect or Poor Network' },
       { name: 'Other discipline doctor could not be available' },
       { name: 'Patient to share Reports/ Scan Images/Video of Investigations' },
-      { name: 'Repeat call with another DMG/Discipline (Non Chargeable)' }
+      { name: 'Repeat call with another DMG/Discipline (Non Chargeable)' },
+      { name: 'Incomplete Visits' },
+      { name: 'No Prescription' }
     ],
     'Close Call without Completion': [
       { name: 'Could not connect for attempts on 2 or more different days' },
@@ -440,6 +443,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
               this.checkIfFollowUpPresent();
               this.checkIfPatientCallDurationPresent(visit.attributes)
               this.checkIfCallStatusPresent(visit.attributes)
+              this.checkIfDiscussionSummaryPresent()
             }
             if (this.patientVisitSummary.notes_section) {
               this.getAdditionalNote(visit.attributes);
@@ -1520,6 +1524,21 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
+  * Get tests for the visit
+  * @returns {void}
+  */
+  checkIfDiscussionSummaryPresent(): void {
+    this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptDiscussionSummary)
+      .subscribe((response: ObsApiResponseModel) => {
+        response.results.forEach((obs: ObsModel) => {
+          if (obs.encounter && obs.encounter.visit.uuid === this.visit.uuid) {
+            this.discussionSummaryForm.patchValue({uuid:obs.uuid, value:obs.value})
+          }
+        });
+      });
+  }
+
+  /**
   * Save test
   * @returns {Observable<any>}
   */
@@ -1577,7 +1596,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           const obs_values = obs.value.split(':');
           if (obs.encounter && obs.encounter.visit.uuid === this.visit.uuid && obs_values.length > 1) {
             if(this.appConfigService.patient_visit_summary?.dp_referral_secondary)
-              this.diagnosisService.deleteObs(obs.uuid)
+              this.diagnosisService.deleteObs(obs.uuid).subscribe()
             else
               this.referrals.push({ uuid: obs.uuid, speciality: obs_values[0].trim(), facility: obs_values[1].trim(), priority: obs_values[2].trim(), reason: obs_values[3].trim() ? obs_values[3].trim() : '-' });
           } else if(obs.encounter && obs.encounter.visit.uuid === this.visit.uuid){
@@ -1708,7 +1727,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @returns {boolean}
   */
   sharePrescription(): boolean {
-    if (this.appConfigService.patient_visit_summary?.dp_dignosis_secondary && this.diagnosisSecondaryForm.value.valid){
+    if (this.appConfigService.patient_visit_summary?.dp_dignosis_secondary && this.diagnosisSecondaryForm.invalid){
       this.toastr.warning(this.translateService.instant('Enter Diagnosis'), this.translateService.instant('Diagnosis Required'));
       return false;
     } else if (!this.appConfigService.patient_visit_summary?.dp_dignosis_secondary && this.existingDiagnosis.length === 0 ) {
@@ -2034,13 +2053,14 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
    * @param {Event} event - The change event from the call status input.
    * @return {void}
    */
-  onCallStatusChange(event: Event): void {
-    const status = (event.target as HTMLInputElement).getAttribute('data-value');
-
-    this.reasonsList = this.reasons[status] || [];
-    this.patientCallStatusForm.patchValue({ reason: null });
-
-    setTimeout(() => this.reasonSelectComponent?.open(), 0);
+  onCallStatusChange(isLoad:boolean = false): void {
+    if(this.patientCallStatusForm.value.callStatus){
+      this.reasonsList = this.reasons[this.patientCallStatusForm.value.callStatus] || [];
+      if(!isLoad) {
+        this.patientCallStatusForm.patchValue({ reason: null });
+        setTimeout(() => this.reasonSelectComponent?.open(), 0);
+      }
+    }
   }
 
   /**
@@ -2119,6 +2139,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     attributes.forEach((attr: VisitAttributeModel) => {
       if (attr.attributeType.uuid === visitAttributeTypes.callStatus && attr.value) {
         this.patientCallStatusForm.patchValue({...obsParse(attr.value,attr.uuid)})
+        this.onCallStatusChange(true)
       }
     });
   }
@@ -2194,7 +2215,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         obsDatetime: new Date(),
         value: `${this.discussionSummaryForm.value.value}`,
         encounter: this.visitNotePresent.uuid,
-      }).pipe(tap((res: ObsModel)=>this.referSpecialityForm.patchValue({uuid:res.uuid})))
+      }).pipe(tap((res: ObsModel)=>this.discussionSummaryForm.patchValue({uuid:res.uuid})))
     } else {
       return of(false)
     }
@@ -2206,11 +2227,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       this.savePatientInteraction(),
       this.saveAdditionalInstruction(),
       this.saveTest()
-      // this.saveFollowUpObservation(),
     ];
 
     if(this.appConfigService.patient_visit_summary?.dp_dignosis_secondary) postObsRequests.push(this.saveDiagnosisSecondary())
-    if(this.isFeatureAvailable("dicussionSummary")) postObsRequests.push(this.saveDiscussionSummary())
+    if(this.appConfigService.patient_visit_summary?.dp_discussion_summary) postObsRequests.push(this.saveDiscussionSummary())
     if(this.appConfigService.patient_visit_summary?.dp_referral_secondary) postObsRequests.push(this.saveReferralSecondary())
     if(this.isFeatureAvailable('follow-up-instruction')) postObsRequests.push(this.followUpInstructionComponentRef.addInstructions())
     if(this.appConfigService?.patient_visit_summary?.dp_call_status) postObsRequests.push(this.saveCallStatus())

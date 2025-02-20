@@ -53,7 +53,7 @@
             <div class="col-md-2 patient-info-section p-3" *ngIf="checkPatientRegField('Gender') && patient?.person.gender">
               <div class="patient-info-item mb-3">
                 <h6 data-test-id="etPatientGender">{{'Gender'|translate}}</h6>
-                <p data-test-id="etPatientGender">{{ patient?.person.gender | translate }}</p>
+                <p data-test-id="etPatientGender">{{ genderData[patient?.person.gender] | translate }}</p>
               </div>
             </div>
 
@@ -917,7 +917,7 @@
                       alt=""
                       width="44px"
                     />
-                    <h6 class="mb-0 ml-2">{{'Discussion with Patient'|translate}}</h6>
+                    <h6 class="mb-0 ml-2">{{'Call Details'|translate}}</h6>
                   </div>
                 </mat-panel-title>
                 <mat-icon>{{ panel1.expanded ? "remove" : "add" }}</mat-icon>
@@ -1265,7 +1265,7 @@
                           <label
                             for="select-diagnosis"
                             class="col-sm-1 col-form-label"
-                            >{{'Select diagnosis'|translate}}*</label
+                            >{{'Diagnosis'|translate}}*</label
                           >
                           <div class="col-sm-11">
                             <textarea
@@ -1440,11 +1440,12 @@
                   #pane20
                   hideToggle
                   class="overflow-show"
+                  *ngIf="appConfigService?.patient_visit_summary?.dp_discussion_summary"
                 >
                   <mat-expansion-panel-header>
                     <mat-panel-title>
                       <div class="intel-accordion-title">
-                        <img src="assets/svgs/advice.svg" alt="" width="44px" />
+                        <img src="assets/svgs/note.svg" alt="" width="44px" />
                         <h6 class="mb-0 ml-2">{{'Discussion Summary'|translate}}</h6>
                       </div>
                     </mat-panel-title>
@@ -1746,7 +1747,7 @@
                 <mat-panel-title>
                   <div class="intel-accordion-title">
                     <img src="assets/svgs/referral.svg" alt="" width="44px" />
-                    <h6 class="mb-0 ml-2">{{'Referral Advise'|translate}}</h6>
+                    <h6 class="mb-0 ml-2">{{'Referral'|translate}}</h6>
                     <mat-icon aria-hidden="false" class="info-icon" aria-label="help icon" matTooltip="{{'Use this if you wish to seek a second opinion from an external facility.' | translate}}" matTooltipPosition="right" data-test-id="matIcoHelpAppointment">help_outline</mat-icon>
                   </div>
                 </mat-panel-title>
@@ -1928,7 +1929,7 @@
               [expanded]="true"
               #panel8
               hideToggle
-              
+              *ngIf="isFeatureAvailable('visitFollowUp')"
             >
               <mat-expansion-panel-header>
                 <mat-panel-title>
@@ -2216,9 +2217,8 @@
                           <input
                             type="radio"
                             value="{{ 'Completed' | translate }}"
-                            [attr.data-value]="'Completed'"
                             formControlName="callStatus"
-                            (change)="onCallStatusChange($event)"
+                            (change)="onCallStatusChange()"
                             data-test-id="radioCallStatusCompleted"
                           />
                           <div class="state p-success">
@@ -2229,9 +2229,8 @@
                           <input
                             type="radio"
                             value="{{ 'Reschedule/Repeat Internally' | translate }}"
-                            [attr.data-value]="'Reschedule/Repeat Internally'"
                             formControlName="callStatus"
-                            (change)="onCallStatusChange($event)"
+                            (change)="onCallStatusChange()"
                             data-test-id="radioCallStatusReschedule"
                           />
                           <div class="state p-success">
@@ -2242,9 +2241,8 @@
                           <input
                             type="radio"
                             value="{{ 'Close Call without Completion' | translate }}"
-                            [attr.data-value]="'Close Call without Completion'"
                             formControlName="callStatus"
-                            (change)="onCallStatusChange($event)"
+                            (change)="onCallStatusChange()"
                             data-test-id="radioCallStatusClose"
                           />
                           <div class="state p-success">
@@ -2290,7 +2288,7 @@
         type="button"
         class="blue-btn mr-2 mb-2"
         (click)="saveAsDraft()"
-        *ngIf="!isMCCUser && visitNotePresent && !visitEnded && isVisitNoteProvider"
+        *ngIf="!isMCCUser && visitNotePresent && !visitEnded && isVisitNoteProvider && !visitCompleted"
       >
        {{'Save as Draft'|translate}}
       </button>

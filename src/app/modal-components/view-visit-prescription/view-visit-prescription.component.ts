@@ -14,7 +14,7 @@ import { DiagnosisModel, EncounterModel, EncounterProviderModel, FollowUpDataMod
 (<any>pdfMake).vfs = pdfFonts.pdfMake.vfs;
 import { precription } from "../../utils/base64"
 import { AppConfigService } from 'src/app/services/app-config.service';
-import { calculateBMI, getFieldValueByLanguage, isFeaturePresent } from 'src/app/utils/utility-functions';
+import { calculateBMI, getFieldValueByLanguage, isFeaturePresent, obsParse } from 'src/app/utils/utility-functions';
 import { checkIsEnabled, VISIT_SECTIONS } from 'src/app/utils/visit-sections';
 
 @Component({
@@ -41,6 +41,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
   notes: ObsModel[] = [];
   medicines: MedicineModel[] = [];
   existingDiagnosis: DiagnosisModel[] = [];
+  dignosisSecondary: any = {};
   advices: ObsModel[] = [];
   additionalInstructions: ObsModel[] = [];
   tests: TestModel[] = [];
@@ -48,6 +49,8 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
   followUp: FollowUpDataModel;
   consultedDoctor: any;
   followUpInstructions: ObsModel[] = [];
+  discussionSummary: string = "";
+  referralSecondary: string = "";
 
 
   signaturePicUrl: string = null;
@@ -130,6 +133,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
               this.checkIfReferralPresent();
               this.checkIfFollowUpPresent();
               this.checkIfFollowUpInstructionsPresent();
+              this.checkIfDiscussionSummaryPresent()
             }
             this.getCheckUpReason(visit.encounters);
             this.getVitalObs(visit.encounters);
@@ -221,12 +225,18 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptDiagnosis).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
-          this.existingDiagnosis.push({
-            diagnosisName: obs.value.split(':')[0].trim(),
-            diagnosisType: obs.value.split(':')[1].split('&')[0].trim(),
-            diagnosisStatus: obs.value.split(':')[1].split('&')[1].trim(),
-            uuid: obs.uuid
-          });
+          if(this.appConfigService.patient_visit_summary?.dp_dignosis_secondary){
+            this.dignosisSecondary = obsParse(obs.value)
+            console.log(this.dignosisSecondary)
+          } else {
+            this.existingDiagnosis.push({
+              diagnosisName: obs.value.split(':')[0].trim(),
+              diagnosisType: obs.value.split(':')[1].split('&')[0].trim(),
+              diagnosisStatus: obs.value.split(':')[1].split('&')[1].trim(),
+              uuid: obs.uuid
+            });
+          }
+          
         }
       });
     });
@@ -242,6 +252,20 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
           this.notes.push(obs);
+        }
+      });
+    });
+  }
+
+  /**
+  * Get notes for the visit
+  * @returns {void}
+  */
+  checkIfDiscussionSummaryPresent() {
+    this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptDiscussionSummary).subscribe((response: ObsApiResponseModel) => {
+      response.results.forEach((obs: ObsModel) => {
+        if (obs.encounter.visit.uuid === this.visit.uuid) {
+          this.discussionSummary = obs.value
         }
       });
     });
@@ -317,9 +341,13 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptReferral)
       .subscribe((response: ObsApiResponseModel) => {
         response.results.forEach((obs: ObsModel) => {
-          const obs_values = obs.value.split(':');
           if (obs.encounter && obs.encounter.visit.uuid === this.visit.uuid) {
-            this.referrals.push({ uuid: obs.uuid, speciality: obs_values[0].trim(), facility: obs_values[1].trim(), priority: obs_values[2].trim(), reason: obs_values[3].trim()? obs_values[3].trim():'-' });
+            if(this.appConfigService.patient_visit_summary?.dp_referral_secondary)
+              this.referralSecondary = obs.value
+            else if(obs.value.includes(":")) {
+              const obs_values = obs.value.split(':');
+              this.referrals.push({ uuid: obs.uuid, speciality: obs_values[0].trim(), facility: obs_values[1].trim(), priority: obs_values[2].trim(), reason: obs_values[3].trim()? obs_values[3].trim():'-' });
+            }
           }
         });
       });
@@ -787,38 +815,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
                 '',
                 ''
               ],
-              [
-                {
-                  colSpan: 4,
-                  table: {
-                    widths: [30, '*'],
-                    headerRows: 1,
-                    body: [
-                      [ {image: 'diagnosis', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Diagnosis', style: 'sectionheader', border: [false, false, false, true] }],
-                      [
-                        {
-                          colSpan: 2,
-                          table: {
-                            widths: ['*', '*', '*', '*'],
-                            headerRows: 1,
-                            body: [
-                              [{text: 'Diagnosis', style: 'tableHeader'}, {text: 'Type', style: 'tableHeader'}, {text: 'Status', style: 'tableHeader'}],
-                              ...this.getRecords('diagnosis')
-                            ]
-                          },
-                          layout: 'lightHorizontalLines'
-                        }
-                      ]
-                    ]
-                  },
-                  layout: {
-                    defaultBorder: false
-                  }
-                },
-                '',
-                '',
-                ''
-              ],
+              this.getDiagnosis(),
               [
                 {
                   colSpan: 4,
@@ -985,7 +982,9 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     const records = [];
     switch (type) {
       case 'diagnosis':
-        if (this.existingDiagnosis.length) {
+        if(this.appConfigService.patient_visit_summary?.dp_dignosis_secondary){
+          records.push([this.dignosisSecondary['diagnosis'],this.dignosisSecondary['type'],this.dignosisSecondary['tnm'],this.dignosisSecondary['otherStaging']]);
+        } else if (this.existingDiagnosis.length) {
           this.existingDiagnosis.forEach(d => {
             records.push([d.diagnosisName, d.diagnosisType, d.diagnosisStatus]);
           });
@@ -1033,7 +1032,9 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
         const referralFacility = this.isFeatureAvailable('referralFacility', true)
         const priorityOfReferral = this.isFeatureAvailable('priorityOfReferral', true)
         let length = 2;
-        if (this.referrals.length) {
+        if(this.appConfigService.patient_visit_summary?.dp_referral_secondary && this.referralSecondary){
+          records.push([{ text: this.referralSecondary }]);
+        } else if (this.referrals.length) {
           this.referrals.forEach(r => {
             const referral = [r.speciality];
             if(referralFacility) referral.push(r.facility)
@@ -1155,6 +1156,9 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
           break;
         case 'Date of Birth':
           value = new Date(this.patient?.person.birthdate).toDateString();
+          break;
+        case 'Request ID':
+          value = this.getPersonAttributeValue('Request ID');
           break;
         case 'Phone Number':
           value = this.getPersonAttributeValue('Telephone Number');
@@ -1328,9 +1332,6 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
           // case 'TMH Case Number':
           //   value = this.getPersonAttributeValue('TMH Case Number');
           //   break;
-          case 'Request ID':
-            value = this.getPersonAttributeValue('Request ID');
-            break;
           case 'Discipline':
             value = this.getPersonAttributeValue('Discipline');
             break;
@@ -1395,6 +1396,17 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
   renderReferralSectionPDF() {
     const referralFacility = isFeaturePresent('referralFacility', true)
     const priorityOfReferral = isFeaturePresent('priorityOfReferral', true)
+
+    if (this.appConfigService.patient_visit_summary?.dp_referral_secondary) {
+      return {
+        widths: ['100%'],
+        headerRows: 1,
+        body: [
+          ...this.getRecords('referral')
+        ]
+      }
+    }
+
     if (!referralFacility && !priorityOfReferral) {
       return {
         widths: ['35%', '65%'],
@@ -1462,21 +1474,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
           headerRows: 1,
           body: [
             [ {image: 'medication', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Medications', style: 'sectionheader', border: [false, false, false, true] }],
-            [
-              {
-                colSpan: 2,
-                table: {
-                  widths: ['*', 'auto', 'auto', 'auto', 'auto', 'auto'],
-                  headerRows: 1,
-                  body: [
-                    [{text: 'Drug name', style: 'tableHeader'}, {text: 'Strength', style: 'tableHeader'}, {text: 'No. of days', style: 'tableHeader'}, {text: 'Timing', style: 'tableHeader'}, {text: 'Frequency', style: 'tableHeader'}, {text: 'Remarks', style: 'tableHeader'}],
-                    ...this.getRecords('medication')
-                  ]
-                },
-                layout: 'lightHorizontalLines'
-              }
-            ],
-            [{ text: 'Additional Instructions:', style: 'sectionheader', colSpan: 2 }, ''],
+            ...this.getPrimaryMedicationData(),
             [
               {
                 colSpan: 2,
@@ -1575,5 +1573,60 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     } else {
       return subFields;
     }
+  }
+
+  getDiagnosis(){
+    return [
+      {
+        colSpan: 4,
+        table: {
+          widths: [30, '*'],
+          headerRows: 1,
+          body: [
+            [ {image: 'diagnosis', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Diagnosis', style: 'sectionheader', border: [false, false, false, true] }],
+            [
+              {
+                colSpan: 2,
+                table: {
+                  widths: this.appConfigService.patient_visit_summary?.dp_dignosis_secondary ? ['40%', '*', '*', '*'] : ['*', '*', '*'],
+                  headerRows: 1,
+                  body: [
+                    this.appConfigService.patient_visit_summary?.dp_dignosis_secondary ? [{text: 'Diagnosis', style: 'tableHeader'}, {text: 'Type', style: 'tableHeader'}, {text: 'TNM', style: 'tableHeader'},{text: 'Other Staging', style: 'tableHeader'}] : [{text: 'Diagnosis', style: 'tableHeader'}, {text: 'Type', style: 'tableHeader'}, {text: 'Status', style: 'tableHeader'}],
+                    ...this.getRecords('diagnosis')
+                  ]
+                },
+                layout: 'lightHorizontalLines'
+              }
+            ]
+          ]
+        },
+        layout: {
+          defaultBorder: false
+        }
+      },
+      '',
+      '',
+      ''
+    ]
+  }
+
+  getPrimaryMedicationData(){
+    if(this.appConfigService.patient_visit_summary?.dp_medication_secondary) 
+      return [];
+    return [[
+      {
+        colSpan: 2,
+        table: {
+          widths: ['*', 'auto', 'auto', 'auto', 'auto', 'auto'],
+          headerRows: 1,
+          body: [
+            [{text: 'Drug name', style: 'tableHeader'}, {text: 'Strength', style: 'tableHeader'}, {text: 'No. of days', style: 'tableHeader'}, {text: 'Timing', style: 'tableHeader'}, {text: 'Frequency', style: 'tableHeader'}, {text: 'Remarks', style: 'tableHeader'}],
+            ...this.getRecords('medication')
+          ]
+        },
+        layout: 'lightHorizontalLines'
+      }
+    ],
+    [{ text: 'Additional Instructions:', style: 'sectionheader', colSpan: 2 }, '']]
   }
 }

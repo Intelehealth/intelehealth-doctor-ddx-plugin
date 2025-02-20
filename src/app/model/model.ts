@@ -694,6 +694,7 @@ export interface PatientVisitSummaryConfigModel {
   dp_medication_secondary: boolean
   dp_investigations_secondary: boolean
   dp_referral_secondary: boolean
+  dp_discussion_summary: boolean  
 }
 
 export interface PagerdutyList {

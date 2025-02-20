@@ -182,9 +182,12 @@ export function obsStringify(obs: any): string {
   }
 }
 
-export function obsParse(obs: string, uuid: string): object {
+export function obsParse(obs: string, uuid: string = ""): object {
   try {
-    return { uuid: uuid, ...JSON.parse(obs) }
+    if(uuid)
+      return { uuid: uuid, ...JSON.parse(obs) }
+    else
+      return { ...JSON.parse(obs) }
   } catch (error) {
     return { uuid: uuid }
   }
