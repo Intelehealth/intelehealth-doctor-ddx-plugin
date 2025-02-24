@@ -402,7 +402,8 @@
                   <!-- END Vitals -->
                       
                   <!-- Checkup Reasons -->
-                    <div class="data-section-content" *ngSwitchCase="pvsConstant['check_up_reason'].key">
+                  <ng-container *ngSwitchCase="pvsConstant['check_up_reason'].key">
+                    <div class="data-section-content" *ngIf="!appConfigService?.patient_visit_summary?.dp_dignosis_secondary">
                       <div class="cheif-complaint-wrapper">
                         <h6>{{'Chief complaint'|translate}}</h6>
                         <div class="complaint-chips">
@@ -454,6 +455,7 @@
                         </ul>
                       </ng-container>
                     </ng-container>
+                  </ng-container>
                   <!-- END Checkup Reasons -->
                 </ng-container>
               </div>
