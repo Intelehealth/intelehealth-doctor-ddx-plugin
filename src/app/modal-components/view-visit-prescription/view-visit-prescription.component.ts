@@ -83,7 +83,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     private profileService: ProfileService,
     private diagnosisService: DiagnosisService,
     private translateService: TranslateService,
-    private appConfigService: AppConfigService,
+    public appConfigService: AppConfigService,
     private sanitizer: DomSanitizer) {
       Object.keys(this.appConfigService.patient_registration).forEach(obj=>{
         this.patientRegFields.push(...this.appConfigService.patient_registration[obj].filter((e: { is_enabled: any; })=>e.is_enabled).map((e: { name: any; })=>e.name));

@@ -1060,6 +1060,24 @@
                     </div>
                   </div>
                 </li>
+                <li *ngIf="isSubSectionEnabled('patient_interaction','Comment')">
+                  <form
+                    class="mt-3"
+                    [formGroup]="patientInteractionCommentForm"
+                  >
+                    <h6 class="list-header mb-2">{{'Comment'|translate}}</h6>
+                    <div class="form-group">
+                      <textarea
+                        formControlName="value"
+                        class="form-control"
+                        rows="3"
+                        placeholder="{{'Type here'|translate}}"
+                        (keyup)="autoGrowTextZone($event)"
+                        [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
+                      ></textarea>
+                    </div>
+                  </form>
+                </li>
               </ul>
             </mat-expansion-panel>  
 

@@ -176,6 +176,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('pastMedicalHistoryNote') pastMedicalHistoryNoteRef: NotesComponent;
   @ViewChild('notes') notesRef: NotesComponent;
   genderData: any = {"M":"Male", "F":"Female", "O":"Other"}
+  patientInteractionCommentForm: FormGroup
 
   reasons = {
     'Completed': [
@@ -317,6 +318,11 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     })
 
     this.discussionSummaryForm = new FormGroup({
+      uuid: new FormControl(null),
+      value: new FormControl(null, [Validators.required])
+    })
+
+    this.patientInteractionCommentForm = new FormGroup({
       uuid: new FormControl(null),
       value: new FormControl(null, [Validators.required])
     })
@@ -1074,6 +1080,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         this.hwInteraction = attr.value
         this.hwInteractionUuid = attr.uuid
       }
+      if (attr.attributeType.display === visitTypes.PATIENT_INTERACTION_COMMENT) {
+        this.patientInteractionCommentForm.patchValue(attr)
+      }
     });
   }
 
@@ -1124,6 +1133,23 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   /**
+  * Save HW interaction visit attribute
+  * @param {String} val - Array of visit attributes
+  * @returns {void}
+  */
+  savePatientInteractionComment(): Observable<any> {
+    if(this.patientInteractionCommentForm.invalid && this.isSubSectionEnabled("Patient Interaction",'Comment')) return of(false)
+    const payload = {
+      attributeType: visitAttributeTypes.patientInteractionComment,
+      value: this.patientInteractionCommentForm.value.value
+    };
+    if(this.patientInteractionCommentForm.value.uuid) 
+      return this.visitService.updateAttribute(this.visit.uuid,this.patientInteractionCommentForm.value.uuid, payload);
+    else
+      return this.visitService.postAttribute(this.visit.uuid, payload).pipe(tap((res:VisitAttributeModel)=>this.patientInteractionCommentForm.patchValue({uuid:res.uuid})));
+  };
+
+  /**
   * Save patient interaction visit attribute
   * @returns {void}
   */
@@ -1131,7 +1157,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     if(this.patientCallStatusForm.valid){
       const payload = {
         attributeType: visitAttributeTypes.callStatus,
-        value: `${obsStringify(this.patientCallStatusForm.value)}`,
+        value: `${obsStringify({...this.patientCallStatusForm.value})}`,
       };
       if(this.patientCallStatusForm.value.uuid) 
         return this.visitService.updateAttribute(this.visit.uuid,this.patientCallStatusForm.value.uuid, payload);
@@ -2063,6 +2089,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       this.reasonsList = this.reasons[this.patientCallStatusForm.value.callStatus] || [];
       if(!isLoad) {
         this.patientCallStatusForm.patchValue({ reason: null });
+        console.log(this.patientCallStatusForm.value)
         setTimeout(() => this.reasonSelectComponent?.open(), 0);
       }
     }
@@ -2145,6 +2172,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       if (attr.attributeType.uuid === visitAttributeTypes.callStatus && attr.value) {
         this.patientCallStatusForm.patchValue({...obsParse(attr.value,attr.uuid)})
         this.onCallStatusChange(true)
+        console.log(this.patientCallStatusForm.value)
       }
     });
   }
@@ -2231,7 +2259,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       this.saveHWInteraction(),
       this.savePatientInteraction(),
       this.saveAdditionalInstruction(),
-      this.saveTest()
+      this.saveTest(),
+      this.savePatientInteractionComment()
     ];
 
     if(this.appConfigService.patient_visit_summary?.dp_dignosis_secondary) postObsRequests.push(this.saveDiagnosisSecondary())
