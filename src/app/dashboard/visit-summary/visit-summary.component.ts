@@ -126,6 +126,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   diagnosisSubject: BehaviorSubject<any>;
   diagnosis$: Observable<any>;
   private dSearchSubject: Subject<string> = new Subject();
+  diagnosisValidated: boolean = false;
 
   dialogRef1: MatDialogRef<ChatBoxComponent>;
   dialogRef2: MatDialogRef<VideoCallComponent>;
@@ -1166,6 +1167,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   * @returns {void}
   */
   onKeyUp(event: { term: string; }): void {
+    this.diagnosisForm.controls.diagnosisName.reset();
+    this.diagnosisValidated = false;
     this.dSearchSubject.next(event.term);
   }
 
@@ -1218,7 +1221,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   * @returns {void}
   */
   saveDiagnosis(): void {
-    if (this.diagnosisForm.invalid || !this.isVisitNoteProvider) {
+    if (this.diagnosisForm.invalid || !this.isVisitNoteProvider || !this.diagnosisValidated) {
       return; 
     }
     if (this.existingDiagnosis.find(o => o.diagnosisName.toLocaleLowerCase() === this.diagnosisForm.value.diagnosisName.toLocaleLowerCase())) {
@@ -1256,6 +1259,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy {
   }
 
   onDiagnosisChange(event: any): void {
+    this.diagnosisValidated = true;
     if (isFeaturePresent("snomedCtDiagnosis")) {
       if (event.conceptId) {
         this.diagnosisForm.addControl('diagnosisCode', new FormControl(null));
