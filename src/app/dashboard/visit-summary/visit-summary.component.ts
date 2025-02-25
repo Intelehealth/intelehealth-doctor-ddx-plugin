@@ -1139,7 +1139,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @returns {void}
   */
   savePatientInteractionComment(): Observable<any> {
-    if(this.patientInteractionCommentForm.invalid && this.isSubSectionEnabled("Patient Interaction",'Comment')) return of(false)
+    if(this.patientInteractionCommentForm.invalid && this.isSubSectionEnabled("Patient Interaction",'Comment') || !this.patientInteractionCommentForm.value.value) return of(false)
     const payload = {
       attributeType: visitAttributeTypes.patientInteractionComment,
       value: this.patientInteractionCommentForm.value.value
