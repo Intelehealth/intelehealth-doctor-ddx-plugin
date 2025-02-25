@@ -1090,7 +1090,7 @@
                 <mat-panel-title>
                   <div class="intel-accordion-title">
                     <img src="assets/svgs/diagnosis.svg" alt="" width="44px" />
-                    <h6 class="mb-0 ml-2">{{'Diagnosis'|translate}}*</h6>
+                    <h6 class="mb-0 ml-2">{{'Diagnosis Details'|translate}}*</h6>
                   </div>
                 </mat-panel-title>
                 <mat-icon>{{ panel2.expanded ? "remove" : "add" }}</mat-icon>
@@ -2193,6 +2193,7 @@
                             formControlName="callStatus"
                             (change)="onCallStatusChange()"
                             data-test-id="radioCallStatusCompleted"
+                            [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
                           />
                           <div class="state p-success">
                             <label>{{ 'Completed' | translate }}</label>
@@ -2205,6 +2206,7 @@
                             formControlName="callStatus"
                             (change)="onCallStatusChange()"
                             data-test-id="radioCallStatusReschedule"
+                            [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
                           />
                           <div class="state p-success">
                             <label>{{ 'Reschedule/Repeat Internally' | translate }}</label>
@@ -2217,6 +2219,7 @@
                             formControlName="callStatus"
                             (change)="onCallStatusChange()"
                             data-test-id="radioCallStatusClose"
+                            [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
                           />
                           <div class="state p-success">
                             <label>{{ 'Close Call without Completion' | translate }}</label>
