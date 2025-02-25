@@ -168,6 +168,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   arrCallDurations: any[] = [];
   callDurationTimeStamp: number;
   callDurationsUuid: string;
+  selectedDiagnoses: string[] = [];
 
   referralSecondaryForm: FormGroup;
   diagnosisSecondaryForm: FormGroup;
@@ -361,6 +362,16 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.dSearchSubject.pipe(debounceTime(500), distinctUntilChanged()).subscribe(searchTextValue => {
       this.searchDiagnosis(searchTextValue);
     });
+
+    this.diagnosisService.selectedDiagnoses$.subscribe(diagnoses => {
+        this.selectedDiagnoses = diagnoses;
+        this.diagnosisSubject.next(diagnoses);
+        this.diagnosisForm.patchValue({ diagnosisName: diagnoses.length > 0 ? diagnoses[0] : null });
+    });
+  }
+
+  removeDiagnosis(diagnosis: string) {
+    this.diagnosisService.removeDiagnosis(diagnosis);
   }
 
   checkOpenChatBoxFlag() {
@@ -1279,6 +1290,15 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @returns {void}
   */
   saveDiagnosis(): void {
+    if (this.selectedDiagnoses.length > 0) {
+      const diagnosisName = this.diagnosisForm.value.diagnosisName?.replace(/:/g, ' ');
+      this.diagnosisForm.patchValue({ diagnosisName: this.selectedDiagnoses?.[0] || null });
+      this.diagnosisService.removeDiagnosis(diagnosisName);
+      this.diagnosisSubject.next(this.selectedDiagnoses);
+      this.selectedDiagnoses = this.selectedDiagnoses.filter(diagnosis => diagnosis !== diagnosisName);
+      this.existingDiagnosis.push({ ...this.diagnosisForm.value, diagnosisName: diagnosisName });
+      this.diagnosisForm.reset(); 
+    }
     if (this.diagnosisForm.invalid || !this.isVisitNoteProvider || !this.diagnosisValidated) {
       return; 
     }

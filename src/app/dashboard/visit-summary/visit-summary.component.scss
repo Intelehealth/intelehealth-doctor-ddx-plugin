@@ -929,3 +929,19 @@ th.mat-header-cell:last-child {
   background: var(--color-red);
 }
 
+.remove-icon {
+  margin-left: -8px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-right: -9px; 
+}
+
+.remove-icon:hover {
+  opacity: 0.8;
+}
+
+.selected-item {
+  border: 1px solid #EFE8FF;
+  padding: 4px;
+  color: #2E1E91;
+}
