@@ -1092,7 +1092,7 @@
                     <img src="assets/svgs/diagnosis.svg" alt="" width="44px" />
                       <div class="text-muted small mt-2">
                       <h6 class="mb-0 ml-2">{{isFeatureAvailable("AILLMDiffDiagnosis") ? 'Ayu suggested diagnosis':
-                        'Diagnosis'|translate}}*</h6>
+                        'Diagnosis Details'|translate}}*</h6>
                     </div>
                   </div>
                 </mat-panel-title>
@@ -1181,7 +1181,7 @@
                             [clearable]="true"
                             [searchable]="true"
                             placeholder="{{'Select diagnosis'|translate}}"
-                            [addTag]="true" 
+                            [addTag]="false" 
                             data-test-id="selectDiagnosisName"
                             >
                           </ng-select>
@@ -2211,6 +2211,7 @@
                             formControlName="callStatus"
                             (change)="onCallStatusChange()"
                             data-test-id="radioCallStatusCompleted"
+                            [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
                           />
                           <div class="state p-success">
                             <label>{{ 'Completed' | translate }}</label>
@@ -2223,6 +2224,7 @@
                             formControlName="callStatus"
                             (change)="onCallStatusChange()"
                             data-test-id="radioCallStatusReschedule"
+                            [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
                           />
                           <div class="state p-success">
                             <label>{{ 'Reschedule/Repeat Internally' | translate }}</label>
@@ -2235,6 +2237,7 @@
                             formControlName="callStatus"
                             (change)="onCallStatusChange()"
                             data-test-id="radioCallStatusClose"
+                            [attr.disabled]="(isMCCUser || !isVisitNoteProvider || visitEnded)? 'disabled' : null"
                           />
                           <div class="state p-success">
                             <label>{{ 'Close Call without Completion' | translate }}</label>

@@ -1638,7 +1638,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
           widths: [30, '*'],
           headerRows: 1,
           body: [
-            [ {image: 'diagnosis', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Diagnosis', style: 'sectionheader', border: [false, false, false, true] }],
+            [ {image: 'diagnosis', width: 25, height: 25, border: [false, false, false, true]  }, {text: 'Diagnosis Details', style: 'sectionheader', border: [false, false, false, true] }],
             [
               {
                 colSpan: 2,
