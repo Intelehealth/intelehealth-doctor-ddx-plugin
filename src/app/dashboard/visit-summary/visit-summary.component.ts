@@ -2172,6 +2172,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @returns {void}
   */
   checkIfCallStatusPresent(attributes: VisitAttributeModel[]): void {
+    if(this.isMCCUser || !this.isVisitNoteProvider || this.visitEnded) this.patientCallStatusForm.get('reason').disable()
     attributes.forEach((attr: VisitAttributeModel) => {
       if (attr.attributeType.uuid === visitAttributeTypes.callStatus && attr.value) {
         this.patientCallStatusForm.patchValue({...obsParse(attr.value,attr.uuid)})
