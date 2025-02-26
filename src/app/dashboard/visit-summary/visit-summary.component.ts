@@ -2203,7 +2203,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           value: `${this.referralSecondaryForm.value.ref}`,
         })
       else 
-        return this.diagnosisService.deleteObs(this.referralSecondaryForm.value.uuid).pipe(tap((res)=>this.referSpecialityForm.patchValue({ uuid: null})))
+        return this.diagnosisService.deleteObs(this.referralSecondaryForm.value.uuid).pipe(tap((res)=>this.referralSecondaryForm.patchValue({ uuid: null})))
     } else if(this.referralSecondaryForm.valid) {
       return this.encounterService.postObs({
         concept: conceptIds.conceptReferral,
@@ -2211,7 +2211,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         obsDatetime: new Date(),
         value: `${this.referralSecondaryForm.value.ref}`,
         encounter: this.visitNotePresent.uuid,
-      }).pipe(tap((res: ObsModel)=>this.referSpecialityForm.patchValue({uuid:res.uuid})))
+      }).pipe(tap((res: ObsModel)=>this.referralSecondaryForm.patchValue({uuid:res.uuid})))
     } else {
       return of(false)
     }
@@ -2245,7 +2245,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
           value: `${this.discussionSummaryForm.value.value}`,
         })
       else 
-        return this.diagnosisService.deleteObs(this.discussionSummaryForm.value.uuid).pipe(tap((res)=>this.referSpecialityForm.patchValue({ uuid: null})))
+        return this.diagnosisService.deleteObs(this.discussionSummaryForm.value.uuid).pipe(tap((res)=>this.discussionSummaryForm.patchValue({ uuid: null})))
     } else if(this.discussionSummaryForm.valid) {
       return this.encounterService.postObs({
         concept: conceptIds.conceptDiscussionSummary,
