@@ -1360,21 +1360,16 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptMed).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
-          if (obs.value.includes(':')) {
-            if(this.appConfigService.patient_visit_summary?.dp_medication_secondary){
-              this.diagnosisService.deleteObs(obs.uuid).subscribe()
-            } else {
-              this.medicines.push({
-                drug: obs.value?.split(':')[0],
-                strength: obs.value?.split(':')[1],
-                days: obs.value?.split(':')[2],
-                timing: obs.value?.split(':')[3],
-                remark: obs.value?.split(':')[4],
-                frequency: obs.value?.split(':')[5] ? obs.value?.split(':')[5] : "",
-                uuid: obs.uuid
-              });
-            }
-            
+          if (obs.value.includes(':') && !this.appConfigService?.patient_visit_summary?.dp_medication_secondary) {
+            this.medicines.push({
+              drug: obs.value?.split(':')[0],
+              strength: obs.value?.split(':')[1],
+              days: obs.value?.split(':')[2],
+              timing: obs.value?.split(':')[3],
+              remark: obs.value?.split(':')[4],
+              frequency: obs.value?.split(':')[5] ? obs.value?.split(':')[5] : "",
+              uuid: obs.uuid
+            });
           } else {
             this.additionalInstructionForm.patchValue({uuid:obs.uuid, value:obs.value});
           }
@@ -1625,11 +1620,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe((response: ObsApiResponseModel) => {
         response.results.forEach((obs: ObsModel) => {
           const obs_values = obs.value.split(':');
-          if (obs.encounter && obs.encounter.visit.uuid === this.visit.uuid && obs_values.length > 1) {
-            if(this.appConfigService.patient_visit_summary?.dp_referral_secondary)
-              this.diagnosisService.deleteObs(obs.uuid).subscribe()
-            else
-              this.referrals.push({ uuid: obs.uuid, speciality: obs_values[0].trim(), facility: obs_values[1].trim(), priority: obs_values[2].trim(), reason: obs_values[3].trim() ? obs_values[3].trim() : '-' });
+          if (obs.encounter && obs.encounter.visit.uuid === this.visit.uuid && obs_values.length > 1 && !this.appConfigService?.patient_visit_summary?.dp_referral_secondary) {
+            this.referrals.push({ uuid: obs.uuid, speciality: obs_values[0].trim(), facility: obs_values[1].trim(), priority: obs_values[2].trim(), reason: obs_values[3].trim() ? obs_values[3].trim() : '-' });
           } else if(obs.encounter && obs.encounter.visit.uuid === this.visit.uuid){
             this.referralSecondaryForm.patchValue({uuid: obs.uuid, ref: obs.value})
           }
