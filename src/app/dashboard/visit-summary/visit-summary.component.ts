@@ -581,7 +581,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
                   obj1.data = [];
                   for (let j = 1; j < splitByBr.length; j = j + 2) {
                     if (splitByBr[j].trim() && splitByBr[j].trim().length > 1) {
-                      obj1.data.push({ key: splitByBr[j].replace('• ', '').replace(' -', ''), value: splitByBr[j + 1] });
+                      obj1.data.push({ key: splitByBr[j].replace('• ', '').replace(' -', ''), value: splitByBr[j + 1].trim() });
                     }
                   }
                   this.checkUpReasonData.push(obj1);
@@ -609,7 +609,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
                         splitByHyphen.push(value);
                         return splitByHyphen.join(" - ");
                       });
-                      const resultString = processedStrings.join(". ");
+                      const resultString = processedStrings.join(". ").trim();
                       this.sanitizedValue = this.sanitizer.bypassSecurityTrustHtml(resultString);
                       obj1.data.push({ key: splitByDash[0].replace('• ', ''), value: this.sanitizedValue });
                     }
