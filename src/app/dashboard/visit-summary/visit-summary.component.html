@@ -910,7 +910,7 @@
             <app-notes #pastMedicalHistoryNote *ngIf="appConfigService?.patient_visit_summary?.past_medical_history_notes" [title]="'Past Medical History Notes'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded"
             [visit]="visit" [visitNotePresent]="visitNotePresent"></app-notes>
 
-            <mat-expansion-panel [expanded]="true" #panel1 hideToggle *ngIf="isSubSectionEnabled('patient_interaction','HW') || isSubSectionEnabled('patient_interaction','Patient')" id="patientInteractionFormTemplate">
+            <mat-expansion-panel [expanded]="true" #panel1 hideToggle *ngIf="isSubSectionEnabled('patient_interaction','HW') || isSubSectionEnabled('patient_interaction','Patient') || isSubSectionEnabled('patient_interaction','Comment')" id="patientInteractionFormTemplate">
               <mat-expansion-panel-header>
                 <mat-panel-title>
                   <div class="intel-accordion-title">
