@@ -329,7 +329,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptMed).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
-          if (obs.value.includes(':')) {
+          if (obs.value.includes(':') && !this.appConfigService?.patient_visit_summary?.dp_medication_secondary) {
             this.medicines.push({
               drug: obs.value?.split(':')[0],
               strength: obs.value?.split(':')[1],
@@ -1057,7 +1057,7 @@ export class ViewVisitPrescriptionComponent implements OnInit, OnDestroy {
           this.additionalInstructions.forEach(ai => {
             records.push({ text: ai.value, margin: [0, 5, 0, 5] });
           });
-        } else {
+        } else if(!this.appConfigService?.patient_visit_summary?.dp_medication_secondary) {
           records.push([{ text: 'No additional instructions added'}]);
         }
         break;
