@@ -919,7 +919,7 @@
                       alt=""
                       width="44px"
                     />
-                    <h6 class="mb-0 ml-2">{{'Call Details'|translate}}</h6>
+                    <h6 class="mb-0 ml-2">{{getPvsSectionConfig('patient_interaction')?.lang?.en || 'Call Details' | translate}}</h6>
                   </div>
                 </mat-panel-title>
                 <mat-icon>{{ panel1.expanded ? "remove" : "add" }}</mat-icon>

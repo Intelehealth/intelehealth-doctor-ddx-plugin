@@ -1292,12 +1292,13 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   saveDiagnosis(): void {
     if (this.selectedDiagnoses.length > 0) {
       const diagnosisName = this.diagnosisForm.value.diagnosisName?.replace(/:/g, ' ');
-      this.diagnosisForm.patchValue({ diagnosisName: this.selectedDiagnoses?.[0] || null });
       this.diagnosisService.removeDiagnosis(diagnosisName);
       this.diagnosisSubject.next(this.selectedDiagnoses);
       this.selectedDiagnoses = this.selectedDiagnoses.filter(diagnosis => diagnosis !== diagnosisName);
+      this.diagnosisForm.patchValue({ diagnosisName: this.selectedDiagnoses?.[0] || null });
       this.existingDiagnosis.push({ ...this.diagnosisForm.value, diagnosisName: diagnosisName });
-      this.diagnosisForm.reset(); 
+      this.diagnosisForm.controls.diagnosisType.reset();
+      this.diagnosisForm.controls.diagnosisStatus.reset();
     }
     if (this.diagnosisForm.invalid || !this.isVisitNoteProvider || !this.diagnosisValidated) {
       return; 
@@ -1361,9 +1362,13 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @returns {void}
   */
   deleteDiagnosis(index: number, uuid: string): void {
-    this.diagnosisService.deleteObs(uuid).subscribe(() => {
+    if (uuid) {
+      this.diagnosisService.deleteObs(uuid).subscribe(() => {
+        this.existingDiagnosis.splice(index, 1);
+      });
+    } else {
       this.existingDiagnosis.splice(index, 1);
-    });
+    }
   }
 
   /**
@@ -2134,6 +2139,16 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     return subSection ? subSection.is_enabled : false;
   }
 
+  /**
+   * Retrieves the configuration for a specific section in the PVS (Patient Visit Summary).
+   *
+   * @param sectionKey - The key identifying the section for which the configuration is to be retrieved.
+   * @returns The configuration object for the specified section.
+   */
+  getPvsSectionConfig(sectionKey: string): any {
+    return this.pvsConfigs.find(config => config.key === sectionKey);
+  }
+
   isFeatureAvailable(featureName: string, notInclude = false): boolean {
     return isFeaturePresent(featureName, notInclude);
   }
@@ -2193,7 +2208,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   */
   checkIfCallStatusPresent(attributes: VisitAttributeModel[]): void {
     if(this.isMCCUser || !this.isVisitNoteProvider || this.visitEnded) this.patientCallStatusForm.get('reason').disable()
-    attributes.forEach((attr: VisitAttributeModel) => {
+      attributes.forEach((attr: VisitAttributeModel) => {
       if (attr.attributeType.uuid === visitAttributeTypes.callStatus && attr.value) {
         this.patientCallStatusForm.patchValue({...obsParse(attr.value,attr.uuid)})
         this.onCallStatusChange(true)
