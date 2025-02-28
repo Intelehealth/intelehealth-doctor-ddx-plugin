@@ -873,7 +873,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @return {string} - Whatsapp link
   */
   getWhatsAppLink(): string {
-    return this.visitService.getWhatsappLink(this.getPersonAttributeValue(doctorDetails.TELEPHONE_NUMBER), `Hello I'm calling for consultation`);
+    return this.visitService.getWhatsappLink(this.hwPhoneNo, `Hello I'm calling for consultation`);
   }
 
   /**
