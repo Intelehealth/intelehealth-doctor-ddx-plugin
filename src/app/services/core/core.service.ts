@@ -40,6 +40,7 @@ import { VcallOverlayComponent } from 'src/app/modal-components/vcall-overlay/vc
 import { VideoCallComponent } from 'src/app/modal-components/video-call/video-call.component';
 import { ViewVisitPrescriptionComponent } from 'src/app/modal-components/view-visit-prescription/view-visit-prescription.component';
 import { ViewVisitSummaryComponent } from 'src/app/modal-components/view-visit-summary/view-visit-summary.component';
+import { LibPresciptionComponent } from 'lib-presciption';
 
 @Injectable({
   providedIn: 'root'
@@ -157,7 +158,7 @@ export class CoreService {
   * @return {Observable<any>} - Dialog result
   */
   openVisitPrescriptionModal(data: { uuid: string }): Observable<any> {
-    const dialogRef = this.dialog.open(ViewVisitPrescriptionComponent, { panelClass: 'modal-lg', data, hasBackdrop: true, disableClose: true });
+    const dialogRef = this.dialog.open(LibPresciptionComponent, { panelClass: 'modal-lg', data, hasBackdrop: true, disableClose: true });
     return dialogRef.afterClosed();
   }
 
