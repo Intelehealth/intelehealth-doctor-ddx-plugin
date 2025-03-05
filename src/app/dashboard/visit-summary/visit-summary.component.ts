@@ -884,7 +884,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @return {string} - Whatsapp link
   */
   getWhatsAppLink(): string {
-    return this.visitService.getWhatsappLink(this.getPersonAttributeValue(doctorDetails.TELEPHONE_NUMBER), `Hello I'm calling for consultation`);
+    return this.visitService.getWhatsappLink(this.hwPhoneNo, `Hello I'm calling for consultation`);
   }
 
   /**
@@ -2208,7 +2208,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   */
   checkIfCallStatusPresent(attributes: VisitAttributeModel[]): void {
     if(this.isMCCUser || !this.isVisitNoteProvider || this.visitEnded) this.patientCallStatusForm.get('reason').disable()
-      attributes.forEach((attr: VisitAttributeModel) => {
+    attributes.forEach((attr: VisitAttributeModel) => {
       if (attr.attributeType.uuid === visitAttributeTypes.callStatus && attr.value) {
         this.patientCallStatusForm.patchValue({...obsParse(attr.value,attr.uuid)})
         this.onCallStatusChange(true)

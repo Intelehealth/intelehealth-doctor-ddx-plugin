@@ -934,14 +934,14 @@
                     <div
                       class="col-sm-9 d-flex align-items-center"
                       *ngIf="
-                        getPersonAttributeValue('Telephone Number') != 'NA';
+                        this.hwPhoneNo;
                         else noContactDetails
                       "
                     >
                       <div class="d-flex">
                         <a
                           href="tel:{{
-                            getPersonAttributeValue('Telephone Number')
+                            this.hwPhoneNo
                           }}"
                           target="_blank"
                           class="icon-btn m-0 mr-2"
@@ -966,7 +966,7 @@
                     <ng-template #noContactDetails>
                       <div class="col-sm-9 d-flex align-items-center">
                         <span class="text-muted"
-                          >{{'Patient Mobile number is not available'|translate}}</span
+                          >{{'Health worker number is not available'|translate}}</span
                         >
                       </div>
                     </ng-template>
