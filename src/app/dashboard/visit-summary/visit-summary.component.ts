@@ -582,7 +582,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
                   obj1.data = [];
                   for (let j = 1; j < splitByBr.length; j = j + 2) {
                     if (splitByBr[j].trim() && splitByBr[j].trim().length > 1) {
-                      obj1.data.push({ key: splitByBr[j].replace('• ', '').replace(' -', ''), value: splitByBr[j + 1] });
+                      obj1.data.push({ key: splitByBr[j].replace('• ', '').replace(' -', ''), value: splitByBr[j + 1].trim() });
                     }
                   }
                   this.checkUpReasonData.push(obj1);
@@ -610,7 +610,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
                         splitByHyphen.push(value);
                         return splitByHyphen.join(" - ");
                       });
-                      const resultString = processedStrings.join(". ");
+                      const resultString = processedStrings.join(". ").trim();
                       this.sanitizedValue = this.sanitizer.bypassSecurityTrustHtml(resultString);
                       obj1.data.push({ key: splitByDash[0].replace('• ', ''), value: this.sanitizedValue });
                     }
@@ -1364,21 +1364,16 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptMed).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
-          if (obs.value.includes(':')) {
-            if(this.appConfigService.patient_visit_summary?.dp_medication_secondary){
-              this.diagnosisService.deleteObs(obs.uuid).subscribe()
-            } else {
-              this.medicines.push({
-                drug: obs.value?.split(':')[0],
-                strength: obs.value?.split(':')[1],
-                days: obs.value?.split(':')[2],
-                timing: obs.value?.split(':')[3],
-                remark: obs.value?.split(':')[4],
-                frequency: obs.value?.split(':')[5] ? obs.value?.split(':')[5] : "",
-                uuid: obs.uuid
-              });
-            }
-            
+          if (obs.value.includes(':') && !this.appConfigService?.patient_visit_summary?.dp_medication_secondary) {
+            this.medicines.push({
+              drug: obs.value?.split(':')[0],
+              strength: obs.value?.split(':')[1],
+              days: obs.value?.split(':')[2],
+              timing: obs.value?.split(':')[3],
+              remark: obs.value?.split(':')[4],
+              frequency: obs.value?.split(':')[5] ? obs.value?.split(':')[5] : "",
+              uuid: obs.uuid
+            });
           } else {
             this.additionalInstructionForm.patchValue({uuid:obs.uuid, value:obs.value});
           }
@@ -1629,11 +1624,8 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe((response: ObsApiResponseModel) => {
         response.results.forEach((obs: ObsModel) => {
           const obs_values = obs.value.split(':');
-          if (obs.encounter && obs.encounter.visit.uuid === this.visit.uuid && obs_values.length > 1) {
-            if(this.appConfigService.patient_visit_summary?.dp_referral_secondary)
-              this.diagnosisService.deleteObs(obs.uuid).subscribe()
-            else
-              this.referrals.push({ uuid: obs.uuid, speciality: obs_values[0].trim(), facility: obs_values[1].trim(), priority: obs_values[2].trim(), reason: obs_values[3].trim() ? obs_values[3].trim() : '-' });
+          if (obs.encounter && obs.encounter.visit.uuid === this.visit.uuid && obs_values.length > 1 && !this.appConfigService?.patient_visit_summary?.dp_referral_secondary) {
+            this.referrals.push({ uuid: obs.uuid, speciality: obs_values[0].trim(), facility: obs_values[1].trim(), priority: obs_values[2].trim(), reason: obs_values[3].trim() ? obs_values[3].trim() : '-' });
           } else if(obs.encounter && obs.encounter.visit.uuid === this.visit.uuid){
             this.referralSecondaryForm.patchValue({uuid: obs.uuid, ref: obs.value})
           }
@@ -2201,9 +2193,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       if(this.referralSecondaryForm.valid)
         return this.encounterService.updateObs(this.referralSecondaryForm.value.uuid,{
           value: `${this.referralSecondaryForm.value.ref}`,
-        })
+        }).pipe(tap((res: ObsModel)=>this.referralSecondaryForm.patchValue({uuid:res.uuid})))
       else 
-        return this.diagnosisService.deleteObs(this.referralSecondaryForm.value.uuid).pipe(tap((res)=>this.referSpecialityForm.patchValue({ uuid: null})))
+        return this.diagnosisService.deleteObs(this.referralSecondaryForm.value.uuid).pipe(tap((res)=>this.referralSecondaryForm.patchValue({ uuid: null})))
     } else if(this.referralSecondaryForm.valid) {
       return this.encounterService.postObs({
         concept: conceptIds.conceptReferral,
@@ -2211,7 +2203,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
         obsDatetime: new Date(),
         value: `${this.referralSecondaryForm.value.ref}`,
         encounter: this.visitNotePresent.uuid,
-      }).pipe(tap((res: ObsModel)=>this.referSpecialityForm.patchValue({uuid:res.uuid})))
+      }).pipe(tap((res: ObsModel)=>this.referralSecondaryForm.patchValue({uuid:res.uuid})))
     } else {
       return of(false)
     }
@@ -2222,7 +2214,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       if(this.diagnosisSecondaryForm.valid)
         return this.encounterService.updateObs(this.diagnosisSecondaryForm.value.uuid,{
           value: `${obsStringify({...this.diagnosisSecondaryForm.value})}`,
-        })
+        }).pipe(tap((res: ObsModel)=>this.diagnosisSecondaryForm.patchValue({uuid:res.uuid})))
       else
         return this.diagnosisService.deleteObs(this.diagnosisSecondaryForm.value.uuid).pipe(tap((res: ObsModel)=>this.diagnosisSecondaryForm.patchValue({uuid:null})))
     } else if(this.diagnosisSecondaryForm.valid) {
@@ -2243,9 +2235,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       if(this.discussionSummaryForm.valid)
         return this.encounterService.updateObs(this.discussionSummaryForm.value.uuid,{
           value: `${this.discussionSummaryForm.value.value}`,
-        })
+        }).pipe(tap((res: ObsModel)=>this.discussionSummaryForm.patchValue({uuid:res.uuid})))
       else 
-        return this.diagnosisService.deleteObs(this.discussionSummaryForm.value.uuid).pipe(tap((res)=>this.referSpecialityForm.patchValue({ uuid: null})))
+        return this.diagnosisService.deleteObs(this.discussionSummaryForm.value.uuid).pipe(tap((res)=>this.discussionSummaryForm.patchValue({ uuid: null})))
     } else if(this.discussionSummaryForm.valid) {
       return this.encounterService.postObs({
         concept: conceptIds.conceptDiscussionSummary,
