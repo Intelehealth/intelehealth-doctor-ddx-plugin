@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { getCacheData, getEncounterProviderUUID } from '../utils/utility-functions';
@@ -35,8 +34,12 @@ export class DiagnosisService {
   * @return {Observable<any>}
   */
   deleteObs(uuid): Observable<any> {
-    const url = `${this.baseURL}/obs/${uuid}`;
-    return this.http.delete(url);
+    if(uuid){
+      const url = `${this.baseURL}/obs/${uuid}`;
+      return this.http.delete(url);
+    } else {
+      return of(false)
+    }
   }
 
   /**
