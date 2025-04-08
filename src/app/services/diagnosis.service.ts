@@ -13,8 +13,6 @@ export class DiagnosisService {
   diagnosisArray = [];
   public isVisitSummaryChanged = false
   private baseURL = environment.baseURL;
-  private selectedDiagnoses = new BehaviorSubject<string[]>([]);
-  selectedDiagnoses$ = this.selectedDiagnoses.asObservable();
 
   constructor(private http: HttpClient, private snackbar: MatSnackBar) { }
 
@@ -97,14 +95,4 @@ export class DiagnosisService {
       return false;
     }
   }
-
-  setDiagnoses(diagnoses: string[]) {
-    this.selectedDiagnoses.next(diagnoses);
-  }
-
-  removeDiagnosis(diagnosis: string) {
-    const updatedDiagnoses = this.selectedDiagnoses.getValue().filter(d => d !== diagnosis);
-    this.selectedDiagnoses.next(updatedDiagnoses);
-  }
-
 }

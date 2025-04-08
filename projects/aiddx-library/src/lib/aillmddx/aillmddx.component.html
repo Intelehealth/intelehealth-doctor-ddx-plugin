@@ -1,15 +1,19 @@
-<ng-container *ngIf="!rationaleList.length" class="mt-2">
+<ng-container *ngIf="!diagnosisList.length" class="mt-2">
     <div class="d-flex justify-content-center">
         <div class="alert text-center p-4 d-flex flex-column align-items-center"
             style="height: 115px; background-color: #faf7fc; border-radius: 10px; width: 100%;">
-            <div *ngIf="!isLoading" class="text-danger">
-                <i class="bi bi-exclamation-triangle-fill"></i>
-                <img src="assets/images/login/interneticon.png" alt="Warning" class="mr-2" width="36px" height="36px" />
-                <span class="ms-2">An unexpected issue occurred</span>
-            </div>
-            <button *ngIf="!isLoading" type="button" class="try-again-btn mt-3" (click)="onTryAgain()">
-                {{'Try again'|translate}}
-            </button>
+            <ng-container *ngIf="!isLoading && (hasError || noData)">
+                <div class="text-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <img src="assets/images/login/interneticon.png" alt="Warning" class="mr-2" width="36px"
+                        height="36px" />
+                    <span *ngIf="hasError" class="ms-2">An unexpected issue occurred</span>
+                    <span *ngIf="noData" class="ms-2">The input provided does not have enough clinical details for an AI-assistant assessment.</span>
+                </div>
+                <button *ngIf="!noData" type="button" class="try-again-btn mt-3" (click)="onTryAgain()">
+                    {{'Try again'|translate}}
+                </button>
+            </ng-container>
 
             <button *ngIf="isLoading" class="stats-loading">
                 <div class="eins"></div>
@@ -26,7 +30,7 @@
     </div>
 </ng-container>
 
-<ng-container *ngIf="rationaleList.length" class="mt-2">
+<ng-container *ngIf="diagnosisList.length" class="mt-2">
     <div class="intel-accordion-title">
         <h6 class="mt-5 ml-2 diffrential-diagnosis">Differential Diagnosis</h6>
     </div>
@@ -38,41 +42,46 @@
 
     <div class="diagnosis-container p-3">
         <div *ngFor="let diagnosis of diagnosisList" class="d-flex align-items-center mb-2">
-            <input type="checkbox" class="custom-checkbox me-2" [checked]="selectedDiagnosis.includes(diagnosis.name)"
-                (change)="onDiagnosisChange(diagnosis.name)">
+            <input type="checkbox" class="custom-checkbox me-2"
+                [checked]="selectedDiagnosis.includes(diagnosis.diagnosis)"
+                (change)="onDiagnosisChange(diagnosis.diagnosis)">
             <label class="fw-bold">
-                {{ diagnosis.name }}
-                <span class="text-muted ms-2">({{ diagnosis.score }}% likely)</span>
+                {{ diagnosis.diagnosis }}
+                <span class="text-muted ms-2">(likely {{ diagnosis.likelihood }})</span>
             </label>
         </div>
     </div>
 
     <div class="rationale-container">
         <h5 class="fw-bold rationale">Rationale</h5>
-        <div *ngFor="let rationale of rationaleList; let i = index" class="rationale-item p-3 mb-2">
-            <h6 class="fw-bold">
-                {{ i + 1 }}. {{ rationale.name }}
-                <span class="text-muted small">({{ rationale.score }}% likely)</span>
-            </h6>
+        <div *ngFor="let rationale of diagnosisList; let i = index" class="rationale-item p-3 mb-2">
+            <h3 class="fw-bold">
+                {{ i + 1 }}. {{ rationale.diagnosis }}
+                <span class="text-muted small">(likely {{ rationale.likelihood }})</span>
+            </h3>
             <p class="rationale-description">
-                {{ rationale.description }}
+                {{ rationale.rationale }}
             </p>
         </div>
     </div>
 
-    <div class="diagnosis-container">
-        <div class="conclusion-box p-3 mb-4">
-            <h6 class="fw-bold rationale">Conclusion</h6>
-            <p class="rationale-description">{{ conclusion }}</p>
-        </div>
-        <div>
-            <h6 class="fw-bold">Further questions</h6>
-            <div *ngFor="let question of questions; let i = index" class="rationale-item p-3 mb-3">
-                <h6 class="fw-bold">{{ i + 1 }}. {{ question.title }}</h6>
-                <ul>
-                    <li *ngFor="let item of question.items">{{ item }}</li>
-                </ul>
-            </div>
-        </div>
-    </div>
 </ng-container>
+
+<div *ngIf="conclusion" class="conclusion-card">
+    <div class="conclusion-header">
+        <h2>Conclusion</h2>
+    </div>
+    <div class="conclusion-body">
+        <p>{{ conclusion }}</p>
+    </div>
+</div>
+
+<!-- <div>
+    <h6 class="fw-bold">Further questions</h6>
+    <div *ngFor="let question of questions; let i = index" class="rationale-item p-3 mb-3">
+        <h6 class="fw-bold">{{ i + 1 }}. {{ question.title }}</h6>
+        <ul>
+            <li *ngFor="let item of question.items">{{ item }}</li>
+        </ul>
+    </div>
+</div> -->

@@ -1081,7 +1081,8 @@
               </ul>
             </mat-expansion-panel>  
 
-              <mat-expansion-panel
+            <div id="ddxContainer" #lazyDDxContainer></div>
+              <!-- <mat-expansion-panel
               [expanded]="true"
               #panel2
               hideToggle
@@ -1091,7 +1092,7 @@
                   <div class="intel-accordion-title">
                     <img src="assets/svgs/diagnosis.svg" alt="" width="44px" />
                       <div class="text-muted small mt-2">
-                      <h6 class="mb-0 ml-2">{{isFeatureAvailable("AILLMDiffDiagnosis") ? 'Ayu suggested diagnosis':
+                      <h6 class="mb-0 ml-2">{{isFeatureAvailable("aiDDx") ? 'Ayu suggested diagnosis':
                         'Diagnosis Details'|translate}}*</h6>
                     </div>
                   </div>
@@ -1100,7 +1101,7 @@
               </mat-expansion-panel-header>
             
               <div class="table-responsive">
-                <p *ngIf="isFeatureAvailable('AILLMDiffDiagnosis')" class="note-con ml-2">
+                <p *ngIf="isFeatureAvailable('aiDDx') && !isMCCUser && isVisitNoteProvider && !visitEnded" class="note-con ml-2">
                   <span class="important-text">{{'Note'|translate}}:</span>
                   {{ 'This information is AI generated. Please rely on your medical judgement while reffering to it.' |
                   translate }}
@@ -1288,9 +1289,6 @@
                   </div>
                 </form>
 
-                <ng-container *ngIf="isFeatureAvailable('AILLMDiffDiagnosis')" class="mt-2">
-                <app-aillmddx></app-aillmddx>
-                </ng-container>
               </ng-container>
 
               <ng-container *ngIf="appConfigService?.patient_visit_summary?.dp_dignosis_secondary">
@@ -1380,7 +1378,7 @@
                   </form>
                 </ng-container>
               
-            </mat-expansion-panel>
+            </mat-expansion-panel> -->
 
             <app-notes #notes [title]="'Note'" [isVisitNoteProvider]="isVisitNoteProvider" [visitEnded]="visitEnded" [visit]="visit"
               [visitNotePresent]="visitNotePresent" [isMCCUser]="isMCCUser" *ngIf="isFeatureAvailable('visitNotes')"></app-notes>
