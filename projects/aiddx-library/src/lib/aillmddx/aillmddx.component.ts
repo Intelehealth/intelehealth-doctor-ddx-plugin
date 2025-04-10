@@ -1,6 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { AiddxService } from '../../services/aiddx.service';
-import { dummyPayload } from '../token';
+// import { dummyPayload, response } from '../token';
 
 @Component({
   selector: 'app-aillmddx',
@@ -10,7 +10,8 @@ import { dummyPayload } from '../token';
 export class AillmddxComponent {
   @Input() patientInfo: any;
   @Input() visit: any;
-  selectedDiagnosis: string[] = [];
+  @Input() existingDiagnosis: any[] = [];
+  @Output() diagnosisSelected = new EventEmitter<string[]>();
   isLoading = false;
   hasError = false;
   noData = false;
@@ -29,7 +30,7 @@ export class AillmddxComponent {
     },
   ];
   diagnosisList: any = []
-  selectedDiagnoses: string[] = [];
+  selectedDiagnosis: string[] = [];
 
   constructor(
     private ddxSvc: AiddxService,
@@ -41,9 +42,8 @@ export class AillmddxComponent {
 
   getAIDiagnosis() {
     const payload = this.ddxSvc.getDDxPayload(this.patientInfo, this.visit);
-    console.log(payload);
     this.isLoading = true;
-    this.ddxSvc.getAIDiagnosis(dummyPayload).subscribe({
+    this.ddxSvc.getAIDiagnosis(payload).subscribe({
       next: (data: any) => {
         if(data?.conclusion) this.conclusion = data?.conclusion;
         if (data.result.length > 0) {
@@ -79,18 +79,23 @@ export class AillmddxComponent {
   }
 
 
-  onDiagnosisChange(event: any) {
+  onAIDiagnosisChange(event: any) {
     if (!event) {
-      this.selectedDiagnoses = [];
+      this.selectedDiagnosis = [];
     } else if (Array.isArray(event)) {
-      this.selectedDiagnoses = [...event];
+      this.selectedDiagnosis = [...event];
     } else {
       const index = this.selectedDiagnosis.indexOf(event);
       if (index > -1) {
-        this.selectedDiagnoses.splice(index, 1);
+        this.selectedDiagnosis = this.selectedDiagnosis.filter(d => d !== event);
       } else {
-        this.selectedDiagnoses.push(event);
+        this.selectedDiagnosis = [...this.selectedDiagnosis, event];
       }
     }
+    this.diagnosisSelected.emit([...this.selectedDiagnosis]);
+  }
+
+  isDiagnosisExists(diagnosis: string): boolean {
+    return this.existingDiagnosis.some(d => d.diagnosisName === diagnosis);
   }
 }

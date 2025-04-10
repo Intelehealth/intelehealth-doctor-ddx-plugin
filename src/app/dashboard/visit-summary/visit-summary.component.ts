@@ -180,18 +180,19 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   genderData: any = { "M": "Male", "F": "Female", "O": "Other" }
   patientInteractionCommentForm: FormGroup
   @ViewChild('lazyDDxContainer', { read: ViewContainerRef, static: false }) lazyLoadDDxContainer!: ViewContainerRef;
+  ddxCompRef: any;
 
   async lazyLoadDDx() {
     setTimeout(async () => {
       this.lazyLoadDDxContainer.clear();
       const { DiagnosisComponent } = await import(/* webpackChunkName: "diagnosis-aillm-ddx" */'./diagnosis/diagnosis.component');
-      const compRef = this.lazyLoadDDxContainer.createComponent(DiagnosisComponent);
-      if(compRef){
-        compRef.instance.visit = this.visit;
-        compRef.instance.patientInfo = this.patient;
-        compRef.instance.isMCCUser = this.isMCCUser;
-        compRef.instance.isVisitNoteProvider = this.isVisitNoteProvider;
-        compRef.instance.visitEnded = this.visitEnded;
+      this.ddxCompRef = this.lazyLoadDDxContainer.createComponent(DiagnosisComponent);
+      if(this.ddxCompRef){
+        this.ddxCompRef.instance.visit = this.visit;
+        this.ddxCompRef.instance.patientInfo = this.patient;
+        this.ddxCompRef.instance.isMCCUser = this.isMCCUser;
+        this.ddxCompRef.instance.isVisitNoteProvider = this.isVisitNoteProvider;
+        this.ddxCompRef.instance.visitEnded = this.visitEnded;
       }
     }, 1000);
   }
@@ -1300,16 +1301,6 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @returns {void}
   */
   saveDiagnosis(): void {
-    if (this.selectedDiagnoses.length > 0) {
-      const diagnosisName = this.diagnosisForm.value.diagnosisName?.replace(/:/g, ' ');
-      // this.diagnosisService.removeDiagnosis(diagnosisName);
-      this.diagnosisSubject.next(this.selectedDiagnoses);
-      this.selectedDiagnoses = this.selectedDiagnoses.filter(diagnosis => diagnosis !== diagnosisName);
-      this.diagnosisForm.patchValue({ diagnosisName: this.selectedDiagnoses?.[0] || null });
-      this.existingDiagnosis.push({ ...this.diagnosisForm.value, diagnosisName: diagnosisName });
-      this.diagnosisForm.controls.diagnosisType.reset();
-      this.diagnosisForm.controls.diagnosisStatus.reset();
-    }
     if (this.diagnosisForm.invalid || !this.isVisitNoteProvider || !this.diagnosisValidated) {
       return;
     }
@@ -2357,6 +2348,24 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     // Diagnosis
     if (!this.appConfigService.patient_visit_summary?.dp_dignosis_secondary) {
       for (const diagnosis of this.existingDiagnosis) {
+        if (diagnosis?.uuid) continue;
+        postObsRequests.push(
+          this.encounterService.postObs({
+            concept: conceptIds.conceptDiagnosis,
+            person: this.visit.patient.uuid,
+            obsDatetime: new Date(),
+            value: `${this.diagnosisCode?.value ? this.diagnosisCode?.value : 'NA'}::${diagnosis.diagnosisName}:${diagnosis.diagnosisType} & ${diagnosis.diagnosisStatus}`,
+            encounter: this.visitNotePresent.uuid
+          }).pipe(tap((res: ObsModel) => diagnosis.uuid = res.uuid))
+        );
+        if (diagnosis?.isSnomed && isFeaturePresent("snomedCtDiagnosis")) {
+          postObsRequests.push(this.diagnosisService.addSnomedDiagnosis(diagnosis.diagnosisName, diagnosis.diagnosisCode))
+        }
+      }
+    }
+
+    if(this.isFeatureAvailable('aiDDx') && this.ddxCompRef?.instance) {
+      for (const diagnosis of this.ddxCompRef.instance.existingDiagnosis) {
         if (diagnosis?.uuid) continue;
         postObsRequests.push(
           this.encounterService.postObs({

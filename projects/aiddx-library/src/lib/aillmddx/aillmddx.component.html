@@ -1,12 +1,11 @@
-<ng-container *ngIf="!diagnosisList.length" class="mt-2">
-    <div class="d-flex justify-content-center">
+<ng-container *ngIf="!diagnosisList.length">
+    <div class="d-flex justify-content-center mt-2">
         <div class="alert text-center p-4 d-flex flex-column align-items-center"
             style="height: 115px; background-color: #faf7fc; border-radius: 10px; width: 100%;">
             <ng-container *ngIf="!isLoading && (hasError || noData)">
                 <div class="text-danger">
                     <i class="bi bi-exclamation-triangle-fill"></i>
-                    <img src="assets/images/login/interneticon.png" alt="Warning" class="mr-2" width="36px"
-                        height="36px" />
+                    <img src="assets/images/login/interneticon.png" alt="Warning" class="warning-icon mr-2" />
                     <span *ngIf="hasError" class="ms-2">An unexpected issue occurred</span>
                     <span *ngIf="noData" class="ms-2">The input provided does not have enough clinical details for an AI-assistant assessment.</span>
                 </div>
@@ -31,8 +30,12 @@
 </ng-container>
 
 <ng-container *ngIf="diagnosisList.length" class="mt-2">
+    <p class="note-con ml-2">
+        <span class="note-label">Note:</span>
+        This information is AI generated. Please rely on your medical judgement while referring to it.
+    </p>
     <div class="intel-accordion-title">
-        <h6 class="mt-5 ml-2 diffrential-diagnosis">Differential Diagnosis</h6>
+        <h6 class="mt-1 ml-2 diffrential-diagnosis">Differential Diagnosis</h6>
     </div>
     <div class="intel-accordion-title">
         <p class="text-muted mb-3 diagnosis-list ml-2">
@@ -41,11 +44,14 @@
     </div>
 
     <div class="diagnosis-container p-3">
-        <div *ngFor="let diagnosis of diagnosisList" class="d-flex align-items-center mb-2">
+        <div *ngFor="let diagnosis of diagnosisList" 
+             class="d-flex align-items-center mb-2"
+             [class.disabled-diagnosis]="isDiagnosisExists(diagnosis.diagnosis)">
             <input type="checkbox" class="custom-checkbox me-2"
                 [checked]="selectedDiagnosis.includes(diagnosis.diagnosis)"
-                (change)="onDiagnosisChange(diagnosis.diagnosis)">
-            <label class="fw-bold">
+                [disabled]="isDiagnosisExists(diagnosis.diagnosis)"
+                (change)="onAIDiagnosisChange(diagnosis.diagnosis)">
+            <label class="fw-bold" [class.text-muted]="isDiagnosisExists(diagnosis.diagnosis)">
                 {{ diagnosis.diagnosis }}
                 <span class="text-muted ms-2">(likely {{ diagnosis.likelihood }})</span>
             </label>

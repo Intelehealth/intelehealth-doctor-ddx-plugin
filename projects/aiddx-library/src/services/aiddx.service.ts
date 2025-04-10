@@ -24,10 +24,6 @@ export class AiddxService {
     const data = this.getDataToExtract(patientInfo, visit);
     const get = (key, fallback = "Null") => data[key] || fallback;
 
-    console.log('patientInfo: ', patientInfo);
-    console.log('visit: ', visit);
-    console.log('========================');
-    console.log('data: ', data);
     const adultinitial = get('vst.encounters')?.ADULTINITIAL || [];
     const complaint = adultinitial.find(a => a?.concept?.display?.includes?.('COMPLAINT'));
     const phyExam = adultinitial.find(a => a?.concept?.display?.includes?.('PHYSICAL EXAMINATION'));
@@ -54,8 +50,6 @@ ${vitals?.length ? vitalPayload : ''}`;
   }
 
   getDataToExtract(patientInfo: any, visit: any) {
-    delete patientInfo?.person?.preferredAddress;
-    delete patientInfo?.person?.preferredName;
     const data = {
       ...this.flatten(patientInfo, 'pi'),
       ...this.flatten(visit, 'vst'),
@@ -76,7 +70,6 @@ ${vitals?.length ? vitalPayload : ''}`;
           value.forEach((item, index) => {
             attr[item?.encounterType?.display] = item?.obs;
           });
-          console.log(attr);
           flatData[newKey] = attr;
         }
       } else if (typeof value === 'object' && value !== null) {
