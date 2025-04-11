@@ -54,6 +54,8 @@ export class AillmddxComponent {
         }
       },
       error: (err: any) => {
+        this.hasError = true;
+        this.isLoading = false;
         console.log('err: ', err);
       },
       complete: () => {

@@ -1,7 +1,6 @@
 <ng-container *ngIf="!diagnosisList.length">
     <div class="d-flex justify-content-center mt-2">
-        <div class="alert text-center p-4 d-flex flex-column align-items-center"
-            style="height: 115px; background-color: #faf7fc; border-radius: 10px; width: 100%;">
+        <div class="erorr-container alert text-center p-4 d-flex flex-column align-items-center">
             <ng-container *ngIf="!isLoading && (hasError || noData)">
                 <div class="text-danger">
                     <i class="bi bi-exclamation-triangle-fill"></i>
