@@ -45,10 +45,17 @@ export class AillmddxComponent {
     this.isLoading = true;
     this.ddxSvc.getAIDiagnosis(payload).subscribe({
       next: (data: any) => {
-        if(data?.conclusion) this.conclusion = data?.conclusion;
+        if (data?.conclusion) this.conclusion = data?.conclusion;
+        this.ddxSvc.markdownit('');
         if (data.result.length > 0) {
           this.noData = false;
-          this.diagnosisList = data.result.map(v => ({ ...v, diagnosis: v?.diagnosis?.replace(/\s*\(.*?\)\s*/g, '') }));
+          this.diagnosisList = data.result.map(v => {
+            return {
+              ...v,
+              diagnosis: v?.diagnosis?.replace(/\s*\(.*?\)\s*/g, ''),
+              rationale: this.ddxSvc.markdownit(v?.rationale)
+            }
+          });
         } else {
           this.noData = true;
         }
@@ -87,6 +94,7 @@ export class AillmddxComponent {
     } else if (Array.isArray(event)) {
       this.selectedDiagnosis = [...event];
     } else {
+      this.ddxSvc.markdownit('');
       const index = this.selectedDiagnosis.indexOf(event);
       if (index > -1) {
         this.selectedDiagnosis = this.selectedDiagnosis.filter(d => d !== event);
