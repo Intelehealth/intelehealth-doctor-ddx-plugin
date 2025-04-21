@@ -20,7 +20,7 @@ export class AiddxService {
     return this.http.post(`${this.env.base}/ddx`, { casehistory });
   }
 
-  getDDxPayload(patientInfo: any, visit: any) {
+  getDDxPayload(patientInfo: any, visit: any, notes?: string) {
     const data = this.getDataToExtract(patientInfo, visit);
     const get = (key, fallback = "Null") => data[key] || fallback;
 
@@ -54,7 +54,9 @@ Family_history: ${this.formatText(famHist?.value || "")}
 
 Medical_history: ${this.formatText(medHist?.value || "")}
 
-${vitals?.length ? vitalPayload : ""}`;
+${vitals?.length ? vitalPayload : ""}
+
+${notes ? `Notes: ${notes}` : ""}`;
 
     return payload;
   }

@@ -12,6 +12,7 @@ export class AillmddxComponent {
   @Input() visit: any;
   @Input() existingDiagnosis: any[] = [];
   @Output() diagnosisSelected = new EventEmitter<string[]>();
+  @Input() notes: string;
   isLoading = false;
   hasError = false;
   noData = false;
@@ -36,12 +37,10 @@ export class AillmddxComponent {
     private ddxSvc: AiddxService,
   ) { }
 
-  ngOnInit() {
-    this.getAIDiagnosis();
-  }
+  ngOnInit() {}
 
-  getAIDiagnosis() {
-    const payload = this.ddxSvc.getDDxPayload(this.patientInfo, this.visit);
+  public getAIDiagnosis(notes?: string) {
+    const payload = this.ddxSvc.getDDxPayload(this.patientInfo, this.visit, notes);
     this.isLoading = true;
     this.ddxSvc.getAIDiagnosis(payload).subscribe({
       next: (data: any) => {
@@ -63,7 +62,6 @@ export class AillmddxComponent {
       error: (err: any) => {
         this.hasError = true;
         this.isLoading = false;
-        console.log('err: ', err);
       },
       complete: () => {
         this.isLoading = false;
@@ -84,7 +82,7 @@ export class AillmddxComponent {
 
 
   onTryAgain() {
-    this.getAIDiagnosis();
+    this.getAIDiagnosis(this.notes);
   }
 
 
