@@ -2,7 +2,8 @@
   "name": "aiddx-library",
   "version": "0.2.0",
   "scripts": {
-    "dev": "ng build aiddx-library --watch"
+    "dev": "ng build aiddx-library --watch",
+    "build": "ng build aiddx-library --configuration production"
   },
   "peerDependencies": {
     "@angular/common": "^16.2.0",
