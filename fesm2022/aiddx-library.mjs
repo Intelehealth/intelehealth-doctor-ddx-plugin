@@ -176,6 +176,7 @@ class AillmddxComponent {
     getAIDiagnosis(notes) {
         const payload = this.ddxSvc.getDDxPayload(this.patientInfo, this.visit, notes);
         this.isLoading = true;
+        this.diagnosisList = [];
         this.ddxSvc.getAIDiagnosis(payload).subscribe({
             next: (data) => {
                 if (data?.conclusion)
