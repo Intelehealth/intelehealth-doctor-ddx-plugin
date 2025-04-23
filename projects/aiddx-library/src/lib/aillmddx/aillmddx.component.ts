@@ -105,4 +105,8 @@ export class AillmddxComponent {
   isDiagnosisExists(diagnosis: string): boolean {
     return this.existingDiagnosis.some(d => d.diagnosisName === diagnosis);
   }
+
+  isDiagnosisSelected(diagnosis: string): boolean {
+    return this.selectedDiagnosis.includes(diagnosis) || this.existingDiagnosis.some(d => d?.diagnosisName === diagnosis);
+  }
 }
