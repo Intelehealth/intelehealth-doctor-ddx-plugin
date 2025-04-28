@@ -4,6 +4,9 @@
     "paths": {
       "aiddx-library": [
         "dist/aiddx-library"
+      ],
+      "ih-library": [
+        "dist/ih-library"
       ]
     },
     "baseUrl": "./",

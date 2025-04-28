@@ -13,7 +13,8 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "prepare": "husky install",
-    "build-library": "ng build aiddx-library --watch",
+    "build-library": "ng build ih-library --configuration production",
+    "build-aiddx": "ng build ih-library --watch",
     "postbuild": "ts-node ./src/assets/scripts/postBuild.ts"
   },
   "lint-staged": {
@@ -46,7 +47,6 @@
     "core-js": "^2.5.4",
     "date-fns": "^2.29.3",
     "html2pdf.js": "^0.10.1",
-    "ih-library": "github:Intelehealth/intelehealth-doctor-webapp-config-table-grid#main",
     "intl-tel-input": "^17.0.19",
     "jquery": "^3.5.1",
     "lib-presciption": "github:Intelehealth/intelehealth-doctor-webapp-download-prescription#build_0.1",
