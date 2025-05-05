@@ -25,6 +25,7 @@ export declare class AillmddxComponent {
     onTryAgain(): void;
     onAIDiagnosisChange(event: any): void;
     isDiagnosisExists(diagnosis: string): boolean;
+    isDiagnosisSelected(diagnosis: string): boolean;
     static ɵfac: i0.ɵɵFactoryDeclaration<AillmddxComponent, never>;
     static ɵcmp: i0.ɵɵComponentDeclaration<AillmddxComponent, "app-aillmddx", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingDiagnosis": "existingDiagnosis"; "notes": "notes"; }, { "diagnosisSelected": "diagnosisSelected"; }, never, never, false>;
 }
