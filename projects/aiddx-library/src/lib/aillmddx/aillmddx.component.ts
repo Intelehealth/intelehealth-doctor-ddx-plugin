@@ -42,6 +42,7 @@ export class AillmddxComponent {
   public getAIDiagnosis(notes?: string) {
     const payload = this.ddxSvc.getDDxPayload(this.patientInfo, this.visit, notes);
     this.isLoading = true;
+    this.diagnosisList = [];
     this.ddxSvc.getAIDiagnosis(payload).subscribe({
       next: (data: any) => {
         if (data?.conclusion) this.conclusion = data?.conclusion;
@@ -103,5 +104,9 @@ export class AillmddxComponent {
 
   isDiagnosisExists(diagnosis: string): boolean {
     return this.existingDiagnosis.some(d => d.diagnosisName === diagnosis);
+  }
+
+  isDiagnosisSelected(diagnosis: string): boolean {
+    return this.selectedDiagnosis.includes(diagnosis) || this.existingDiagnosis.some(d => d?.diagnosisName === diagnosis);
   }
 }

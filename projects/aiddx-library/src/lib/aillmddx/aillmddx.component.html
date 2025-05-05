@@ -47,7 +47,7 @@
              class="d-flex align-items-center mb-2"
              [class.disabled-diagnosis]="isDiagnosisExists(diagnosis.diagnosis)">
             <input type="checkbox" class="custom-checkbox me-2"
-                [checked]="selectedDiagnosis.includes(diagnosis.diagnosis)"
+                [checked]="isDiagnosisSelected(diagnosis.diagnosis)"
                 [disabled]="isDiagnosisExists(diagnosis.diagnosis)"
                 (change)="onAIDiagnosisChange(diagnosis.diagnosis)">
             <label class="fw-bold" [class.text-muted]="isDiagnosisExists(diagnosis.diagnosis)">
