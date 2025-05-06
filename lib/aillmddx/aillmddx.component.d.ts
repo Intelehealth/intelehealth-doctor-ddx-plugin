@@ -22,6 +22,7 @@ export declare class AillmddxComponent {
     constructor(ddxSvc: AiddxService);
     ngOnInit(): void;
     getAIDiagnosis(notes?: string): void;
+    getAIDiagnosisWithRetry(notes?: string): void;
     onTryAgain(): void;
     onAIDiagnosisChange(event: any): void;
     isDiagnosisExists(diagnosis: string): boolean;
