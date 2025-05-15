@@ -18,6 +18,7 @@ export declare class AillmddxComponent {
         items: string[];
     }[];
     diagnosisList: any;
+    furtherQuestionsList: any;
     selectedDiagnosis: string[];
     constructor(ddxSvc: AiddxService);
     ngOnInit(): void;
