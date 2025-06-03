@@ -1,0 +1,30 @@
+import { EventEmitter } from '@angular/core';
+import { AiTxService } from '../../services/aitx.service';
+import * as i0 from "@angular/core";
+export declare class AillmtxReferralComponent {
+    private TxService;
+    patientInfo: any;
+    visit: any;
+    existingReferral: any[];
+    referralSelected: EventEmitter<string[]>;
+    diagnosisName: string;
+    notesss: string;
+    isLoading: boolean;
+    hasError: boolean;
+    noData: boolean;
+    insufficientData: boolean;
+    conclusion: string;
+    referralList: any;
+    furtherQuestionsList: any;
+    selectedReferral: any[];
+    constructor(TxService: AiTxService);
+    ngOnInit(): void;
+    getAIReferral(diagnosis?: string): void;
+    getAIReferralWithRetry(diagnosis: any): void;
+    onTryAgain(): void;
+    onAIReferralChange(event: any): void;
+    isReferralExists(referral: string): boolean;
+    isReferralSelected(referral: any): boolean;
+    static ɵfac: i0.ɵɵFactoryDeclaration<AillmtxReferralComponent, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<AillmtxReferralComponent, "lib-aillmtx-referral", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingReferral": "existingReferral"; "diagnosisName": "diagnosisName"; "notesss": "notesss"; }, { "referralSelected": "referralSelected"; }, never, never, false>;
+}

@@ -1,0 +1,30 @@
+import { EventEmitter } from '@angular/core';
+import { AiTxService } from '../../services/aitx.service';
+import * as i0 from "@angular/core";
+export declare class AillmtxMedicationComponent {
+    private TxService;
+    patientInfo: any;
+    visit: any;
+    existingMedication: any[];
+    medicationSelected: EventEmitter<string[]>;
+    diagnosisName: string;
+    notesss: string;
+    isLoading: boolean;
+    hasError: boolean;
+    noData: boolean;
+    insufficientData: boolean;
+    conclusion: string;
+    medicationList: any;
+    furtherQuestionsList: any;
+    selectedMedicine: any[];
+    constructor(TxService: AiTxService);
+    ngOnInit(): void;
+    getAIMedical(diagnosis?: string): void;
+    getAIMedicalWithRetry(diagnosis: any): void;
+    onTryAgain(): void;
+    onAIMedicineChange(event: any): void;
+    isMedicineExists(medicine: string): boolean;
+    isMedicineSelected(medicine: any): boolean;
+    static ɵfac: i0.ɵɵFactoryDeclaration<AillmtxMedicationComponent, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<AillmtxMedicationComponent, "lib-aillmtx-medication", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingMedication": "existingMedication"; "diagnosisName": "diagnosisName"; "notesss": "notesss"; }, { "medicationSelected": "medicationSelected"; }, never, never, false>;
+}

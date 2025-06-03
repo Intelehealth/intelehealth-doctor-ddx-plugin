@@ -1,0 +1,30 @@
+import { EventEmitter } from '@angular/core';
+import { AiTxService } from '../../services/aitx.service';
+import * as i0 from "@angular/core";
+export declare class AillmtxFollowupComponent {
+    private TxService;
+    patientInfo: any;
+    visit: any;
+    existingFollowUp: any[];
+    followUpSelected: EventEmitter<any[]>;
+    diagnosisName: string;
+    notesss: string;
+    isLoading: boolean;
+    hasError: boolean;
+    noData: boolean;
+    insufficientData: boolean;
+    conclusion: string;
+    followUpList: any;
+    furtherQuestionsList: any;
+    selectedFollowUp: any[];
+    constructor(TxService: AiTxService);
+    ngOnInit(): void;
+    getAIFollowUp(diagnosis?: string): void;
+    getAIFollowUpWithRetry(diagnosis: any): void;
+    onTryAgain(): void;
+    onAIFollowUpChange(followup: any): void;
+    isFollowUpExists(followup: string): boolean;
+    isFollowUpSelected(followup: any): boolean;
+    static ɵfac: i0.ɵɵFactoryDeclaration<AillmtxFollowupComponent, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<AillmtxFollowupComponent, "lib-aillmtx-followup", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingFollowUp": "existingFollowUp"; "diagnosisName": "diagnosisName"; "notesss": "notesss"; }, { "followUpSelected": "followUpSelected"; }, never, never, false>;
+}
