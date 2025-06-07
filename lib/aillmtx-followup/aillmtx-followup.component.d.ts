@@ -22,7 +22,7 @@ export declare class AillmtxFollowupComponent {
     getAIFollowUp(diagnosis?: string): void;
     getAIFollowUpWithRetry(diagnosis: any): void;
     onTryAgain(): void;
-    onAIFollowUpChange(followup: any): void;
+    onAIFollowUpChange(event: any): void;
     isFollowUpExists(followup: string): boolean;
     isFollowUpSelected(followup: any): boolean;
     static ɵfac: i0.ɵɵFactoryDeclaration<AillmtxFollowupComponent, never>;
