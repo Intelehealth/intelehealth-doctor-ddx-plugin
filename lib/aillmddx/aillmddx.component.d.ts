@@ -18,6 +18,7 @@ export declare class AillmddxComponent {
     isActive: boolean;
     conclusion: string;
     menuContent: string;
+    diagnosisName: any;
     questions: {
         title: string;
         items: string[];
@@ -33,7 +34,7 @@ export declare class AillmddxComponent {
     onAIDiagnosisChange(event: any): void;
     isDiagnosisExists(diagnosis: string): boolean;
     isDiagnosisSelected(diagnosis: string): boolean;
-    setMenuContent(item: any): void;
+    setMenuContent(title: any, likelihood: any, item: any): void;
     static ɵfac: i0.ɵɵFactoryDeclaration<AillmddxComponent, never>;
     static ɵcmp: i0.ɵɵComponentDeclaration<AillmddxComponent, "app-aillmddx", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingDiagnosis": "existingDiagnosis"; "notes": "notes"; }, { "diagnosisSelected": "diagnosisSelected"; "furtherQuestionsListReceived": "furtherQuestionsListReceived"; }, never, never, false>;
 }
