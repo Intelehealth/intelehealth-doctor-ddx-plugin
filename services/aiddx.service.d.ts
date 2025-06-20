@@ -4,7 +4,7 @@ export declare class AiddxService {
     private http;
     private env?;
     constructor(http: HttpClient, env?: any);
-    getAIDiagnosis(casehistory: any): import("rxjs").Observable<Object>;
+    getAIDiagnosis(casehistory: any, visitUuid: string): import("rxjs").Observable<Object>;
     getDDxPayload(patientInfo: any, visit: any, notes?: string): string;
     getDataToExtract(patientInfo: any, visit: any): {};
     flatten(obj?: {}, parentKey?: string): {};
