@@ -17,6 +17,7 @@ export declare class AillmtxFollowupComponent {
     followUpList: any;
     furtherQuestionsList: any;
     selectedFollowUp: any[];
+    loggedError: string;
     constructor(TxService: AiTxService);
     ngOnInit(): void;
     getAIFollowUp(diagnosis?: string): void;

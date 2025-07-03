@@ -17,6 +17,7 @@ export declare class AillmtxReferralComponent {
     referralList: any;
     furtherQuestionsList: any;
     selectedReferral: any[];
+    loggedError: string;
     constructor(TxService: AiTxService);
     ngOnInit(): void;
     getAIReferral(diagnosis?: string): void;

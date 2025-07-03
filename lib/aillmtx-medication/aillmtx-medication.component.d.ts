@@ -17,6 +17,7 @@ export declare class AillmtxMedicationComponent {
     medicationList: any;
     furtherQuestionsList: any;
     selectedMedicine: any[];
+    loggedError: string;
     constructor(TxService: AiTxService);
     ngOnInit(): void;
     getAIMedical(diagnosis?: string): void;

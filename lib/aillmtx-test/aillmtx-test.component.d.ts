@@ -17,6 +17,7 @@ export declare class AillmtxTestComponent {
     testList: any;
     furtherQuestionsList: any;
     selectedTest: string[];
+    loggedError: string;
     constructor(TxService: AiTxService);
     ngOnInit(): void;
     getAITest(diagnosis?: string): void;
