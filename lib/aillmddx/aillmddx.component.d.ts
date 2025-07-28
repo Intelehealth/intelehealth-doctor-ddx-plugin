@@ -10,6 +10,7 @@ export declare class AillmddxComponent {
     existingDiagnosis: any[];
     diagnosisSelected: EventEmitter<string[]>;
     furtherQuestionsListReceived: EventEmitter<any[]>;
+    diagnosisReceived: EventEmitter<any[]>;
     notes: string;
     isLoading: boolean;
     hasError: boolean;
@@ -36,5 +37,5 @@ export declare class AillmddxComponent {
     isDiagnosisSelected(diagnosis: string): boolean;
     setMenuContent(title: any, likelihood: any, item: any): void;
     static ɵfac: i0.ɵɵFactoryDeclaration<AillmddxComponent, never>;
-    static ɵcmp: i0.ɵɵComponentDeclaration<AillmddxComponent, "app-aillmddx", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingDiagnosis": "existingDiagnosis"; "notes": "notes"; }, { "diagnosisSelected": "diagnosisSelected"; "furtherQuestionsListReceived": "furtherQuestionsListReceived"; }, never, never, false>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<AillmddxComponent, "app-aillmddx", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingDiagnosis": "existingDiagnosis"; "notes": "notes"; }, { "diagnosisSelected": "diagnosisSelected"; "furtherQuestionsListReceived": "furtherQuestionsListReceived"; "diagnosisReceived": "diagnosisReceived"; }, never, never, false>;
 }
