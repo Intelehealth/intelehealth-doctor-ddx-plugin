@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { AiddxService } from '../../services/aiddx.service';
+import { MatDialog } from '@angular/material/dialog';
 // import { dummyPayload, response } from '../token';
 
 @Component({
@@ -7,17 +8,23 @@ import { AiddxService } from '../../services/aiddx.service';
   templateUrl: './aillmddx.component.html',
   styleUrls: ['./aillmddx.component.scss']
 })
+
 export class AillmddxComponent {
   @Input() patientInfo: any;
   @Input() visit: any;
   @Input() existingDiagnosis: any[] = [];
   @Output() diagnosisSelected = new EventEmitter<string[]>();
+  @Output() furtherQuestionsListReceived = new EventEmitter<any[]>();
+  @Output() diagnosisReceived = new EventEmitter<any[]>();
   @Input() notes: string;
   isLoading = false;
   hasError = false;
   noData = false;
   insufficientData = false;
+  isActive = false;
   conclusion: string = '';
+  menuContent: string = '';
+  diagnosisName: any = [];
   questions = [
     {
       title: 'Key symptoms and their characteristics',
@@ -31,10 +38,11 @@ export class AillmddxComponent {
     },
   ];
   diagnosisList: any = []
+  furtherQuestionsList: any = []
   selectedDiagnosis: string[] = [];
 
   constructor(
-    private ddxSvc: AiddxService,
+    private ddxSvc: AiddxService, private dialog: MatDialog
   ) { }
 
   ngOnInit() {}
@@ -43,20 +51,29 @@ export class AillmddxComponent {
     const payload = this.ddxSvc.getDDxPayload(this.patientInfo, this.visit, notes);
     this.isLoading = true;
     this.diagnosisList = [];
-    this.ddxSvc.getAIDiagnosis(payload).subscribe({
+    this.furtherQuestionsList = [];
+    this.ddxSvc.getAIDiagnosis(payload, this.visit.uuid).subscribe({
       next: (data: any) => {
         if (data?.conclusion) this.conclusion = data?.conclusion;
-        if (data.result.length > 0) {
+        if (data?.result?.data?.result?.length > 0) {
           this.noData = false;
-          this.diagnosisList = data.result.map(v => {
+          this.diagnosisList = data.result.data.result.map(v => {
             return {
               ...v,
               diagnosis: v?.diagnosis?.replace(/\s*\(.*?\)\s*/g, ''),
               rationale: this.ddxSvc.markdownit(v?.rationale)
             }
           });
+          this.diagnosisReceived.emit(this.diagnosisList);
         } else {
           this.noData = true;
+        }
+        if(data?.result?.data?.further_questions?.length > 0) {
+          this.furtherQuestionsList = data.result.data.further_questions.map(q => {
+            const key = Object.keys(q)[0];
+            return q[key];
+          });
+          this.furtherQuestionsListReceived.emit(this.furtherQuestionsList);
         }
       },
       error: (err: any) => {
@@ -80,6 +97,62 @@ export class AillmddxComponent {
     // }, 3000);
   }
 
+  public getAIDiagnosisWithRetry(notes?: string) {
+    const MAX_RETRIES = 3;
+    let retryCount = 0;
+    const payload = this.ddxSvc.getDDxPayload(this.patientInfo, this.visit, notes);
+
+    const attemptDiagnosis = () => {
+      this.isLoading = true;
+      this.diagnosisList = [];
+      this.furtherQuestionsList = [];
+      this.ddxSvc.getAIDiagnosis(payload, this.visit.uuid).subscribe({
+        next: (data: any) => {
+          if (data?.conclusion) this.conclusion = data?.conclusion;
+          if (data?.result?.data?.result?.length > 0) {
+            this.noData = false;
+            this.diagnosisList = data.result.data.result.map(v => {
+              return {
+                ...v,
+                diagnosis: v?.diagnosis?.replace(/\s*\(.*?\)\s*/g, ''),
+                // rationale: this.ddxSvc.markdownit(v?.rationale)
+                rationale: v?.rationale
+              }
+            });
+            this.diagnosisReceived.emit(this.diagnosisList);
+            if(data?.result?.data?.further_questions?.length > 0) {
+              this.furtherQuestionsList = data.result.data.further_questions.map(q => {
+                const key = Object.keys(q)[0];
+                return q[key];
+              });
+              this.furtherQuestionsListReceived.emit(this.furtherQuestionsList);
+            }
+          } else {
+            this.noData = true;
+          }
+          this.isLoading = false;
+        },
+        error: (err: any) => {
+          retryCount++;
+          if (retryCount < MAX_RETRIES) {
+            console.log(`Retry attempt ${retryCount} for getAIDiagnosis`);
+            setTimeout(() => {
+              attemptDiagnosis();
+            }, 1000);
+          } else {
+            this.hasError = true;
+            this.isLoading = false;
+            console.error('Failed to get AI diagnosis after 3 attempts:', err);
+          }
+        },
+        complete: () => {
+          this.isLoading = false;
+        }
+      });
+    };
+
+    attemptDiagnosis();
+  }
 
   onTryAgain() {
     this.getAIDiagnosis(this.notes);
@@ -108,5 +181,13 @@ export class AillmddxComponent {
 
   isDiagnosisSelected(diagnosis: string): boolean {
     return this.selectedDiagnosis.includes(diagnosis) || this.existingDiagnosis.some(d => d?.diagnosisName === diagnosis);
+  }
+
+  setMenuContent(title: any, likelihood: any, item: any) {
+    this.menuContent = item.flatMap(obj =>
+      Object.entries(obj).map(([key, value]) => ({ key, value }))
+    );
+    this.diagnosisName = [title, likelihood]
+    return
   }
 }
