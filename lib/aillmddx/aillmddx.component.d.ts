@@ -1,10 +1,12 @@
 import { EventEmitter } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
 import { AiddxService } from '../../services/aiddx.service';
 import { MatDialog } from '@angular/material/dialog';
 import * as i0 from "@angular/core";
 export declare class AillmddxComponent {
     private ddxSvc;
     private dialog;
+    private toastr;
     private env?;
     patientInfo: any;
     visit: any;
@@ -28,7 +30,7 @@ export declare class AillmddxComponent {
     diagnosisList: any;
     furtherQuestionsList: any;
     selectedDiagnosis: string[];
-    constructor(ddxSvc: AiddxService, dialog: MatDialog, env?: any);
+    constructor(ddxSvc: AiddxService, dialog: MatDialog, toastr: ToastrService, env?: any);
     ngOnInit(): void;
     getAIDiagnosis(notes?: string): void;
     getAIDiagnosisWithRetry(notes?: string): void;
@@ -37,6 +39,7 @@ export declare class AillmddxComponent {
     isDiagnosisExists(diagnosis: string): boolean;
     isDiagnosisSelected(diagnosis: string): boolean;
     setMenuContent(title: any, likelihood: any, item: any): void;
-    static ɵfac: i0.ɵɵFactoryDeclaration<AillmddxComponent, [null, null, { optional: true; }]>;
+    private isValidDdxResponse;
+    static ɵfac: i0.ɵɵFactoryDeclaration<AillmddxComponent, [null, null, null, { optional: true; }]>;
     static ɵcmp: i0.ɵɵComponentDeclaration<AillmddxComponent, "app-aillmddx", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingDiagnosis": "existingDiagnosis"; "notes": "notes"; }, { "diagnosisSelected": "diagnosisSelected"; "furtherQuestionsListReceived": "furtherQuestionsListReceived"; "diagnosisReceived": "diagnosisReceived"; }, never, never, false>;
 }
