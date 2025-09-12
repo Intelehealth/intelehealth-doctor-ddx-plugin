@@ -174,7 +174,8 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
     this.diagnosisForm = this.fb.group({
       diagnosisName: ['', Validators.required],
       diagnosisType: ['', Validators.required],
-      diagnosisStatus: ['', Validators.required]
+      diagnosisStatus: ['', Validators.required],
+      diagnosisAiGenerated: ['']
     });
 
     this.addMedicineForm = new FormGroup({
@@ -440,9 +441,7 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
       }
       else if (event.snomedCTCode) {
         this.diagnosisForm.addControl('diagnosisCode', new FormControl(null));
-        this.diagnosisForm.addControl('isSnomed', new FormControl(null));
         this.diagnosisForm.patchValue({ diagnosisCode: event.snomedCTCode });
-        this.diagnosisForm.patchValue({ isSnomed: true });
       }
     }
     if (this.selectedDiagnoses.length > 0) {
@@ -474,7 +473,13 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
       this.aillmtxFollowupComponent?.getAIFollowUpWithRetry(this.diagnosisName);
 
       this.diagnosisSubject.next(this.selectedDiagnoses);
-      this.existingDiagnosis.push({ ...this.diagnosisForm.value, diagnosisName: this.diagnosisName });
+      const { diagnosisAiGenerated, ...restForm } = this.diagnosisForm.value;
+      const newDiagnosis = { 
+          ...restForm, 
+          diagnosisName: this.diagnosisName, 
+          ...(diagnosisAiGenerated ? { diagnosisAiGenerated: diagnosisAiGenerated } : {}),
+      };
+      this.existingDiagnosis.push(newDiagnosis);
       this.removeDiagnosis(this.diagnosisName);
       this.diagnosisForm.patchValue({ diagnosisName: this.selectedDiagnoses?.[0] || null });
       this.diagnosisForm.controls.diagnosisType.reset();
@@ -502,7 +507,8 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
     this.aillmtxReferralComponent?.getAIReferralWithRetry(this.diagnosisName);
     this.aillmtxFollowupComponent?.getAIFollowUpWithRetry(this.diagnosisName);
 
-    this.existingDiagnosis.push({ ...this.diagnosisForm.value, diagnosisName: this.diagnosisName });
+    const { diagnosisAiGenerated: _ignore, ...rest } = this.diagnosisForm.value;
+    this.existingDiagnosis.push({ ...rest, diagnosisName: this.diagnosisName });
     this.diagnosisForm.reset();
     this.diagnosisSaved.emit(this.existingDiagnosis);
   }
@@ -561,6 +567,7 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
       if (this.selectedDiagnoses.length > 0) {
         this.diagnosisForm.patchValue({
           diagnosisName: this.selectedDiagnoses[0],
+          diagnosisAiGenerated: 'AI generated'
         });
       }
 
@@ -651,24 +658,28 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
   addMedicine(): void {
     if (this.selectedMedication.length > 0) {
       const medicine = this.selectedMedication[0];
+
       const formattedMedicine = {
-        drug: medicine.name,
-        dose: medicine.dosage,
-        frequency: medicine.frequency,
-        durationNo: medicine.duration,
-        durationUnit: medicine.duration_unit,
-        instructRemark: medicine.instructions,
+        drug: this.addMedicineForm.value.drug,
+        dose: this.addMedicineForm.value.dose,
+        frequency: this.addMedicineForm.value.frequency,
+        durationNo: this.addMedicineForm.value.durationNo,
+        durationUnit: this.addMedicineForm.value.durationUnit,
+        instructRemark: this.addMedicineForm.value.instructRemark || '',
         uuid: medicine.uuid
       };
 
+      // Check for duplicates
       if (!this.medicines.find(m => m.drug.toLowerCase() === formattedMedicine.drug.toLowerCase())) {
         this.medicines.push(formattedMedicine);
+
         if (this.aillmtxMedicationComponent) {
           this.aillmtxMedicationComponent.existingMedication = [...this.medicines];
         }
+
         this.removeMedicine(medicine);
         this.medicationSaved.emit(this.medicines);
-        
+
         if (this.selectedMedication.length > 0) {
           const nextMedicine = this.selectedMedication[0];
           if (nextMedicine) {
@@ -695,6 +706,7 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Add manually entered medicine
     if (this.addMedicineForm.invalid || !this.isVisitNoteProvider) {
       return;
     }
@@ -703,7 +715,14 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
       this.toastr.warning(this.translateService.instant('Medicine already added, please add another drug.'), this.translateService.instant('Already Added'));
       return;
     }
-    this.medicines.push({ ...this.addMedicineForm.value });
+    // Ensure instructRemark is never null
+    const medicineData = { ...this.addMedicineForm.value };
+    if (!medicineData.instructRemark) {
+      medicineData.instructRemark = '';
+    }
+
+    this.medicines.push(medicineData);
+    // this.medicines.push({ ...this.addMedicineForm.value });
     this.addMedicineForm.reset();
     this.medicationSaved.emit(this.medicines);
   }
@@ -1353,6 +1372,7 @@ export class DiagnosisComponent implements OnInit, OnDestroy {
     if (this.selectedDiagnoses.length > 0) {
       this.diagnosisForm.patchValue({
         diagnosisName: this.selectedDiagnoses[0],
+        diagnosisAiGenerated: 'AI generated'
       });
     } else {
       this.diagnosisForm.reset();
