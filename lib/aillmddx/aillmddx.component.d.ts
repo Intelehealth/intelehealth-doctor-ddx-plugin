@@ -30,6 +30,7 @@ export declare class AillmddxComponent {
     diagnosisList: any;
     furtherQuestionsList: any;
     selectedDiagnosis: string[];
+    apiResponseChanged: boolean;
     constructor(ddxSvc: AiddxService, dialog: MatDialog, toastr: ToastrService, env?: any);
     ngOnInit(): void;
     getAIDiagnosis(notes?: string): void;
