@@ -18,6 +18,8 @@ export class AppConfigService {
   public theme_config: any[];
   public patient_vitals: VitalModel[];
   public patient_diagnostics:any[];
+  public digital_stethoscope:any[];
+  public digital_stethoscope_section: boolean;
   public webrtc_section: boolean;
   public webrtc: WebRTCConfigModel;
   public patient_visit_summary: PatientVisitSummaryConfigModel;
@@ -26,9 +28,9 @@ export class AppConfigService {
   public patient_reg_address: boolean;
   public abha_section: boolean;
   public sidebar_menus: { [key: string]: boolean };
-  public patient_visit_sections: PatientVisitSection[];
-  public patient_diagnostics_section: boolean;
+  public patient_visit_sections: PatientVisitSection[]
   public dropdown_values: DropdownValuesModel[]
+  public patient_diagnostics_section: boolean;
   public ai_llm_section: boolean;
   public ai_llm_recording_section:  boolean;
   constructor(private http: HttpClient) { }
@@ -76,8 +78,8 @@ export class AppConfigService {
   public checkPatientRegField(fieldName: any, fields: string | any[]): boolean{
     return fields.indexOf(fieldName) !== -1;
   }
- fetchAllLanguage(): Observable<any> {
-  return this.http.get<any>(`${this.baseURL}/language/getallEnabledLanguages`);
-} 
+  fetchAllLanguage(): Observable<any> {
+    return this.http.get<any>(`${this.baseURL}/language/getallEnabledLanguages`);
+  } 
 }
     
