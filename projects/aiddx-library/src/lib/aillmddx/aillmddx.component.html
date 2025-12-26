@@ -1,61 +1,71 @@
-<ng-container *ngIf="!diagnosisList.length">
-  <div class="d-flex justify-content-center mt-3">
-    <div class="erorr-container alert text-center p-4 d-flex flex-column align-items-center">
+<ng-container *ngIf="!diagnosisList.length" data_test_id="ayu-no-diagnosis-container">
+  <div class="d-flex justify-content-center mt-3" data_test_id="ayu-no-diagnosis-container">
+    <div class="erorr-container alert text-center p-4 d-flex flex-column align-items-center" data_test_id="ayu-error-container">
       <ng-container *ngIf="!isLoading && (hasError || noData)">
-        <div class="text-danger" [ngStyle]="{ 'margin-top': hasError ? '15px' : '40px' }">
-          <span><img class="mb-1" src="assets/svgs/alert-triangle.svg" alt="" /></span>
-          <span *ngIf="hasError" class="ml-2">No suggestions at this moment</span>
-          <span *ngIf="noData" class="ml-2">The input provided does not have enough clinical details for an AI-assistant assessment.</span>
+        <div class="text-danger" [ngStyle]="{ 'margin-top': hasError ? '15px' : '40px' }" data_test_id="ayu-error-message">
+          <span data_test_id="ayu-alert-triangle"><img class="mb-1" src="assets/svgs/alert-triangle.svg" alt="" /></span>
+          <span *ngIf="hasError" class="ml-2" data_test_id="ayu-error-message">No suggestions at this moment</span>
+          <span *ngIf="noData" class="ml-2" data_test_id="ayu-no-data-message">The input provided does not have enough clinical details for an AI-assistant assessment.</span>
         </div>
-        <button *ngIf="!noData" type="button" class="try-again-btn mt-3" (click)="onTryAgain()">{{'Try again'|translate}}</button>
+        <button *ngIf="!noData" type="button" class="try-again-btn mt-3" (click)="onTryAgain()" data_test_id
+    ="ayu-try-again-button">{{'Try again'|translate}}</button>
       </ng-container>
 
-      <button *ngIf="isLoading" class="stats-loading">
+      <button *ngIf="isLoading" class="stats-loading" data_test_id
+  ="ayu-loading-button">
         <div class="eins"></div>
         <div class="zwei"></div>
         <div class="drei"></div>
       </button>
 
-      <div *ngIf="isLoading" class="mt-3">
+      <div *ngIf="isLoading" class="mt-3" data_test_id
+  ="ayu-loading-message">
         <i class="bi bi-exclamation-triangle-fill"></i>
-        <span class="ms-2 loading-text">Please wait while the results are being generated.</span>
+        <span class="ms-2 loading-text" data_test_id="ayu-loading-text">Please wait while the results are being generated.</span>
       </div>
     </div>
   </div>
 </ng-container>
 
 <div class="intel-expansion-con mt-3">
-  <mat-expansion-panel [expanded]="true" class="ayu-report-panel" *ngIf="diagnosisList.length">
-    <mat-expansion-panel-header class="custom-header">
+  <mat-expansion-panel [expanded]="true" class="ayu-report-panel" *ngIf="diagnosisList.length" data_test_id="ayu-diagnosis-expansion-panel">
+    <mat-expansion-panel-header class="custom-header" data_test_id
+="ayu-expansion-panel-header">
       <mat-panel-title>
-        <div class="intel-accordion-title">
+        <div class="intel-accordion-title" data_test_id
+    ="ayu-ai-accordion-title">
           <img src="assets/svgs/ayu-ddx.svg" alt="" />
-          <h6 class="mb-0 ml-2">{{ "Ayu's Detailed Report" | translate }}</h6>
+          <h6 class="mb-0 ml-2" data_test_id="ayu-accordion-title">{{ "Ayu's Detailed Report" | translate }}</h6>
         </div>
       </mat-panel-title>
     </mat-expansion-panel-header>
 
     <!-- <div class="mat-elevation-z8"> -->
     <ng-container class="mt-2">
-      <div class="ayu-report-container">
+      <div class="ayu-report-container" data_test_id="ayu-report-container">
         <!-- Left: Rationale -->
-        <div class="left-section">
-          <div class="warning">
-            <img class="mb-1 mr-2" src="assets/svgs/info-ddx.svg" alt="" />This AI-generated suggestion is intended to support—not replace—your clinical judgement and may not account for all relevant factors; please use your own judgement before acting.
+        <div class="left-section" data_test_id
+    ="rationale-section">
+          <div class="warning" data_test_id
+      ="warning-message">
+            <img class="mb-1 mr-2" src="assets/svgs/info-ddx.svg" alt="" data_test_id="info-ddx-icon"/>This AI-generated suggestion is intended to support—not replace—your clinical judgement and may not account for all relevant factors; please use your own judgement before acting.
           </div>
-          <div class="header">
+          <div class="header" data_test_id
+      ="ayu-rationale-header">
             <h2> Rationale </h2>
           </div>
-          <div class="diagnosis-box">
+          <div class="diagnosis-box" data_test_id
+      ="ayu-diagnosis-box">
             <div *ngFor="let rationale of diagnosisList; let i = index"
-             [ngClass]="{ 'rationale-item': i < diagnosisList.length-1 }" class=" mb-2">
+             [ngClass]="{ 'rationale-item': i < diagnosisList.length-1 }" class=" mb-2" [attr.data_test_id
+          ]="'ayu-rationale-item-' + i">
               <div>
-                <h4><span style="font-weight: bold;">{{ rationale.diagnosis }}</span>
-                  <span class="text-muted ms-2"> ({{ rationale.likelihood }} likely)</span>
+                <h4><span style="font-weight: bold;"  [attr.data_test_id]="'ayu-diagnosis-' + i">{{ rationale.diagnosis }}</span>
+                  <span class="text-muted ms-2"  [attr.data_test_id]="'ayu-rationale-likelihood-' + i"> ({{ rationale.likelihood }} likely)</span>
                 </h4>
                 <ul>
                   <li *ngFor="let point of rationale.summarised_rationale; let i = index">
-                    <span>{{point}}</span>
+                    <span  [attr.data_test_id]="'ayu-rational-point-' + i">{{point}}</span>
                   </li>
                 </ul>   
                 <button 
@@ -64,6 +74,7 @@
                   [placement]="i === 0 ? 'bottom' : 'top'"
                   [ngClass]="{ 'active-btn': isActive && selectedIndex === i }"
                   (mouseenter)="setMenuContent(rationale.diagnosis, rationale.likelihood, rationale.rationale);"
+                  [attr.data_test_id]="'ayu-read-more-button-' + i"
                 >
                   Read more
                 </button>
@@ -73,24 +84,26 @@
         </div>
 
         <!-- Right: Conclusion and Questions -->
-        <div class="right-section">
-          <div class="report-box">
-            <h3 style="font-weight: bold;">Conclusion</h3>
+        <div class="right-section" data_test_id
+    ="ayu-conclusion-section">
+          <div class="report-box" data_test_id
+      ="ayu-conclusion-box">
+            <h3 style="font-weight: bold;" data_test_id="ayu-ai-conclusion-header">Conclusion</h3>
             {{conclusion}}
           </div>
         </div>
       </div>
 
       <ng-template #tipContent>
-        <div class="tooltip-container">
-          <div class="tooltip-box">
-            <div class="tooltip-header">
-              <strong>{{diagnosisName[0]}}</strong>
-              <span class="text-muted ms-2">({{diagnosisName[1]}} likely)</span>
+        <div class="tooltip-container" data_test_id="ayu-tooltip-container">
+          <div class="tooltip-box" data_test_id ="ayu-tooltip-box">
+            <div class="tooltip-header" data_test_id ="ayu-tooltip-header">
+              <strong data_test_id="diagnosisName[0]">{{diagnosisName[0]}}</strong>
+              <span class="text-muted ms-2" data_test_id="diagnosisName[1]">({{diagnosisName[1]}} likely)</span>
             </div>
-            <ul class="bullet-points">
-              <li *ngFor="let item of menuContent">
-                <p><strong>{{ item.key }}:</strong> {{ item.value }}</p>
+            <ul class="bullet-points" data_test_id ="ayu-tooltip-bullet-points">
+              <li *ngFor="let item of menuContent;let i = index">
+                <p [attr.data_test_id]="'tooltip-item-' + i"><strong>{{ item.key }}:</strong> {{ item.value }}</p>
               </li>
             </ul>
           </div>
