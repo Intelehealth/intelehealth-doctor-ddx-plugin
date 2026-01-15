@@ -208,6 +208,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.ddxCompRef) {
         this.ddxCompRef.instance.visit = this.visit;
         this.ddxCompRef.instance.patientInfo = this.patient;
+        this.ddxCompRef.instance.patientHistoryData = this.patientHistoryData;
         this.ddxCompRef.instance.isMCCUser = this.isMCCUser;
         this.ddxCompRef.instance.isVisitNoteProvider = this.isVisitNoteProvider;
         this.ddxCompRef.instance.visitEnded = this.visitEnded;
@@ -302,6 +303,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     }, 1000);
   }
   isWhatsappCallWarningShown = false;
+  consultationStartTime: Date; // Track consultation start time
 
   reasons = {
     'Completed': [
@@ -508,7 +510,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       present: new FormControl(false, [Validators.required]),
       wantFollowUp: new FormControl('', [Validators.required]),
       followUpDate: new FormControl(null),
-      // followUpTime: new FormControl(null),
+      followUpTime: new FormControl(null),
       followUpReason: new FormControl(null),
       uuid: new FormControl(null),
       followUpType: new FormControl(null)
@@ -700,6 +702,10 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             this.visitEnded = this.visitSummaryService.checkIfEncounterExists(visit.encounters, visitTypes.PATIENT_EXIT_SURVEY) || visit.stopDatetime;
             this.getPastVisitHistory();
             if (this.visitNotePresent) {
+              // Set consultation start time from visit note encounter datetime if not already set
+              if (!this.consultationStartTime && this.visitNotePresent.encounterDatetime) {
+                this.consultationStartTime = new Date(this.visitNotePresent.encounterDatetime);
+              }
               this.visitNotePresent.encounterProviders.forEach((p: EncounterProviderModel) => {
                 if (p.provider.uuid === this.provider.uuid) {
                   this.isVisitNoteProvider = true;
@@ -1397,6 +1403,9 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   * @return {void}
   */
   startVisitNote(): void {
+    // Capture consultation start time
+    this.consultationStartTime = new Date();
+
     const json = {
       patient: this.visit.patient.uuid,
       encounterType: 'd7151f82-c1f3-4152-a605-2f9ea7414a79', // Visit Note encounter
@@ -2216,15 +2225,19 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.diagnosisService.getObs(this.visit.patient.uuid, conceptIds.conceptFollow).subscribe((response: ObsApiResponseModel) => {
       response.results.forEach((obs: ObsModel) => {
         if (obs.encounter.visit.uuid === this.visit.uuid) {
-          let followUpDate: string, /* followUpTime: any, */ followUpReason: any, wantFollowUp: string = 'No', followUpType: any;
+          let followUpDate: string, followUpTime: any, followUpReason: any, wantFollowUp: string = 'No', followUpType: any;
           if (obs.value.includes('Time:') || obs.value.includes('Remark:')) {
             const result = obs.value.split(',').filter(Boolean);
-            // const time = result.find((v: string) => v.includes('Time:'))?.split('Time:')?.[1]?.trim();
             const remark = result.find((v: string) => v.includes('Remark:'))?.split('Remark:')?.[1]?.trim();
             followUpDate = moment(result[0]).format('YYYY-MM-DD');
-            // followUpTime = time ? time : null;
             followUpReason = remark ? remark : null;
             wantFollowUp = 'Yes';
+
+            // Only try to get Time if the feature is enabled
+            if (this.isFeatureAvailable('followUpTime')) {
+              const time = result.find((v: string) => v.includes('Time:'))?.split('Time:')?.[1]?.trim();
+              followUpTime = time ? time : null;
+            }
 
             // Only try to get Type if the feature is enabled
             if (this.isFeatureAvailable('followUpType')) {
@@ -2237,7 +2250,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             present: true,
             wantFollowUp,
             followUpDate,
-            // followUpTime,
+            followUpTime: this.isFeatureAvailable('followUpTime') ? followUpTime : null,
             followUpReason,
             uuid: obs.uuid,
             followUpType: this.isFeatureAvailable('followUpType') ? followUpType : null
@@ -2253,7 +2266,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   */
   saveFollowUp(): Observable<any> {
     if (this.followUpForm.value.wantFollowUp === 'Yes') {
-      const value = `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')},Remark:${this.followUpForm.value.followUpReason}${this.isFeatureAvailable('followUpType') ? ',Type:' + (this.followUpForm.value.followUpType) : ''}`; // Removed Time:${this.followUpForm.value.followUpTime}
+      const value = `${moment(this.followUpForm.value.followUpDate).format('YYYY-MM-DD')}${this.isFeatureAvailable('followUpTime') ? ',Time:' + (this.followUpForm.value.followUpTime) : ''},Remark:${this.followUpForm.value.followUpReason}${this.isFeatureAvailable('followUpType') ? ',Type:' + (this.followUpForm.value.followUpType) : ''}`;
       
       if (this.followUpForm.value.uuid) {
         return this.encounterService.updateObs(this.followUpForm.value.uuid, { value });
@@ -2269,7 +2282,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             present: true,
             wantFollowUp: 'Yes',
             followUpDate : this.followUpForm.value.followUpDate,
-            // followUpTime : this.followUpForm.value.followUpTime,
+            followUpTime : this.isFeatureAvailable('followUpTime') ? this.followUpForm.value.followUpTime : null,
             followUpReason : this.followUpForm.value.followUpReason,
             uuid: res.uuid,
             followUpType : this.isFeatureAvailable('followUpType') ? this.followUpForm.value.followUpType : null
@@ -2288,7 +2301,7 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
             present: true,
             wantFollowUp: 'No',
             followUpDate : null,
-            // followUpTime : null,
+            followUpTime : null,
             followUpReason :null,
             uuid: res.uuid,
             followUpType : null
@@ -2334,8 +2347,14 @@ export class VisitSummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this.saveAllObs().subscribe({
       next: (responses) => {
         this.changesMade = false;
+        //Calculate consultation duration
+        const consultationDuration = this.consultationStartTime
+          ? (new Date().getTime() - this.consultationStartTime.getTime()) / 1000 // duration in seconds
+          : null;
+        const isRapidCompletion = consultationDuration !== null && consultationDuration < 60; // less than 1 minute
+
         //Open Share Prescription Confirmation Modal
-        this.coreService.openSharePrescriptionConfirmModal().subscribe((res: boolean) => {
+        this.coreService.openSharePrescriptionConfirmModal({ isRapidCompletion }).subscribe((res: boolean) => {
           if (res) {
             if (this.isVisitNoteProvider) {
               if (this.provider.attributes.length) {
