@@ -1,7 +1,7 @@
-import { EventEmitter } from '@angular/core';
+import { EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { AiTxService } from '../../services/aitx.service';
 import * as i0 from "@angular/core";
-export declare class AillmtxMedicationComponent {
+export declare class AillmtxMedicationComponent implements OnInit, OnChanges {
     private TxService;
     patientInfo: any;
     visit: any;
@@ -9,6 +9,9 @@ export declare class AillmtxMedicationComponent {
     medicationSelected: EventEmitter<string[]>;
     diagnosisName: string;
     notesss: string;
+    patientAllergies: string;
+    patientCurrentMedications: string;
+    allergyDataStatus: 'empty' | 'present';
     isLoading: boolean;
     hasError: boolean;
     noData: boolean;
@@ -18,8 +21,14 @@ export declare class AillmtxMedicationComponent {
     furtherQuestionsList: any;
     selectedMedicine: any[];
     loggedError: string;
+    reminderMessages: string[];
     constructor(TxService: AiTxService);
     ngOnInit(): void;
+    ngOnChanges(changes: SimpleChanges): void;
+    /**
+     * Update reminder messages based on allergy and medication data
+     */
+    updateReminderMessage(): void;
     getAIMedical(diagnosis?: string): void;
     getAIMedicalWithRetry(diagnosis: any): void;
     onTryAgain(): void;
@@ -27,5 +36,5 @@ export declare class AillmtxMedicationComponent {
     isMedicineExists(medicine: string): boolean;
     isMedicineSelected(medicine: any): boolean;
     static ɵfac: i0.ɵɵFactoryDeclaration<AillmtxMedicationComponent, never>;
-    static ɵcmp: i0.ɵɵComponentDeclaration<AillmtxMedicationComponent, "lib-aillmtx-medication", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingMedication": "existingMedication"; "diagnosisName": "diagnosisName"; "notesss": "notesss"; }, { "medicationSelected": "medicationSelected"; }, never, never, false>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<AillmtxMedicationComponent, "lib-aillmtx-medication", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingMedication": "existingMedication"; "diagnosisName": "diagnosisName"; "notesss": "notesss"; "patientAllergies": "patientAllergies"; "patientCurrentMedications": "patientCurrentMedications"; "allergyDataStatus": "allergyDataStatus"; }, { "medicationSelected": "medicationSelected"; }, never, never, false>;
 }

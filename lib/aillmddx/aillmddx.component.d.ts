@@ -30,6 +30,7 @@ export declare class AillmddxComponent {
     diagnosisList: any;
     furtherQuestionsList: any;
     selectedDiagnosis: string[];
+    apiResponseChanged: boolean;
     constructor(ddxSvc: AiddxService, dialog: MatDialog, toastr: ToastrService, env?: any);
     ngOnInit(): void;
     getAIDiagnosis(notes?: string): void;
@@ -40,6 +41,7 @@ export declare class AillmddxComponent {
     isDiagnosisSelected(diagnosis: string): boolean;
     setMenuContent(title: any, likelihood: any, item: any): void;
     private isValidDdxResponse;
+    isObject(value: any): boolean;
     static ɵfac: i0.ɵɵFactoryDeclaration<AillmddxComponent, [null, null, null, { optional: true; }]>;
     static ɵcmp: i0.ɵɵComponentDeclaration<AillmddxComponent, "app-aillmddx", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingDiagnosis": "existingDiagnosis"; "notes": "notes"; }, { "diagnosisSelected": "diagnosisSelected"; "furtherQuestionsListReceived": "furtherQuestionsListReceived"; "diagnosisReceived": "diagnosisReceived"; }, never, never, false>;
 }
