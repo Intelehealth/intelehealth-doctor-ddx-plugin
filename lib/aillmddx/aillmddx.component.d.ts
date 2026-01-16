@@ -21,6 +21,7 @@ export declare class AillmddxComponent {
     insufficientData: boolean;
     isActive: boolean;
     conclusion: string;
+    treatment: string;
     menuContent: string;
     diagnosisName: any;
     questions: {
