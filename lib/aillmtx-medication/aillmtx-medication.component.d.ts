@@ -26,7 +26,17 @@ export declare class AillmtxMedicationComponent implements OnInit, OnChanges {
     ngOnInit(): void;
     ngOnChanges(changes: SimpleChanges): void;
     /**
-     * Update reminder messages based on allergy and medication data
+     * Cleans medication string by removing phrases like "Name of Medications" and "Medication Name".
+     * @param rawMedicationString - The raw medication string to clean.
+     * @returns Cleaned medication string, or an empty string if input is invalid.
+     */
+    extractCleanMedicationNames(rawMedicationString: string): string;
+    /**
+     * Checks if a value indicates a negative response (e.g., "no known allergies").
+     */
+    isNegativeValue: (value: string) => boolean;
+    /**
+     * Updates reminder messages based on patient's allergies and current medications.
      */
     updateReminderMessage(): void;
     getAIMedical(diagnosis?: string): void;
