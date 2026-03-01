@@ -342,7 +342,7 @@ class AillmddxComponent {
                     this.conclusion = data?.conclusion;
                 if (data?.result?.data?.result?.length > 0) {
                     this.noData = false;
-                    this.diagnosisList = data.result.data.result.map(v => {
+                    const mapped = data.result.data.result.map(v => {
                         // When summarised_rationale is missing, generate from rationale values
                         let summarised = v?.summarised_rationale;
                         // if (!summarised?.length && Array.isArray(v?.rationale)) {
@@ -354,8 +354,10 @@ class AillmddxComponent {
                             summarised_rationale: summarised,
                             rationale: v?.rationale
                         };
-                    }).filter(v => { const rank = Number(v?.rank); return rank >= 1 && rank <= 5; })
-                        .sort((a, b) => Number(a.rank) - Number(b.rank));
+                    });
+                    this.diagnosisList = this.visitCompleted
+                        ? mapped.filter(v => { const rank = Number(v?.rank); return rank >= 1 && rank <= 5; }).sort((a, b) => Number(a.rank) - Number(b.rank))
+                        : mapped;
                     this.diagnosisReceived.emit(this.diagnosisList);
                     if (data?.result?.data?.further_questions?.length > 0) {
                         this.furtherQuestionsList = data.result.data.further_questions.map(q => {
@@ -397,7 +399,7 @@ class AillmddxComponent {
                         this.conclusion = data?.conclusion;
                     if (data?.result?.data?.result?.length > 0) {
                         this.noData = false;
-                        this.diagnosisList = data.result.data.result.map(v => {
+                        const mapped = data.result.data.result.map(v => {
                             // let summarised = v?.summarised_rationale;
                             // if (!summarised?.length && Array.isArray(v?.rationale)) {
                             //   summarised = v.rationale.flatMap(obj => Object.values(obj));
@@ -408,8 +410,10 @@ class AillmddxComponent {
                                 summarised_rationale: v?.summarised_rationale,
                                 rationale: v?.rationale
                             };
-                        }).filter(v => { const rank = Number(v?.rank); return rank >= 1 && rank <= 5; })
-                            .sort((a, b) => Number(a.rank) - Number(b.rank));
+                        });
+                        this.diagnosisList = this.visitCompleted
+                            ? mapped.filter(v => { const rank = Number(v?.rank); return rank >= 1 && rank <= 5; }).sort((a, b) => Number(a.rank) - Number(b.rank))
+                            : mapped;
                         this.diagnosisReceived.emit(this.diagnosisList);
                         if (data?.result?.data?.further_questions?.length > 0) {
                             this.furtherQuestionsList = data.result.data.further_questions.map(q => {
