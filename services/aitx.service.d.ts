@@ -5,9 +5,10 @@ export declare class AiTxService {
     private http;
     private env?;
     private lastDiagnosis;
+    private lastPrescriptionShared;
     private cachedResponse;
     constructor(http: HttpClient, env?: any);
-    getAITTx(casehistory: any, diagnosis: any, visitUuid: string): Observable<any>;
+    getAITTx(casehistory: any, diagnosis: any, visitUuid: string, prescriptionShared?: boolean): Observable<any>;
     getTxPayload(patientInfo: any, visit: any): string;
     getDataToExtract(patientInfo: any, visit: any): {};
     flatten(obj?: {}, parentKey?: string): {};
