@@ -8,6 +8,7 @@ export declare class AiddxService {
     getDDxPayload(patientInfo: any, visit: any, notes?: string): string;
     getDataToExtract(patientInfo: any, visit: any): {};
     flatten(obj?: {}, parentKey?: string): {};
+    formatAge(birthdate: any, age: any): string;
     formatText(text: string): string;
     markdownit(txt: any): any;
     static ɵfac: i0.ɵɵFactoryDeclaration<AiddxService, [null, { optional: true; }]>;

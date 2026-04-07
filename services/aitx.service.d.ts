@@ -12,6 +12,7 @@ export declare class AiTxService {
     getTxPayload(patientInfo: any, visit: any): string;
     getDataToExtract(patientInfo: any, visit: any): {};
     flatten(obj?: {}, parentKey?: string): {};
+    formatAge(birthdate: any, age: any): string;
     formatText(text: string): string;
     markdownit(txt: any): any;
     clearCache(): void;
