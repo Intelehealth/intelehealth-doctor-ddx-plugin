@@ -16,6 +16,7 @@ export class AillmtxMedicationComponent implements OnInit, OnChanges {
   @Input() patientAllergies: string = '';
   @Input() patientCurrentMedications: string = '';
   @Input() allergyDataStatus: 'empty' | 'present' = 'empty';
+  @Input() visitCompleted: boolean = false;
   isLoading = false;
   hasError = false;
   noData = false;
@@ -95,7 +96,7 @@ export class AillmtxMedicationComponent implements OnInit, OnChanges {
     this.isLoading = true;
     this.medicationList = [];
     this.furtherQuestionsList = [];
-    this.TxService.getAITTx(payload, diagnosis, this.visit.uuid).subscribe({
+    this.TxService.getAITTx(payload, diagnosis, this.visit.uuid, this.visitCompleted).subscribe({
       next: (data: any) => {
         if (data.result.data.result.length > 0) {
           this.noData = false;
@@ -127,15 +128,18 @@ export class AillmtxMedicationComponent implements OnInit, OnChanges {
       this.isLoading = true;
       this.medicationList = [];
       this.furtherQuestionsList = [];
-      this.TxService.getAITTx(payload, diagnosis, this.visit.uuid).subscribe({
+      this.TxService.getAITTx(payload, diagnosis, this.visit.uuid, this.visitCompleted).subscribe({
         next: (data: any) => {
           if (data.result.data.success && data.result.data.medications.length > 0) {
             this.noData = false;
-            this.medicationList = data.result.data.medications.map(v => {
-              return {
-                ...v,
-              }
-            });
+            const mapped = data.result.data.medications.map(v => ({
+              ...v,
+              name: v.name || v.medication,
+            }));
+            const hasNumericRank = mapped.some(v => { const r = Number(v?.rank); return !isNaN(r) && r >= 1; });
+            this.medicationList = hasNumericRank
+              ? mapped.filter(v => { const rank = Number(v?.rank); return rank >= 1 && rank <= 5; }).sort((a, b) => Number(a.rank) - Number(b.rank))
+              : mapped.slice(0, 5);
           } else if(!data.result.data.success) {
             this.hasError = true;
             this.loggedError = data.result.data?.error;
@@ -189,7 +193,8 @@ export class AillmtxMedicationComponent implements OnInit, OnChanges {
           duration_unit: event.duration_unit,
           instructions: event.instructions,
           uuid: event.uuid,
-          likelihood: event.likelihood
+          likelihood: event.likelihood,
+          rationale: event.rationale
         };
         this.selectedMedicine = [...this.selectedMedicine, medicineData];
       }

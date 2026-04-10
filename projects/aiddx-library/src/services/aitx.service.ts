@@ -10,6 +10,7 @@ import { shareReplay } from 'rxjs/operators';
 })
 export class AiTxService {
   private lastDiagnosis: string | null = null;
+  private lastPrescriptionShared: boolean | null = null;
   private cachedResponse: Observable<any> | null = null;
 
   constructor(
@@ -21,10 +22,12 @@ export class AiTxService {
     }
   }
 
-  getAITTx(casehistory: any, diagnosis: any, visitUuid: string) {
-    if (diagnosis !== this.lastDiagnosis || !this.cachedResponse) {
+  getAITTx(casehistory: any, diagnosis: any, visitUuid: string, prescriptionShared: boolean = false) {
+    const endpoint = prescriptionShared ? '/ttxfinal' : '/ttxv1';
+    if (diagnosis !== this.lastDiagnosis || prescriptionShared !== this.lastPrescriptionShared || !this.cachedResponse) {
       this.lastDiagnosis = diagnosis;
-      this.cachedResponse = this.http.post(`${this.env.base}/ttxv1`, { diagnosis, case: casehistory, visitUuid }).pipe(
+      this.lastPrescriptionShared = prescriptionShared;
+      this.cachedResponse = this.http.post(`${this.env.base}${endpoint}`, { diagnosis, case: casehistory, visitUuid }).pipe(
         shareReplay(1)
       );
     }
@@ -56,7 +59,7 @@ export class AiTxService {
       .join("\n")}`;
 
     const payload = `Gender: ${get("pi.person.gender", "Not specified")}
-Age: ${get("pi.person.age", "Not specified")}
+Age: ${this.formatAge(data["pi.person.birthdate"], data["pi.person.age"])}
 
 Chief_complaint: ${this.formatText(complaint?.value || "")}
 
@@ -104,6 +107,35 @@ ${vitals?.length ? vitalPayload : ""}`;
     return flatData;
   }
 
+  formatAge(birthdate: any, age: any): string {
+    if (birthdate) {
+      const dob = new Date(birthdate);
+      if (!isNaN(dob.getTime())) {
+        const now = new Date();
+        const days = Math.max(0, Math.floor((now.getTime() - dob.getTime()) / 86400000));
+        // 0-28 days: days only
+        if (days <= 28) return `${days} day${days === 1 ? "" : "s"}`;
+        let months = (now.getFullYear() - dob.getFullYear()) * 12 + (now.getMonth() - dob.getMonth());
+        if (now.getDate() < dob.getDate()) months--;
+        if (months < 0) months = 0;
+        // 29 days - 23 months: months only
+        if (months < 24) return `${months} month${months === 1 ? "" : "s"}`;
+        const years = Math.floor(months / 12);
+        const remMonths = months % 12;
+        // 18+ years: years only
+        if (years >= 18) return `${years} years`;
+        // 2-17 years: years and months
+        return remMonths > 0
+          ? `${years} years ${remMonths} month${remMonths === 1 ? "" : "s"}`
+          : `${years} years`;
+      }
+    }
+    if (age !== undefined && age !== null && age !== "" && Number(age) > 0) {
+      return `${age} year${Number(age) === 1 ? "" : "s"}`;
+    }
+    return "Not specified";
+  }
+
   formatText(text: string): string {
     if (!text) return "";
 
@@ -134,6 +166,7 @@ ${vitals?.length ? vitalPayload : ""}`;
 
   clearCache() {
     this.lastDiagnosis = null;
+    this.lastPrescriptionShared = null;
     this.cachedResponse = null;
   }
 }
