@@ -13,7 +13,10 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "prepare": "husky install",
+    "ngcc": "ngcc --properties es2015 browser module main --first-only",
+    "prebuild-library": "npm run ngcc",
     "build-library": "ng build ih-library --configuration production",
+    "prebuild-aiddx": "npm run ngcc",
     "build-aiddx": "ng build aiddx-library --configuration production",
     "postbuild": "ts-node ./src/assets/scripts/postBuild.ts"
   },
