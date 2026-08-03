@@ -16,6 +16,7 @@ export declare class AillmddxComponent {
     diagnosisReceived: EventEmitter<any[]>;
     notes: string;
     visitCompleted: boolean;
+    reportExpanded: boolean;
     isLoading: boolean;
     hasError: boolean;
     noData: boolean;
@@ -45,5 +46,5 @@ export declare class AillmddxComponent {
     private isValidDdxResponse;
     isObject(value: any): boolean;
     static ɵfac: i0.ɵɵFactoryDeclaration<AillmddxComponent, [null, null, null, { optional: true; }]>;
-    static ɵcmp: i0.ɵɵComponentDeclaration<AillmddxComponent, "app-aillmddx", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingDiagnosis": "existingDiagnosis"; "notes": "notes"; "visitCompleted": "visitCompleted"; }, { "diagnosisSelected": "diagnosisSelected"; "furtherQuestionsListReceived": "furtherQuestionsListReceived"; "diagnosisReceived": "diagnosisReceived"; }, never, never, false>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<AillmddxComponent, "app-aillmddx", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingDiagnosis": "existingDiagnosis"; "notes": "notes"; "visitCompleted": "visitCompleted"; "reportExpanded": "reportExpanded"; }, { "diagnosisSelected": "diagnosisSelected"; "furtherQuestionsListReceived": "furtherQuestionsListReceived"; "diagnosisReceived": "diagnosisReceived"; }, never, never, false>;
 }
