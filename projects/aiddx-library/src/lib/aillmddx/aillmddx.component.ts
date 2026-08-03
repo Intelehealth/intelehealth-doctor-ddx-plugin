@@ -20,6 +20,7 @@ export class AillmddxComponent {
   @Output() diagnosisReceived = new EventEmitter<any[]>();
   @Input() notes: string;
   @Input() visitCompleted: boolean = false;
+  @Input() reportExpanded = false;
   isLoading = false;
   hasError = false;
   noData = false;
