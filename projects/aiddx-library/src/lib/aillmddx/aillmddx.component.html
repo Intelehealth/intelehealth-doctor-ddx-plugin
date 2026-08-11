@@ -26,7 +26,7 @@
 </ng-container>
 
 <div class="intel-expansion-con mt-3">
-  <mat-expansion-panel [expanded]="reportExpanded" class="ayu-report-panel" *ngIf="diagnosisList.length">
+  <mat-expansion-panel [expanded]="reportExpanded" (opened)="onReportOpened()" class="ayu-report-panel" *ngIf="diagnosisList.length">
     <mat-expansion-panel-header class="custom-header">
       <mat-panel-title>
         <div class="intel-accordion-title">
