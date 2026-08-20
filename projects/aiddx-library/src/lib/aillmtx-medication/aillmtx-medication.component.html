@@ -7,7 +7,7 @@
                     <i class="bi bi-exclamation-triangle-fill text-danger mb-2" style="font-size: 2rem;"></i>
                     <img src="assets/images/login/interneticon.png" alt="Warning" class="warning-icon" />
                     <h3 class="text-danger">No diagnosis Provided</h3>
-                    <p class="text-muted">Please add the required diagnosis details to fetch AI-assisted Medicines suggestions.</p>
+                    <p class="text-muted">Press the Confirm button to fetch AI-assisted Medicines suggestions</p>
                     <button type="button" class="suggest-tx-btn mt-2" [disabled]="treatmentDisabled" (click)="requestTreatmentPlan.emit()">
                         <ng-container *ngIf="!treatmentLoading">
                             <img src="assets/svgs/ayu-ddx.svg" alt="" class="mr-2" />{{ 'Confirm & Suggest Treatment Plan' | translate }}

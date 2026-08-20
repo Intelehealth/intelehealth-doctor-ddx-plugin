@@ -236,10 +236,11 @@
 }
 
 .erorr-container {
-  height: 150px;
+  min-height: 150px;
   background-color: #faf7fc;
   border-radius: 10px;
   width: 100%;
+  padding-bottom: 8px;
 }
 
 .txt-position {
@@ -332,24 +333,30 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 6px;
+  padding-right: 22px;
 }
 
 .checkbox-label {
   display: flex;
 //  align-items: baseline;
   gap: 8px;
-  margin-right: auto;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .med-flag-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
   background: none;
   border: none;
   outline: none;
-  padding: 0 0 0 6px;
+  padding: 0;
   cursor: pointer;
   line-height: 0;
-  flex-shrink: 0;
   opacity: 0.85;
+  z-index: 2;
 }
 
 .med-flag-btn:hover {
@@ -461,7 +468,8 @@
   line-height: 150%;
   letter-spacing: 0%;
   word-break: break-word;
-  width: 175px;
+  min-width: 0;
+  flex: 1 1 auto;
   color: #1B163A;
 }
 
@@ -471,6 +479,7 @@
   font-size: 12px;
   color: #7F7B92;
   white-space: nowrap;
+  flex-shrink: 0;
  // margin-top: 3px;
 }
 
@@ -587,7 +596,7 @@
 
 @media (max-width: 768px) {
   .erorr-container {
-    height: 180px;
+    min-height: 180px;
     background-color: #faf7fc;
     border-radius: 10px;
     width: 100%;
