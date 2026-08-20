@@ -296,6 +296,19 @@
   color: black;
 }
 
+.warning .report-link {
+  color: #C0392B;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: 6px;
+  white-space: nowrap;
+}
+
+.warning .report-link:hover {
+  opacity: 0.85;
+}
+
 .diagnosis-box h4 {
   margin: 0;
 }

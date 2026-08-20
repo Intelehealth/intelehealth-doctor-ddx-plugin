@@ -19,6 +19,7 @@ export class AillmddxComponent {
   @Output() furtherQuestionsListReceived = new EventEmitter<any[]>();
   @Output() diagnosisReceived = new EventEmitter<any[]>();
   @Output() rationaleOpened = new EventEmitter<any>();
+  @Output() reportIssue = new EventEmitter<any>();
   @Input() notes: string;
   @Input() visitCompleted: boolean = false;
   @Input() reportExpanded = false;
@@ -188,6 +189,10 @@ export class AillmddxComponent {
 
   onReportOpened() {
     this.rationaleOpened.emit({ diagnosis_count: this.diagnosisList?.length || 0 });
+  }
+
+  onReportIssue() {
+    this.reportIssue.emit({ diagnosis_count: this.diagnosisList?.length || 0 });
   }
 
   onAIDiagnosisChange(event: any) {
