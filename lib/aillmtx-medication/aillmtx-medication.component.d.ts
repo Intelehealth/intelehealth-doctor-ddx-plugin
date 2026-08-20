@@ -9,6 +9,9 @@ export declare class AillmtxMedicationComponent implements OnInit, OnChanges {
     medicationSelected: EventEmitter<string[]>;
     reportPanelIssue: EventEmitter<any>;
     reportSuggestionIssue: EventEmitter<any>;
+    requestTreatmentPlan: EventEmitter<void>;
+    treatmentDisabled: boolean;
+    treatmentLoading: boolean;
     diagnosisName: string;
     notesss: string;
     patientAllergies: string;
@@ -55,5 +58,5 @@ export declare class AillmtxMedicationComponent implements OnInit, OnChanges {
     isMedicineExists(medicine: string): boolean;
     isMedicineSelected(medicine: any): boolean;
     static ɵfac: i0.ɵɵFactoryDeclaration<AillmtxMedicationComponent, never>;
-    static ɵcmp: i0.ɵɵComponentDeclaration<AillmtxMedicationComponent, "lib-aillmtx-medication", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingMedication": "existingMedication"; "diagnosisName": "diagnosisName"; "notesss": "notesss"; "patientAllergies": "patientAllergies"; "patientCurrentMedications": "patientCurrentMedications"; "allergyDataStatus": "allergyDataStatus"; "visitCompleted": "visitCompleted"; }, { "medicationSelected": "medicationSelected"; "reportPanelIssue": "reportPanelIssue"; "reportSuggestionIssue": "reportSuggestionIssue"; }, never, never, false>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<AillmtxMedicationComponent, "lib-aillmtx-medication", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingMedication": "existingMedication"; "treatmentDisabled": "treatmentDisabled"; "treatmentLoading": "treatmentLoading"; "diagnosisName": "diagnosisName"; "notesss": "notesss"; "patientAllergies": "patientAllergies"; "patientCurrentMedications": "patientCurrentMedications"; "allergyDataStatus": "allergyDataStatus"; "visitCompleted": "visitCompleted"; }, { "medicationSelected": "medicationSelected"; "reportPanelIssue": "reportPanelIssue"; "reportSuggestionIssue": "reportSuggestionIssue"; "requestTreatmentPlan": "requestTreatmentPlan"; }, never, never, false>;
 }
