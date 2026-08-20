@@ -7,6 +7,8 @@ export declare class AillmtxMedicationComponent implements OnInit, OnChanges {
     visit: any;
     existingMedication: any[];
     medicationSelected: EventEmitter<string[]>;
+    reportPanelIssue: EventEmitter<any>;
+    reportSuggestionIssue: EventEmitter<any>;
     diagnosisName: string;
     notesss: string;
     patientAllergies: string;
@@ -23,6 +25,9 @@ export declare class AillmtxMedicationComponent implements OnInit, OnChanges {
     selectedMedicine: any[];
     loggedError: string;
     reminderMessages: string[];
+    reportOpenFor: any;
+    reportReason: string | null;
+    reportNote: string;
     constructor(TxService: AiTxService);
     ngOnInit(): void;
     ngOnChanges(changes: SimpleChanges): void;
@@ -43,9 +48,12 @@ export declare class AillmtxMedicationComponent implements OnInit, OnChanges {
     getAIMedical(diagnosis?: string): void;
     getAIMedicalWithRetry(diagnosis: any): void;
     onTryAgain(): void;
+    openReport(medicine: any): void;
+    closeReport(): void;
+    sendReport(medicine: any): void;
     onAIMedicineChange(event: any): void;
     isMedicineExists(medicine: string): boolean;
     isMedicineSelected(medicine: any): boolean;
     static ɵfac: i0.ɵɵFactoryDeclaration<AillmtxMedicationComponent, never>;
-    static ɵcmp: i0.ɵɵComponentDeclaration<AillmtxMedicationComponent, "lib-aillmtx-medication", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingMedication": "existingMedication"; "diagnosisName": "diagnosisName"; "notesss": "notesss"; "patientAllergies": "patientAllergies"; "patientCurrentMedications": "patientCurrentMedications"; "allergyDataStatus": "allergyDataStatus"; "visitCompleted": "visitCompleted"; }, { "medicationSelected": "medicationSelected"; }, never, never, false>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<AillmtxMedicationComponent, "lib-aillmtx-medication", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingMedication": "existingMedication"; "diagnosisName": "diagnosisName"; "notesss": "notesss"; "patientAllergies": "patientAllergies"; "patientCurrentMedications": "patientCurrentMedications"; "allergyDataStatus": "allergyDataStatus"; "visitCompleted": "visitCompleted"; }, { "medicationSelected": "medicationSelected"; "reportPanelIssue": "reportPanelIssue"; "reportSuggestionIssue": "reportSuggestionIssue"; }, never, never, false>;
 }

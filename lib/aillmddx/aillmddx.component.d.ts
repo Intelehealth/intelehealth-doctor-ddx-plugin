@@ -15,6 +15,7 @@ export declare class AillmddxComponent {
     furtherQuestionsListReceived: EventEmitter<any[]>;
     diagnosisReceived: EventEmitter<any[]>;
     rationaleOpened: EventEmitter<any>;
+    reportIssue: EventEmitter<any>;
     notes: string;
     visitCompleted: boolean;
     reportExpanded: boolean;
@@ -41,6 +42,7 @@ export declare class AillmddxComponent {
     getAIDiagnosisWithRetry(notes?: string): void;
     onTryAgain(): void;
     onReportOpened(): void;
+    onReportIssue(): void;
     onAIDiagnosisChange(event: any): void;
     isDiagnosisExists(diagnosis: string): boolean;
     isDiagnosisSelected(diagnosis: string): boolean;
@@ -48,5 +50,5 @@ export declare class AillmddxComponent {
     private isValidDdxResponse;
     isObject(value: any): boolean;
     static ɵfac: i0.ɵɵFactoryDeclaration<AillmddxComponent, [null, null, null, { optional: true; }]>;
-    static ɵcmp: i0.ɵɵComponentDeclaration<AillmddxComponent, "app-aillmddx", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingDiagnosis": "existingDiagnosis"; "notes": "notes"; "visitCompleted": "visitCompleted"; "reportExpanded": "reportExpanded"; }, { "diagnosisSelected": "diagnosisSelected"; "furtherQuestionsListReceived": "furtherQuestionsListReceived"; "diagnosisReceived": "diagnosisReceived"; "rationaleOpened": "rationaleOpened"; }, never, never, false>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<AillmddxComponent, "app-aillmddx", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingDiagnosis": "existingDiagnosis"; "notes": "notes"; "visitCompleted": "visitCompleted"; "reportExpanded": "reportExpanded"; }, { "diagnosisSelected": "diagnosisSelected"; "furtherQuestionsListReceived": "furtherQuestionsListReceived"; "diagnosisReceived": "diagnosisReceived"; "rationaleOpened": "rationaleOpened"; "reportIssue": "reportIssue"; }, never, never, false>;
 }
