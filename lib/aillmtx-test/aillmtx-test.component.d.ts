@@ -1,0 +1,31 @@
+import { EventEmitter } from '@angular/core';
+import { AiTxService } from '../../services/aitx.service';
+import * as i0 from "@angular/core";
+export declare class AillmtxTestComponent {
+    private TxService;
+    patientInfo: any;
+    visit: any;
+    existingTest: any[];
+    testSelected: EventEmitter<string[]>;
+    diagnosisName: string;
+    notesss: string;
+    isLoading: boolean;
+    hasError: boolean;
+    noData: boolean;
+    insufficientData: boolean;
+    conclusion: string;
+    testList: any;
+    furtherQuestionsList: any;
+    selectedTest: string[];
+    loggedError: string;
+    constructor(TxService: AiTxService);
+    ngOnInit(): void;
+    getAITest(diagnosis?: string): void;
+    getAITestWithRetry(diagnosis: any): void;
+    onTryAgain(): void;
+    onAITestChange(test: any): void;
+    isTestExists(test: string): boolean;
+    isTestSelected(test: any): boolean;
+    static ɵfac: i0.ɵɵFactoryDeclaration<AillmtxTestComponent, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<AillmtxTestComponent, "lib-aillmtx-test", never, { "patientInfo": "patientInfo"; "visit": "visit"; "existingTest": "existingTest"; "diagnosisName": "diagnosisName"; "notesss": "notesss"; }, { "testSelected": "testSelected"; }, never, never, false>;
+}
