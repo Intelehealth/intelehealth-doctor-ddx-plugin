@@ -95,10 +95,10 @@
                     </div>
                 </div>
                 <ul class="med-details" [class.text-muted]="isMedicineExists(medicine.name)">
-                    <li>{{ medicine.dosage }}</li>
-                    <li>{{ medicine.frequency }}</li>
-                    <li>{{ medicine.duration }} {{medicine.duration_unit}}</li>
-                    <li>{{ medicine.instructions }}</li>
+                    <li *ngIf="medicine.dosage">{{ medicine.dosage }}</li>
+                    <li *ngIf="medicine.frequency">{{ medicine.frequency }}</li>
+                    <li *ngIf="medicine.duration">{{ medicine.duration }} {{medicine.duration_unit}}</li>
+                    <li *ngIf="medicine.instructions">{{ medicine.instructions }}</li>
                 </ul>
                 <div *ngIf="medicine.rationale" class="med-rationale" [class.text-muted]="isMedicineExists(medicine.name)">
                     <strong>Rationale:</strong> {{ medicine.rationale }}
