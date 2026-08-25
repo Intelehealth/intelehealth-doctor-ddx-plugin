@@ -89,8 +89,11 @@ export class AillmddxComponent {
               rationale: v?.rationale
             }
           });
+          const hasNumericRank = mapped.some(v => { const r = Number(v?.rank); return !isNaN(r) && r >= 1; });
           this.diagnosisList = this.visitCompleted
-            ? mapped.filter(v => { const rank = Number(v?.rank); return rank >= 1 && rank <= 5; }).sort((a, b) => Number(a.rank) - Number(b.rank))
+            ? (hasNumericRank
+                ? mapped.filter(v => { const rank = Number(v?.rank); return rank >= 1 && rank <= 5; }).sort((a, b) => Number(a.rank) - Number(b.rank))
+                : mapped.slice(0, 5))
             : mapped;
           this.diagnosisReceived.emit(this.diagnosisList);
           if(data?.result?.data?.further_questions?.length > 0) {
@@ -145,8 +148,11 @@ export class AillmddxComponent {
                 rationale: v?.rationale
               }
             });
+            const hasNumericRank = mapped.some(v => { const r = Number(v?.rank); return !isNaN(r) && r >= 1; });
             this.diagnosisList = this.visitCompleted
-              ? mapped.filter(v => { const rank = Number(v?.rank); return rank >= 1 && rank <= 5; }).sort((a, b) => Number(a.rank) - Number(b.rank))
+              ? (hasNumericRank
+                  ? mapped.filter(v => { const rank = Number(v?.rank); return rank >= 1 && rank <= 5; }).sort((a, b) => Number(a.rank) - Number(b.rank))
+                  : mapped.slice(0, 5))
               : mapped;
             this.diagnosisReceived.emit(this.diagnosisList);
             if(data?.result?.data?.further_questions?.length > 0) {
