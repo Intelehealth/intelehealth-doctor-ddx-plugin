@@ -1,0 +1,16 @@
+import { HttpClient } from "@angular/common/http";
+import * as i0 from "@angular/core";
+export declare class AiddxService {
+    private http;
+    private env?;
+    constructor(http: HttpClient, env?: any);
+    getAIDiagnosis(casehistory: any, visitUuid: string, prescriptionShared?: boolean): import("rxjs").Observable<Object>;
+    getDDxPayload(patientInfo: any, visit: any, notes?: string): string;
+    getDataToExtract(patientInfo: any, visit: any): {};
+    flatten(obj?: {}, parentKey?: string): {};
+    formatAge(birthdate: any, age: any): string;
+    formatText(text: string): string;
+    markdownit(txt: any): any;
+    static ɵfac: i0.ɵɵFactoryDeclaration<AiddxService, [null, { optional: true; }]>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<AiddxService>;
+}
