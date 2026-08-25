@@ -26,7 +26,7 @@ export class AiTxService {
     if (diagnosis !== this.lastDiagnosis || prescriptionShared !== this.lastPrescriptionShared || !this.cachedResponse) {
       this.lastDiagnosis = diagnosis;
       this.lastPrescriptionShared = prescriptionShared;
-      const url = prescriptionShared ? `${this.env.base}/ttxfinal` : `${this.env.mindmapURL}/ttxv1`;
+      const url = prescriptionShared ? `${this.env.mindmapURL}/ttxfinal` : `${this.env.mindmapURL}/ttxv1`;
       this.cachedResponse = this.http.post(url, { diagnosis, case: casehistory, visitUuid }).pipe(
         shareReplay(1)
       );
