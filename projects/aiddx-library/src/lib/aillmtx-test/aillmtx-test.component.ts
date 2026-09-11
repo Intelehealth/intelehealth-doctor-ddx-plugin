@@ -9,6 +9,8 @@ import { AiTxService } from '../../services/aitx.service';
 export class AillmtxTestComponent {
   @Input() patientInfo: any;
   @Input() visit: any;
+  @Input() useJsonVisitSummary?: boolean;
+  public visitSummaryJson: any = null;
   @Input() existingTest: any[] = [];
   @Output() testSelected = new EventEmitter<string[]>();
   @Input() diagnosisName: string;
@@ -30,11 +32,11 @@ export class AillmtxTestComponent {
   ngOnInit() {}
 
   public getAITest(diagnosis?: string) {
-    const payload = this.TxService.getTxPayload(this.patientInfo, this.visit);
+    const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
     this.isLoading = true;
     this.testList = [];
     this.furtherQuestionsList = [];
-    this.TxService.getAITTx(payload, diagnosis, this.visit).subscribe({
+    this.TxService.getAITTx(payload, diagnosis, this.visit.uuid).subscribe({
       next: (data: any) => {
         if (data.result.data.result.length > 0) {
           this.noData = false;
@@ -57,16 +59,21 @@ export class AillmtxTestComponent {
     });
   }
 
+  public resolveVisitSummaryJson(): any {
+    this.visitSummaryJson = this.TxService.resolveVisitSummaryJson(this.visit, this.useJsonVisitSummary);
+    return this.visitSummaryJson;
+  }
+
   public getAITestWithRetry(diagnosis: any) {    
     const MAX_RETRIES = 1;
     let retryCount = 0;
-    const payload = this.TxService.getTxPayload(this.patientInfo, this.visit);
+    const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
 
     const attemptDiagnosis = () => {
       this.isLoading = true;
       this.testList = [];
       this.furtherQuestionsList = [];
-      this.TxService.getAITTx(payload, diagnosis, this.visit).subscribe({
+      this.TxService.getAITTx(payload, diagnosis, this.visit.uuid).subscribe({
         next: (data: any) => {
           if (data.result.data.success && data.result.data.tests_to_be_done.length > 0) {
             this.noData = false;

@@ -1,9 +1,10 @@
 import { Inject, Injectable, Optional } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { ENVIRONMENT } from "../lib/token";
+import { CONFIG_SERVICE, ENVIRONMENT } from "../lib/token";
 import markdownit from "markdown-it";
 import { Observable } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
+import { getVisitSummaryJson, isJsonVisitSummaryEnabled } from "../lib/visit-summary-json";
 
 @Injectable({
   providedIn: "root",
@@ -15,7 +16,8 @@ export class AiTxService {
 
   constructor(
     private http: HttpClient,
-    @Optional() @Inject(ENVIRONMENT) private env?: any
+    @Optional() @Inject(ENVIRONMENT) private env?: any,
+    @Optional() @Inject(CONFIG_SERVICE) private configService?: any
   ) {
     if (!this.env) {
       console.warn("ENVIRONMENT is not provided!");
@@ -34,9 +36,21 @@ export class AiTxService {
     return this.cachedResponse;
   }
 
-  getTxPayload(patientInfo: any, visit: any) {
-    
+  getVisitSummaryJson(visit: any): any | null {
+    return getVisitSummaryJson(visit);
+  }
+
+  isJsonVisitSummaryEnabled(override?: boolean): boolean {
+    return isJsonVisitSummaryEnabled(this.configService, override);
+  }
+
+  resolveVisitSummaryJson(visit: any, override?: boolean): any | null {
+    return this.isJsonVisitSummaryEnabled(override) ? getVisitSummaryJson(visit) : null;
+  }
+
+  getTxPayload(patientInfo: any, visit: any, visitSummaryJson?: any) {
     const data = this.getDataToExtract(patientInfo, visit);
+    const summaryJson = visitSummaryJson !== undefined ? visitSummaryJson : this.resolveVisitSummaryJson(visit);
     const get = (key, fallback = "Null") => data[key] || fallback;
 
     const adultinitial = get("vst.encounters")?.ADULTINITIAL || [];
@@ -58,6 +72,10 @@ export class AiTxService {
       .map((v) => `${v?.concept?.display}: ${v?.value}`)
       .join("\n")}`;
 
+    if (summaryJson) {
+      return summaryJson;
+    }
+
     const payload = `Gender: ${get("pi.person.gender", "Not specified")}
 Age: ${this.formatAge(data["pi.person.birthdate"], data["pi.person.age"])}
 
@@ -70,7 +88,7 @@ Family_history: ${this.formatText(famHist?.value || "")}
 Medical_history: ${this.formatText(medHist?.value || "")}
 
 ${vitals?.length ? vitalPayload : ""}`;
-      
+
     return payload;
   }
 

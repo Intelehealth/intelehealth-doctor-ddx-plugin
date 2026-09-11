@@ -9,6 +9,8 @@ import { AiTxService } from '../../services/aitx.service';
 export class AillmtxReferralComponent {
   @Input() patientInfo: any;
   @Input() visit: any;
+  @Input() useJsonVisitSummary?: boolean;
+  public visitSummaryJson: any = null;
   @Input() existingReferral: any[] = [];
   @Output() referralSelected = new EventEmitter<string[]>();
   @Input() diagnosisName: string;
@@ -30,7 +32,7 @@ export class AillmtxReferralComponent {
   ngOnInit() {}
 
   public getAIReferral(diagnosis?: string) {
-    const payload = this.TxService.getTxPayload(this.patientInfo, this.visit);
+    const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
     this.isLoading = true;
     this.referralList = [];
     this.furtherQuestionsList = [];
@@ -60,10 +62,15 @@ export class AillmtxReferralComponent {
     });
   }
 
+  public resolveVisitSummaryJson(): any {
+    this.visitSummaryJson = this.TxService.resolveVisitSummaryJson(this.visit, this.useJsonVisitSummary);
+    return this.visitSummaryJson;
+  }
+
   public getAIReferralWithRetry(diagnosis: any) {    
     const MAX_RETRIES = 1;
     let retryCount = 0;
-    const payload = this.TxService.getTxPayload(this.patientInfo, this.visit);
+    const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
 
     const attemptDiagnosis = () => {
       this.isLoading = true;

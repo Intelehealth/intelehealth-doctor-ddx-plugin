@@ -1,7 +1,8 @@
 import { Inject, Injectable, Optional } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { ENVIRONMENT } from "../lib/token";
+import { CONFIG_SERVICE, ENVIRONMENT } from "../lib/token";
 import markdownit from "markdown-it";
+import { getVisitSummaryJson, isJsonVisitSummaryEnabled } from "../lib/visit-summary-json";
 
 @Injectable({
   providedIn: "root",
@@ -9,7 +10,8 @@ import markdownit from "markdown-it";
 export class AiddxService {
   constructor(
     private http: HttpClient,
-    @Optional() @Inject(ENVIRONMENT) private env?: any
+    @Optional() @Inject(ENVIRONMENT) private env?: any,
+    @Optional() @Inject(CONFIG_SERVICE) private configService?: any
   ) {
     if (!this.env) {
       console.warn("ENVIRONMENT is not provided!");
@@ -24,8 +26,21 @@ export class AiddxService {
     return this.http.post(`${this.env.mindmapURL}/ddx`, { casehistory, visitUuid });
   }
 
-  getDDxPayload(patientInfo: any, visit: any, notes?: string) {
+  getVisitSummaryJson(visit: any): any | null {
+    return getVisitSummaryJson(visit);
+  }
+
+  isJsonVisitSummaryEnabled(override?: boolean): boolean {
+    return isJsonVisitSummaryEnabled(this.configService, override);
+  }
+
+  resolveVisitSummaryJson(visit: any, override?: boolean): any | null {
+    return this.isJsonVisitSummaryEnabled(override) ? getVisitSummaryJson(visit) : null;
+  }
+
+  getDDxPayload(patientInfo: any, visit: any, notes?: string, visitSummaryJson?: any) {
     const data = this.getDataToExtract(patientInfo, visit);
+    const summaryJson = visitSummaryJson !== undefined ? visitSummaryJson : this.resolveVisitSummaryJson(visit);
     const get = (key, fallback = "Null") => data[key] || fallback;
 
     const adultinitial = get("vst.encounters")?.ADULTINITIAL || [];
@@ -46,6 +61,10 @@ export class AiddxService {
     const vitalPayload = `\nVitals: \n${vitals
       .map((v) => `${v?.concept?.display}: ${v?.value}`)
       .join("\n")}`;
+
+    if (summaryJson) {
+      return notes ? { ...summaryJson, notes } : summaryJson;
+    }
 
     const payload = `Gender: ${get("pi.person.gender", "Not specified")}
 Age: ${this.formatAge(data["pi.person.birthdate"], data["pi.person.age"])}

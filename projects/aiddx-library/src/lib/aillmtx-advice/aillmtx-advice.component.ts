@@ -9,6 +9,8 @@ import { AiTxService } from '../../services/aitx.service';
 export class AillmtxAdviceComponent {
   @Input() patientInfo: any;
   @Input() visit: any;
+  @Input() useJsonVisitSummary?: boolean;
+  public visitSummaryJson: any = null;
   @Input() existingAdvice: any[] = [];
   @Output() adviceSelected = new EventEmitter<string[]>();
   @Input() diagnosisName: string;
@@ -30,7 +32,7 @@ export class AillmtxAdviceComponent {
   ngOnInit() {}
 
   public getAIAdvice(diagnosis?: string) {
-    const payload = this.TxService.getTxPayload(this.patientInfo, this.visit);
+    const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
     this.isLoading = true;
     this.adviceList = [];
     this.furtherQuestionsList = [];
@@ -57,10 +59,15 @@ export class AillmtxAdviceComponent {
     });
   }
 
+  public resolveVisitSummaryJson(): any {
+    this.visitSummaryJson = this.TxService.resolveVisitSummaryJson(this.visit, this.useJsonVisitSummary);
+    return this.visitSummaryJson;
+  }
+
   public getAIAdviceWithRetry(diagnosis: any) {    
     const MAX_RETRIES = 1;
     let retryCount = 0;
-    const payload = this.TxService.getTxPayload(this.patientInfo, this.visit);
+    const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
 
     const attemptDiagnosis = () => {
       this.isLoading = true;
