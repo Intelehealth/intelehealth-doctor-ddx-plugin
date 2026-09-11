@@ -1,0 +1,1764 @@
+import * as i0 from '@angular/core';
+import { InjectionToken, Injectable, Optional, Inject, EventEmitter, Component, Input, Output, NgModule } from '@angular/core';
+import markdownit from 'markdown-it';
+import * as i1 from '@angular/common/http';
+import { shareReplay } from 'rxjs/operators';
+import * as i2 from '@angular/material/dialog';
+import * as i3 from 'ngx-toastr';
+import * as i2$1 from '@angular/common';
+import { CommonModule } from '@angular/common';
+import * as i5 from '@angular/material/expansion';
+import { MatExpansionModule } from '@angular/material/expansion';
+import * as i6 from '@ng-bootstrap/ng-bootstrap';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import * as i4 from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
+import * as i3$1 from '@angular/forms';
+import { FormsModule } from '@angular/forms';
+import { MatMenuModule } from '@angular/material/menu';
+
+const DIAGNOSIS_SERVICE = new InjectionToken('DIAGNOSIS_SERVICE');
+const CONFIG_SERVICE = new InjectionToken('CONFIG_SERVICE');
+const ENVIRONMENT = new InjectionToken('ENVIRONMENT');
+const dummyPayload = "Gender: Male\n\n\u00a0 Age: 21 years\n\n\u00a0 Chief_complaint: ► **Skin disorder** :\n\u00a0• Type of the skin lesion - Skin rash.\n\u00a0• Site - Face.\n\u00a0• No. of lesions - Multiple lesions.\n\u00a0• Duration - 1 महिने.\n\u00a0• Progression - Transient.\n\u00a0• Exposure to irritants/offending agents - No.\n\u00a0• Prior treatment sought - None.\n\u00a0► **Associated symptoms** :\n\u00a0• Patient reports -\n\u00a0Skin discharge - Clear.\n\u00a0• Patient denies -\n\u00a0Painful skin lesion, Skin bruises, Nose bleed, Gum bleeding, Abdominal pain,\n\u00a0Fever, Itchy skin, Runny nose, Joint pain, Dandruff, Sensitive to the sun\n\n\u00a0 Physical_examination: **General exams:**\n\u00a0• Eyes: Jaundice-no jaundice seen, [picture taken].\n\u00a0• Eyes: Pallor-normal pallor, [picture taken].\n\u00a0• Arm-Pinch skin* - pinch test normal.\n\u00a0• Nail abnormality-nails normal, [picture taken].\n\u00a0• Nail anemia-Nails are not pale, [picture taken].\n\u00a0• Ankle-no pedal oedema.\n\u00a0**Any Location:**\n\u00a0• Skin Rash:-rash seen, 5. surface is smooth. rash not present on palms and\n\u00a0soles. no eschar. , [picture taken].\n\n\u00a0 Patient_medical_history: • Allergies - No known allergies.\n\u00a0• Alcohol use - No.\n\u00a0• Smoking history - Patient denied/has no h/o smoking.\n\u00a0• Drug history - No recent medication.\n\n\u00a0 Family_history: -\n\n\u00a0 Vitals:-\n\n\u00a0Sbp: 102.0\n\n\u00a0 Dbp: 83.0\n\n\u00a0 Pulse: 86.0\n\n\u00a0 Temperature: 37.0 'C\n\n\u00a0 Weight: 46.0 Kg\n\n\u00a0 Height: 156.0 cm\n\n\u00a0 RR: 21.0\n\n\u00a0 SPO2: 99.0\n\n\u00a0 HB: Null\n\n\u00a0 Sugar_random: Null\n\n\u00a0 Blood_group: Null\n\n\u00a0 Sugar_pp: Null\n\n\u00a0 Sugar_after_meal: Null";
+const response = {
+    "conclusion": "Based on the patient's age, the location and description of the rash, and the absence of other symptoms, acne vulgaris is the most likely diagnosis. Rosacea and seborrheic dermatitis are also possible, but less likely. Contact dermatitis and tinea facialis are less likely due to the lack of specific features. Further evaluation, such as a skin examination and potentially a skin scraping, may be necessary to confirm the diagnosis and determine the appropriate treatment.",
+    "result": [
+        {
+            "diagnosis": "Acne Vulgaris (High)",
+            "likelihood": "High",
+            "rationale": "*Clinical Relevance and Features:The patient is a 21 year old male presenting with a skin rash on the face for one month. The description of multiple lesions and clear discharge is consistent with acne. The absence of pain, itching, or other systemic symptoms further supports this diagnosis. *Relevance to Rural India:Acne is a common skin condition worldwide, affecting adolescents and young adults. While not directly related to the rural Indian context, access to dermatological care and specific treatments might be limited, leading to delayed or inappropriate management. *Clinical Relevance:Acne vulgaris is a common skin condition that occurs when hair follicles become clogged with oil and dead skin cells. It is most common in adolescents and young adults, and it can cause pimples, blackheads, and whiteheads."
+        },
+        {
+            "diagnosis": "Rosacea (Moderate)",
+            "likelihood": "Moderate",
+            "rationale": "*Clinical Relevance and Features:Rosacea can present with facial redness, small visible blood vessels, and sometimes papules and pustules. The patient's age and the location of the rash on the face are consistent with rosacea. The absence of itching argues against other common skin conditions. *Relevance to Rural India:Rosacea is less common than acne but can occur in individuals with fair skin. Environmental factors like sun exposure, which is common in rural India, can exacerbate rosacea. *Clinical Relevance:Rosacea is a chronic skin condition that causes redness, small bumps, and visible blood vessels on the face. It is more common in women than men, and it typically affects people between the ages of 30 and 50."
+        },
+        {
+            "diagnosis": "Seborrheic Dermatitis (Moderate)",
+            "likelihood": "Moderate",
+            "rationale": "*Clinical Relevance and Features:Seborrheic dermatitis can cause a rash on the face, particularly in areas with sebaceous glands. While the patient denies dandruff, seborrheic dermatitis can sometimes present without significant scalp involvement. *Relevance to Rural India:Seborrheic dermatitis is a common skin condition that can be exacerbated by factors like stress and poor hygiene. *Clinical Relevance:Seborrheic dermatitis is a common skin condition that causes scaly, flaky, itchy skin. It is most common on the scalp, face, and chest."
+        },
+        {
+            "diagnosis": "Contact Dermatitis (Low)",
+            "likelihood": "Low",
+            "rationale": "*Lack of Fit Reasoning:Although the patient denies exposure to irritants, it's possible they are unaware of a specific trigger. However, the transient nature of the rash and the absence of itching make contact dermatitis less likely. *Clinical Relevance:Contact dermatitis is a skin condition that occurs when the skin comes into contact with an irritant or allergen. The symptoms of contact dermatitis include redness, itching, and blistering."
+        },
+        {
+            "diagnosis": "Tinea Facialis (Low)",
+            "likelihood": "Low",
+            "rationale": "*Lack of Fit Reasoning:Tinea facialis (ringworm of the face) is a fungal infection that typically presents with a more circular, scaly rash. The description of the rash as \"smooth\" and the absence of itching make this diagnosis less likely. *Clinical Relevance:Tinea facialis is a fungal infection of the face that causes a red, scaly rash. It is more common in people who live in warm, humid climates."
+        }
+    ]
+};
+
+const ADULTINITIAL_ENCOUNTER = 'ADULTINITIAL';
+const JSON_VISIT_SUMMARY_CONCEPT = 'JSON Format Visit Summary';
+const JSON_VISIT_SUMMARY_CONFIG_KEY = 'json_format_visit_summary';
+function isJsonVisitSummaryEnabled(configService, override) {
+    if (override !== undefined && override !== null) {
+        return !!override;
+    }
+    return !!configService?.ai_llm?.[JSON_VISIT_SUMMARY_CONFIG_KEY];
+}
+function getEncounterByType(visit, encounterType) {
+    const encounters = Array.isArray(visit?.encounters) ? visit.encounters : [];
+    return (encounters.find((e) => e?.encounterType?.display === encounterType) ||
+        encounters.find((e) => typeof e?.display === 'string' && e.display.startsWith(encounterType)) ||
+        null);
+}
+function findObsByConcept(encounter, conceptName) {
+    const obs = Array.isArray(encounter?.obs) ? encounter.obs : [];
+    return (obs.find((o) => typeof o?.concept?.display === 'string' && o.concept.display.trim() === conceptName) ||
+        obs.find((o) => typeof o?.display === 'string' && o.display.trim().startsWith(`${conceptName}:`)) ||
+        null);
+}
+function getObsRawValue(obs, conceptName) {
+    const value = obs?.value;
+    if (typeof value === 'string' && value.trim()) {
+        return value.trim();
+    }
+    if (value && typeof value === 'object') {
+        return null;
+    }
+    const display = obs?.display;
+    if (typeof display === 'string') {
+        const prefix = `${conceptName}:`;
+        const trimmed = display.trim();
+        if (trimmed.startsWith(prefix)) {
+            const raw = trimmed.slice(prefix.length).trim();
+            if (raw) {
+                return raw;
+            }
+        }
+    }
+    return null;
+}
+function getVisitSummaryJson(visit) {
+    const encounter = getEncounterByType(visit, ADULTINITIAL_ENCOUNTER);
+    if (!encounter) {
+        return null;
+    }
+    const obs = findObsByConcept(encounter, JSON_VISIT_SUMMARY_CONCEPT);
+    if (!obs) {
+        return null;
+    }
+    const raw = getObsRawValue(obs, JSON_VISIT_SUMMARY_CONCEPT);
+    if (!raw) {
+        return null;
+    }
+    try {
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') {
+            return null;
+        }
+        return parsed;
+    }
+    catch (err) {
+        console.warn(`[aiddx-library] Could not parse "${JSON_VISIT_SUMMARY_CONCEPT}" for visit ${visit?.uuid}`, err);
+        return null;
+    }
+}
+
+class AiddxService {
+    http;
+    env;
+    configService;
+    constructor(http, env, configService) {
+        this.http = http;
+        this.env = env;
+        this.configService = configService;
+        if (!this.env) {
+            console.warn("ENVIRONMENT is not provided!");
+        }
+    }
+    getAIDiagnosis(casehistory, visitUuid, prescriptionShared = false) {
+        if (prescriptionShared) {
+            return this.http.post(`${this.env.mindmapURL}/ddxfinal`, { casehistory, visitUuid });
+        }
+        /* Routed through the portal's authenticated wrapper. */
+        return this.http.post(`${this.env.mindmapURL}/ddx`, { casehistory, visitUuid });
+    }
+    getVisitSummaryJson(visit) {
+        return getVisitSummaryJson(visit);
+    }
+    isJsonVisitSummaryEnabled(override) {
+        return isJsonVisitSummaryEnabled(this.configService, override);
+    }
+    resolveVisitSummaryJson(visit, override) {
+        return this.isJsonVisitSummaryEnabled(override) ? getVisitSummaryJson(visit) : null;
+    }
+    getDDxPayload(patientInfo, visit, notes, visitSummaryJson) {
+        const data = this.getDataToExtract(patientInfo, visit);
+        const summaryJson = visitSummaryJson !== undefined ? visitSummaryJson : this.resolveVisitSummaryJson(visit);
+        const get = (key, fallback = "Null") => data[key] || fallback;
+        const adultinitial = get("vst.encounters")?.ADULTINITIAL || [];
+        const complaint = adultinitial.find((a) => a?.concept?.display?.includes?.("COMPLAINT"));
+        const phyExam = adultinitial.find((a) => a?.concept?.display?.includes?.("PHYSICAL EXAMINATION"));
+        const famHist = adultinitial.find((a) => a?.concept?.display?.includes?.("FAMILY HISTORY"));
+        const medHist = adultinitial.find((a) => a?.concept?.display?.includes?.("MEDICAL HISTORY"));
+        const vitals = get("vst.encounters")?.Vitals || [];
+        const vitalPayload = `\nVitals: \n${vitals
+            .map((v) => `${v?.concept?.display}: ${v?.value}`)
+            .join("\n")}`;
+        if (summaryJson) {
+            return notes ? { ...summaryJson, notes } : summaryJson;
+        }
+        const payload = `Gender: ${get("pi.person.gender", "Not specified")}
+Age: ${this.formatAge(data["pi.person.birthdate"], data["pi.person.age"])}
+
+Chief_complaint: ${this.formatText(complaint?.value || "")}
+
+Physical_examination: ${this.formatText(phyExam?.value || "")}
+
+Family_history: ${this.formatText(famHist?.value || "")}
+
+Medical_history: ${this.formatText(medHist?.value || "")}
+
+${vitals?.length ? vitalPayload : ""}
+
+${notes ? `Notes: ${notes}` : ""}`;
+        return payload;
+    }
+    getDataToExtract(patientInfo, visit) {
+        const data = {
+            ...this.flatten(patientInfo, "pi"),
+            ...this.flatten(visit, "vst"),
+        };
+        return data;
+    }
+    flatten(obj = {}, parentKey = "") {
+        let flatData = {};
+        for (const [key, value] of Object.entries(obj)) {
+            const newKey = parentKey ? `${parentKey}.${key}` : key;
+            if (Array.isArray(value)) {
+                if (key === "encounters") {
+                    let attr = {};
+                    value.forEach((item, index) => {
+                        attr[item?.encounterType?.display] = item?.obs;
+                    });
+                    flatData[newKey] = attr;
+                }
+            }
+            else if (typeof value === "object" && value !== null) {
+                const nestedFlat = this.flatten(value, newKey);
+                flatData = { ...flatData, ...nestedFlat };
+            }
+            else {
+                flatData[newKey] = value;
+            }
+        }
+        return flatData;
+    }
+    formatAge(birthdate, age) {
+        if (birthdate) {
+            const dob = new Date(birthdate);
+            if (!isNaN(dob.getTime())) {
+                const now = new Date();
+                const days = Math.max(0, Math.floor((now.getTime() - dob.getTime()) / 86400000));
+                // 0-28 days: days only
+                if (days <= 28)
+                    return `${days} day${days === 1 ? "" : "s"}`;
+                let months = (now.getFullYear() - dob.getFullYear()) * 12 + (now.getMonth() - dob.getMonth());
+                if (now.getDate() < dob.getDate())
+                    months--;
+                if (months < 0)
+                    months = 0;
+                // 29 days - 23 months: months only
+                if (months < 24)
+                    return `${months} month${months === 1 ? "" : "s"}`;
+                const years = Math.floor(months / 12);
+                const remMonths = months % 12;
+                // 18+ years: years only
+                if (years >= 18)
+                    return `${years} years`;
+                // 2-17 years: years and months
+                return remMonths > 0
+                    ? `${years} years ${remMonths} month${remMonths === 1 ? "" : "s"}`
+                    : `${years} years`;
+            }
+        }
+        if (age !== undefined && age !== null && age !== "" && Number(age) > 0) {
+            return `${age} year${Number(age) === 1 ? "" : "s"}`;
+        }
+        return "Not specified";
+    }
+    formatText(text) {
+        if (!text)
+            return "";
+        return text
+            .replace(/<br\/>/g, "\n")
+            .replace(/<b>/g, "**")
+            .replace(/<\/b>/g, "**")
+            .replace(/►/g, "")
+            .trim();
+    }
+    markdownit(txt) {
+        const md = markdownit();
+        let formattedText = txt.map(obj => {
+            return Object.entries(obj).map(([key, value]) => `**${key}**: ${value}`).join("\n");
+        }).join("\n\n");
+        return md.renderInline(formattedText);
+    }
+    static ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AiddxService, deps: [{ token: i1.HttpClient }, { token: ENVIRONMENT, optional: true }, { token: CONFIG_SERVICE, optional: true }], target: i0.ɵɵFactoryTarget.Injectable });
+    static ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AiddxService, providedIn: "root" });
+}
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AiddxService, decorators: [{
+            type: Injectable,
+            args: [{
+                    providedIn: "root",
+                }]
+        }], ctorParameters: function () { return [{ type: i1.HttpClient }, { type: undefined, decorators: [{
+                    type: Optional
+                }, {
+                    type: Inject,
+                    args: [ENVIRONMENT]
+                }] }, { type: undefined, decorators: [{
+                    type: Optional
+                }, {
+                    type: Inject,
+                    args: [CONFIG_SERVICE]
+                }] }]; } });
+
+class AiTxService {
+    http;
+    env;
+    configService;
+    lastDiagnosis = null;
+    lastPrescriptionShared = null;
+    cachedResponse = null;
+    constructor(http, env, configService) {
+        this.http = http;
+        this.env = env;
+        this.configService = configService;
+        if (!this.env) {
+            console.warn("ENVIRONMENT is not provided!");
+        }
+    }
+    getAITTx(casehistory, diagnosis, visitUuid, prescriptionShared = false) {
+        if (diagnosis !== this.lastDiagnosis || prescriptionShared !== this.lastPrescriptionShared || !this.cachedResponse) {
+            this.lastDiagnosis = diagnosis;
+            this.lastPrescriptionShared = prescriptionShared;
+            const url = prescriptionShared ? `${this.env.mindmapURL}/ttxfinal` : `${this.env.mindmapURL}/ttxv1`;
+            this.cachedResponse = this.http.post(url, { diagnosis, case: casehistory, visitUuid }).pipe(shareReplay(1));
+        }
+        return this.cachedResponse;
+    }
+    getVisitSummaryJson(visit) {
+        return getVisitSummaryJson(visit);
+    }
+    isJsonVisitSummaryEnabled(override) {
+        return isJsonVisitSummaryEnabled(this.configService, override);
+    }
+    resolveVisitSummaryJson(visit, override) {
+        return this.isJsonVisitSummaryEnabled(override) ? getVisitSummaryJson(visit) : null;
+    }
+    getTxPayload(patientInfo, visit, visitSummaryJson) {
+        const data = this.getDataToExtract(patientInfo, visit);
+        const summaryJson = visitSummaryJson !== undefined ? visitSummaryJson : this.resolveVisitSummaryJson(visit);
+        const get = (key, fallback = "Null") => data[key] || fallback;
+        const adultinitial = get("vst.encounters")?.ADULTINITIAL || [];
+        const complaint = adultinitial.find((a) => a?.concept?.display?.includes?.("COMPLAINT"));
+        const phyExam = adultinitial.find((a) => a?.concept?.display?.includes?.("PHYSICAL EXAMINATION"));
+        const famHist = adultinitial.find((a) => a?.concept?.display?.includes?.("FAMILY HISTORY"));
+        const medHist = adultinitial.find((a) => a?.concept?.display?.includes?.("MEDICAL HISTORY"));
+        const vitals = get("vst.encounters")?.Vitals || [];
+        const vitalPayload = `\nVitals: \n${vitals
+            .map((v) => `${v?.concept?.display}: ${v?.value}`)
+            .join("\n")}`;
+        if (summaryJson) {
+            return summaryJson;
+        }
+        const payload = `Gender: ${get("pi.person.gender", "Not specified")}
+Age: ${this.formatAge(data["pi.person.birthdate"], data["pi.person.age"])}
+
+Chief_complaint: ${this.formatText(complaint?.value || "")}
+
+Physical_examination: ${this.formatText(phyExam?.value || "")}
+
+Family_history: ${this.formatText(famHist?.value || "")}
+
+Medical_history: ${this.formatText(medHist?.value || "")}
+
+${vitals?.length ? vitalPayload : ""}`;
+        return payload;
+    }
+    getDataToExtract(patientInfo, visit) {
+        const data = {
+            ...this.flatten(patientInfo, "pi"),
+            ...this.flatten(visit, "vst"),
+        };
+        return data;
+    }
+    flatten(obj = {}, parentKey = "") {
+        let flatData = {};
+        for (const [key, value] of Object.entries(obj)) {
+            const newKey = parentKey ? `${parentKey}.${key}` : key;
+            if (Array.isArray(value)) {
+                if (key === "encounters") {
+                    let attr = {};
+                    value.forEach((item, index) => {
+                        attr[item?.encounterType?.display] = item?.obs;
+                    });
+                    flatData[newKey] = attr;
+                }
+            }
+            else if (typeof value === "object" && value !== null) {
+                const nestedFlat = this.flatten(value, newKey);
+                flatData = { ...flatData, ...nestedFlat };
+            }
+            else {
+                flatData[newKey] = value;
+            }
+        }
+        return flatData;
+    }
+    formatAge(birthdate, age) {
+        if (birthdate) {
+            const dob = new Date(birthdate);
+            if (!isNaN(dob.getTime())) {
+                const now = new Date();
+                const days = Math.max(0, Math.floor((now.getTime() - dob.getTime()) / 86400000));
+                // 0-28 days: days only
+                if (days <= 28)
+                    return `${days} day${days === 1 ? "" : "s"}`;
+                let months = (now.getFullYear() - dob.getFullYear()) * 12 + (now.getMonth() - dob.getMonth());
+                if (now.getDate() < dob.getDate())
+                    months--;
+                if (months < 0)
+                    months = 0;
+                // 29 days - 23 months: months only
+                if (months < 24)
+                    return `${months} month${months === 1 ? "" : "s"}`;
+                const years = Math.floor(months / 12);
+                const remMonths = months % 12;
+                // 18+ years: years only
+                if (years >= 18)
+                    return `${years} years`;
+                // 2-17 years: years and months
+                return remMonths > 0
+                    ? `${years} years ${remMonths} month${remMonths === 1 ? "" : "s"}`
+                    : `${years} years`;
+            }
+        }
+        if (age !== undefined && age !== null && age !== "" && Number(age) > 0) {
+            return `${age} year${Number(age) === 1 ? "" : "s"}`;
+        }
+        return "Not specified";
+    }
+    formatText(text) {
+        if (!text)
+            return "";
+        return text
+            .replace(/<br\/>/g, "\n")
+            .replace(/<b>/g, "**")
+            .replace(/<\/b>/g, "**")
+            .replace(/►/g, "")
+            .trim();
+    }
+    markdownit(txt) {
+        const md = markdownit();
+        let formattedText;
+        if (typeof txt === 'string') {
+            formattedText = txt;
+        }
+        else if (Array.isArray(txt)) {
+            formattedText = txt.map(obj => {
+                return Object.entries(obj).map(([key, value]) => `**${key}**: ${value}`).join("\n");
+            }).join("\n\n");
+        }
+        else {
+            // Fallback for unexpected input
+            formattedText = String(txt);
+        }
+        return md.renderInline(formattedText);
+    }
+    clearCache() {
+        this.lastDiagnosis = null;
+        this.lastPrescriptionShared = null;
+        this.cachedResponse = null;
+    }
+    static ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AiTxService, deps: [{ token: i1.HttpClient }, { token: ENVIRONMENT, optional: true }, { token: CONFIG_SERVICE, optional: true }], target: i0.ɵɵFactoryTarget.Injectable });
+    static ɵprov = i0.ɵɵngDeclareInjectable({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AiTxService, providedIn: "root" });
+}
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AiTxService, decorators: [{
+            type: Injectable,
+            args: [{
+                    providedIn: "root",
+                }]
+        }], ctorParameters: function () { return [{ type: i1.HttpClient }, { type: undefined, decorators: [{
+                    type: Optional
+                }, {
+                    type: Inject,
+                    args: [ENVIRONMENT]
+                }] }, { type: undefined, decorators: [{
+                    type: Optional
+                }, {
+                    type: Inject,
+                    args: [CONFIG_SERVICE]
+                }] }]; } });
+
+class AillmddxComponent {
+    ddxSvc;
+    dialog;
+    toastr;
+    env;
+    patientInfo;
+    visit;
+    existingDiagnosis = [];
+    diagnosisSelected = new EventEmitter();
+    furtherQuestionsListReceived = new EventEmitter();
+    diagnosisReceived = new EventEmitter();
+    rationaleOpened = new EventEmitter();
+    reportIssue = new EventEmitter();
+    notes;
+    visitCompleted = false;
+    reportExpanded = false;
+    useJsonVisitSummary;
+    visitSummaryJson = null;
+    isLoading = false;
+    hasError = false;
+    noData = false;
+    insufficientData = false;
+    isActive = false;
+    conclusion = '';
+    treatment = '';
+    menuContent = '';
+    diagnosisName = [];
+    questions = [
+        {
+            title: 'Key symptoms and their characteristics',
+            items: [
+                'Can you describe the rash in more detail?',
+                'Are there any blackheads or whiteheads?',
+                'Does the rash itch or burn? Does it get worse after sweating or sun exposure?',
+                'When you say the rash is transient, how long does it last before disappearing?',
+                'Does it reappear in the same location?'
+            ]
+        },
+    ];
+    diagnosisList = [];
+    furtherQuestionsList = [];
+    selectedDiagnosis = [];
+    apiResponseChanged = false;
+    constructor(ddxSvc, dialog, toastr, env) {
+        this.ddxSvc = ddxSvc;
+        this.dialog = dialog;
+        this.toastr = toastr;
+        this.env = env;
+        if (!this.env) {
+            console.warn("ENVIRONMENT is not provided!");
+        }
+    }
+    ngOnInit() { }
+    ngOnChanges(changes) {
+        if (changes['visit'] || changes['useJsonVisitSummary']) {
+            this.visitSummaryJson = this.resolveVisitSummaryJson();
+        }
+    }
+    resolveVisitSummaryJson() {
+        return this.ddxSvc.resolveVisitSummaryJson(this.visit, this.useJsonVisitSummary);
+    }
+    getAIDiagnosis(notes) {
+        this.visitSummaryJson = this.resolveVisitSummaryJson();
+        const payload = this.ddxSvc.getDDxPayload(this.patientInfo, this.visit, notes, this.visitSummaryJson);
+        this.isLoading = true;
+        this.diagnosisList = [];
+        this.furtherQuestionsList = [];
+        this.ddxSvc.getAIDiagnosis(payload, this.visit.uuid, this.visitCompleted).subscribe({
+            next: (data) => {
+                // if (!this.isValidDdxResponse(data)) {
+                //   this.apiResponseChanged = true;
+                //   return false;
+                // }
+                if (data?.conclusion)
+                    this.conclusion = data?.conclusion;
+                if (data?.result?.data?.result?.length > 0) {
+                    this.noData = false;
+                    const mapped = data.result.data.result.map(v => {
+                        // When summarised_rationale is missing, generate from rationale values
+                        let summarised = v?.summarised_rationale;
+                        // if (!summarised?.length && Array.isArray(v?.rationale)) {
+                        //   summarised = v.rationale.flatMap(obj => Object.values(obj));
+                        // }
+                        return {
+                            ...v,
+                            diagnosis: v?.diagnosis,
+                            summarised_rationale: summarised,
+                            rationale: v?.rationale
+                        };
+                    });
+                    const hasNumericRank = mapped.some(v => { const r = Number(v?.rank); return !isNaN(r) && r >= 1; });
+                    this.diagnosisList = this.visitCompleted
+                        ? (hasNumericRank
+                            ? mapped.filter(v => { const rank = Number(v?.rank); return rank >= 1 && rank <= 5; }).sort((a, b) => Number(a.rank) - Number(b.rank))
+                            : mapped.slice(0, 5))
+                        : mapped;
+                    this.diagnosisReceived.emit(this.diagnosisList);
+                    if (data?.result?.data?.further_questions?.length > 0) {
+                        this.furtherQuestionsList = data.result.data.further_questions.map(q => {
+                            const key = Object.keys(q)[0];
+                            return q[key];
+                        });
+                        this.furtherQuestionsListReceived.emit(this.furtherQuestionsList);
+                    }
+                }
+                else {
+                    this.noData = true;
+                }
+                this.isLoading = false;
+            },
+            error: (err) => {
+                this.hasError = true;
+                this.isLoading = false;
+            },
+            complete: () => {
+                this.isLoading = false;
+            }
+        });
+    }
+    getAIDiagnosisWithRetry(notes) {
+        const MAX_RETRIES = 3;
+        let retryCount = 0;
+        this.visitSummaryJson = this.resolveVisitSummaryJson();
+        const payload = this.ddxSvc.getDDxPayload(this.patientInfo, this.visit, notes, this.visitSummaryJson);
+        const attemptDiagnosis = () => {
+            this.isLoading = true;
+            this.diagnosisList = [];
+            this.furtherQuestionsList = [];
+            this.ddxSvc.getAIDiagnosis(payload, this.visit.uuid, this.visitCompleted).subscribe({
+                next: (data) => {
+                    // if (!this.isValidDdxResponse(data)) {
+                    //   this.apiResponseChanged = true;
+                    //   return false;
+                    // }
+                    if (data?.conclusion)
+                        this.conclusion = data?.conclusion;
+                    if (data?.result?.data?.result?.length > 0) {
+                        this.noData = false;
+                        const mapped = data.result.data.result.map(v => {
+                            // let summarised = v?.summarised_rationale;
+                            // if (!summarised?.length && Array.isArray(v?.rationale)) {
+                            //   summarised = v.rationale.flatMap(obj => Object.values(obj));
+                            // }
+                            return {
+                                ...v,
+                                diagnosis: v?.diagnosis,
+                                summarised_rationale: v?.summarised_rationale,
+                                rationale: v?.rationale
+                            };
+                        });
+                        const hasNumericRank = mapped.some(v => { const r = Number(v?.rank); return !isNaN(r) && r >= 1; });
+                        this.diagnosisList = this.visitCompleted
+                            ? (hasNumericRank
+                                ? mapped.filter(v => { const rank = Number(v?.rank); return rank >= 1 && rank <= 5; }).sort((a, b) => Number(a.rank) - Number(b.rank))
+                                : mapped.slice(0, 5))
+                            : mapped;
+                        this.diagnosisReceived.emit(this.diagnosisList);
+                        if (data?.result?.data?.further_questions?.length > 0) {
+                            this.furtherQuestionsList = data.result.data.further_questions.map(q => {
+                                const key = Object.keys(q)[0];
+                                return q[key];
+                            });
+                            this.furtherQuestionsListReceived.emit(this.furtherQuestionsList);
+                        }
+                    }
+                    else {
+                        this.noData = true;
+                    }
+                    this.isLoading = false;
+                },
+                error: (err) => {
+                    retryCount++;
+                    if (retryCount < MAX_RETRIES) {
+                        console.warn('[AILLMDDX] Retry attempt scheduled', { retryAfterMs: 1000, nextAttempt: retryCount + 1 });
+                        setTimeout(() => {
+                            attemptDiagnosis();
+                        }, 1000);
+                    }
+                    else {
+                        this.hasError = true;
+                        this.isLoading = false;
+                        console.error('Failed to get AI diagnosis after 3 attempts:', err);
+                    }
+                },
+                complete: () => {
+                    this.isLoading = false;
+                }
+            });
+        };
+        attemptDiagnosis();
+    }
+    onTryAgain() {
+        this.getAIDiagnosis(this.notes);
+    }
+    onReportOpened() {
+        this.rationaleOpened.emit({ diagnosis_count: this.diagnosisList?.length || 0 });
+    }
+    onReportIssue() {
+        this.reportIssue.emit({ diagnosis_count: this.diagnosisList?.length || 0 });
+    }
+    onAIDiagnosisChange(event) {
+        if (!event) {
+            this.selectedDiagnosis = [];
+        }
+        else if (Array.isArray(event)) {
+            this.selectedDiagnosis = [...event];
+        }
+        else {
+            const index = this.selectedDiagnosis.indexOf(event);
+            if (index > -1) {
+                this.selectedDiagnosis = this.selectedDiagnosis.filter(d => d !== event);
+            }
+            else {
+                this.selectedDiagnosis = [...this.selectedDiagnosis, event];
+            }
+        }
+        this.diagnosisSelected.emit([...this.selectedDiagnosis]);
+    }
+    isDiagnosisExists(diagnosis) {
+        return this.existingDiagnosis.some(d => d.diagnosisName === diagnosis);
+    }
+    isDiagnosisSelected(diagnosis) {
+        return this.selectedDiagnosis.includes(diagnosis) || this.existingDiagnosis.some(d => d?.diagnosisName === diagnosis);
+    }
+    setMenuContent(title, likelihood, item) {
+        this.menuContent = item.flatMap(obj => Object.entries(obj).map(([key, value]) => ({ key, value })));
+        this.diagnosisName = [title, likelihood];
+        return;
+    }
+    isValidDdxResponse(data) {
+        if (!data || typeof data !== 'object')
+            return false;
+        const resultArray = data?.result?.data?.result;
+        const furtherQuestions = data?.result?.data?.further_questions;
+        const conclusionTop = data?.conclusion;
+        const conclusionNested = data?.result?.data?.conclusion;
+        // Check if resultArray is valid
+        const resultArrayValid = Array.isArray(resultArray);
+        if (!resultArrayValid) {
+            this.toastr.error('Please refresh the page to try again. If issue persists contact Tech Support', 'AI recommendation could not be generated.');
+        }
+        // Validate each result item
+        const itemsValid = resultArray.every((item, idx) => {
+            const diagnosisOk = typeof item?.diagnosis === 'string' && item.diagnosis.length > 0;
+            const likelihoodOk = typeof item?.likelihood === 'string' && item.likelihood.length > 0;
+            const rationaleOk = Array.isArray(item?.rationale) && item.rationale.every((r) => r && typeof r === 'object' && !Array.isArray(r));
+            const summarisedOk = Array.isArray(item?.summarised_rationale) && item.summarised_rationale.every((s) => typeof s === 'string');
+            const ok = diagnosisOk && likelihoodOk && rationaleOk && summarisedOk;
+            if (!ok) {
+                console.error('[AILLMDDX] Invalid result item at index', idx, { item });
+                this.toastr.error(`Invalid result item at index ${idx}`, 'API response format of "result.items" has changed.');
+            }
+            return ok;
+        });
+        // Validate further questions
+        const furtherQuestionsValid = furtherQuestions === undefined || Array.isArray(furtherQuestions);
+        if (!furtherQuestionsValid) {
+            this.toastr.error('Please refresh the page to try again. If issue persists contact Tech Support', 'AI recommendation could not be generated.');
+        }
+        // Validate conclusion
+        const conclusionValid = (conclusionTop === undefined || typeof conclusionTop === 'string') && (conclusionNested === undefined || typeof conclusionNested === 'string');
+        if (!conclusionValid) {
+            this.toastr.error('Please refresh the page to try again. If issue persists contact Tech Support', 'AI recommendation could not be generated.');
+        }
+        return itemsValid && furtherQuestionsValid && conclusionValid;
+    }
+    // In your component class
+    isObject(value) {
+        return typeof value === 'object' && value !== null;
+    }
+    static ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AillmddxComponent, deps: [{ token: AiddxService }, { token: i2.MatDialog }, { token: i3.ToastrService }, { token: ENVIRONMENT, optional: true }], target: i0.ɵɵFactoryTarget.Component });
+    static ɵcmp = i0.ɵɵngDeclareComponent({ minVersion: "14.0.0", version: "14.3.0", type: AillmddxComponent, selector: "app-aillmddx", inputs: { patientInfo: "patientInfo", visit: "visit", existingDiagnosis: "existingDiagnosis", notes: "notes", visitCompleted: "visitCompleted", reportExpanded: "reportExpanded", useJsonVisitSummary: "useJsonVisitSummary" }, outputs: { diagnosisSelected: "diagnosisSelected", furtherQuestionsListReceived: "furtherQuestionsListReceived", diagnosisReceived: "diagnosisReceived", rationaleOpened: "rationaleOpened", reportIssue: "reportIssue" }, usesOnChanges: true, ngImport: i0, template: "<ng-container *ngIf=\"!diagnosisList.length\">\n  <div class=\"d-flex justify-content-center mt-3\">\n    <div class=\"erorr-container alert text-center p-4 d-flex flex-column align-items-center\">\n      <ng-container *ngIf=\"!isLoading && (hasError || noData || apiResponseChanged)\">\n        <div class=\"text-danger\" [ngStyle]=\"{ 'margin-top': hasError ? '15px' : '40px' }\">\n          <span><img class=\"mb-1\" src=\"assets/svgs/alert-triangle.svg\" alt=\"\" /></span>\n          <span *ngIf=\"hasError\" class=\"ml-2\">No suggestions at this moment</span>\n          <span *ngIf=\"apiResponseChanged\" class=\"ml-2\">The response format has changed. Please contact support or try again later.</span>\n          <span *ngIf=\"noData\" class=\"ml-2\">The input provided does not have enough clinical details for an AI-assistant assessment.</span>\n        </div>\n        <button *ngIf=\"!noData\" type=\"button\" class=\"try-again-btn mt-3\" (click)=\"onTryAgain()\">{{'Try again'|translate}}</button>\n      </ng-container>\n\n      <button *ngIf=\"isLoading\" class=\"stats-loading\">\n        <div class=\"eins\"></div>\n        <div class=\"zwei\"></div>\n        <div class=\"drei\"></div>\n      </button>\n\n      <div *ngIf=\"isLoading\" class=\"mt-3\">\n        <i class=\"bi bi-exclamation-triangle-fill\"></i>\n        <span class=\"ms-2 loading-text\">Please wait while the results are being generated.</span>\n      </div>\n    </div>\n  </div>\n</ng-container>\n\n<div class=\"intel-expansion-con mt-3\">\n  <mat-expansion-panel [expanded]=\"reportExpanded\" (opened)=\"onReportOpened()\" class=\"ayu-report-panel\" *ngIf=\"diagnosisList.length\">\n    <mat-expansion-panel-header class=\"custom-header\">\n      <mat-panel-title>\n        <div class=\"intel-accordion-title\">\n          <img src=\"assets/svgs/ayu-ddx.svg\" alt=\"\" />\n          <h6 class=\"mb-0 ml-2\">{{ \"Ayu's Detailed Report\" | translate }}</h6>\n        </div>\n      </mat-panel-title>\n    </mat-expansion-panel-header>\n\n    <!-- <div class=\"mat-elevation-z8\"> -->\n    <ng-container class=\"mt-2\">\n      <div class=\"ayu-report-container\">\n        <!-- Left: Rationale -->\n        <div class=\"left-section\">\n            <div class=\"warning\">\n            <img class=\"mb-1 mr-2\" src=\"assets/svgs/info-ddx.svg\" alt=\"\" />This AI-generated suggestion is intended to support\u2014not replace\u2014your clinical judgement and may not account for all relevant factors.<strong> Please use your own judgement before acting.</strong>\n            <a class=\"report-link\" (click)=\"onReportIssue()\">{{ 'Is something wrong? Report it' | translate }}</a>\n          </div>\n            <div class=\"header\">\n            <h2> Rationale </h2>\n          </div>\n          <div class=\"diagnosis-box\" [class.full-width]=\"!conclusion?.trim?.()\">\n            <div *ngFor=\"let rationale of diagnosisList; let i = index\"\n             [ngClass]=\"{ 'rationale-item': i < diagnosisList.length-1 }\" class=\" mb-2\">\n              <div>\n                <h4><span style=\"font-weight: bold;\">{{ rationale.diagnosis }}</span>\n                  <span class=\"text-muted ms-2\"> ({{ rationale.likelihood }} likely)</span>\n                </h4>\n                <ul>\n                  <li *ngFor=\"let point of rationale.summarised_rationale; let i = index\">\n                    <ng-container *ngIf=\"isObject(point); else directString\">\n                      <span>{{point[i+1]}}</span>\n                    </ng-container>\n                    <ng-template #directString>\n                      <span>{{ point }}</span>\n                    </ng-template>\n                  </li>\n                </ul>   \n                <button \n                  class=\"read-more\" \n                  [ngbTooltip]=\"tipContent\" \n                  [placement]=\"i === 0 ? 'bottom' : 'top'\"\n                  [ngClass]=\"{ 'active-btn': isActive && selectedIndex === i }\"\n                  (mouseenter)=\"setMenuContent(rationale.diagnosis, rationale.likelihood, rationale.rationale);\"\n                >\n                  Read more\n                </button>\n              </div>\n            </div>\n          </div>\n        </div>\n\n        <!-- Right: Conclusion and Questions -->\n        <div class=\"right-section\" *ngIf=\"conclusion?.trim?.()\">\n          <div class=\"report-box\">\n            <h3 style=\"font-weight: bold;\">Conclusion</h3>\n            {{conclusion}}\n          </div>\n        </div>\n      </div>\n\n      <ng-template #tipContent>\n        <div class=\"tooltip-container\">\n          <div class=\"tooltip-box\">\n            <div class=\"tooltip-header\">\n              <strong>{{diagnosisName[0]}}</strong>\n              <span class=\"text-muted ms-2\">({{diagnosisName[1]}} likely)</span>\n            </div>\n            <ul class=\"bullet-points\">\n              <li *ngFor=\"let item of menuContent\">\n                <p><strong>{{ item.key }}:</strong> {{ item.value }}</p>\n              </li>\n            </ul>\n          </div>\n        </div>\n      </ng-template>\n    </ng-container>\n  </mat-expansion-panel>\n</div>\n\n\n<!-- <div *ngIf=\"furtherQuestionsList.length\" class=\"rationale-container\">\n    <h2 class=\"fw-bold\">Further questions</h2>\n    <div *ngFor=\"let question of furtherQuestionsList; let i = index\" class=\"fq-item\">\n        <li>{{ question }}</li>\n    </div>\n</div> -->\n<!-- <div class=\"diagnosis-container p-3\">\n      <div *ngFor=\"let diagnosis of diagnosisList\" \n          class=\"d-flex align-items-center mb-2\"\n          [class.disabled-diagnosis]=\"isDiagnosisExists(diagnosis.diagnosis)\">\n          <input type=\"checkbox\" class=\"custom-checkbox me-2\"\n              [checked]=\"isDiagnosisSelected(diagnosis.diagnosis)\"\n              [disabled]=\"isDiagnosisExists(diagnosis.diagnosis)\"\n              (change)=\"onAIDiagnosisChange(diagnosis.diagnosis)\">\n          <label class=\"fw-bold\" [class.text-muted]=\"isDiagnosisExists(diagnosis.diagnosis)\">\n              {{ diagnosis.diagnosis }}\n              <span class=\"text-muted ms-2\">(likely {{ diagnosis.likelihood }})</span>\n          </label>\n      </div>\n  </div> -->\n\n<!-- <div *ngIf=\"furtherQuestionsList.length\" class=\"rationale-container\">\n    <h2 class=\"fw-bold\">Further questions</h2>\n    <div *ngFor=\"let question of furtherQuestionsList; let i = index\" class=\"fq-item\">\n        <li>{{ question }}</li>\n    </div>\n</div> -->", styles: ["@charset \"UTF-8\";.try-again-btn{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;background-color:var(--color-darkBlue);color:#fff}.diffrential-diagnosis{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.diagnosis-list{font-weight:400;font-size:14px;line-height:21px;letter-spacing:0%}.diagnosis-container{background-color:#faf7fc;border-radius:10px;padding:15px}.custom-checkbox{appearance:none;width:18px;height:18px;flex-shrink:0;border:1px solid #B0ADBE;border-radius:4px;position:relative;cursor:pointer;background-color:transparent;margin-right:10px;margin-bottom:9px}.custom-checkbox:checked{background-color:#0fd197}.custom-checkbox:checked:after{content:\"\\2713\";font-size:14px;font-weight:700;color:#fff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}.rationale-container{background-color:#faf7fc;border-radius:10px;padding:15px}.rationale-container h2{font-size:16px;font-weight:700;line-height:24px;color:#101828}.rationale-container .fq-item{margin-left:20px}.rationale-item{border-bottom:1.5px solid rgba(178,175,190,.2)}.rationale{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.rationale-description{font-weight:400;font-size:16px;line-height:24px;letter-spacing:0%;margin-left:13px}.stats-loading{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;color:var(--color-darkBlue)}.stats-loading div{background:#0060ff;display:inline-block;height:8px;width:8px;border-radius:100%;animation:bouncedelay 1.4s infinite ease-in-out;animation-fill-mode:both}.stats-loading div.eins{animation-delay:-.32s}.stats-loading div.zwei{animation-delay:-.16s}.alert{background:#fff;border:1px solid rgba(178,175,190,.2);border-radius:8px;margin-bottom:0}.alert-icon{position:relative;bottom:2px;right:6px}.text-reminder{color:#dc3545!important;font-size:15px;font-weight:700}@keyframes bouncedelay{0%,80%,to{transform:scale(0);opacity:0}40%{transform:scale(1);opacity:100}}.loading-text{font-weight:400;font-size:12px;line-height:18px;color:#7f7b92}.conclusion-card{background:#fff;border-radius:10px;margin:20px 0;box-shadow:0 1px 3px #1018281a,0 1px 2px #1018280f}.conclusion-card .conclusion-header{padding:16px 24px;border-bottom:1px solid #EAECF0}.conclusion-card .conclusion-header h2{font-size:16px;font-weight:700;line-height:24px;margin:0;color:#101828}.conclusion-card .conclusion-body{padding:24px}.conclusion-card .conclusion-body p{margin:0;font-size:14px;line-height:20px;color:#344054;font-weight:400}.note-con{border-radius:4px;font-size:14px;line-height:20px;color:#6c757d}.note-con .note-label{font-weight:600;margin-right:4px;color:#dc3545}.disabled-diagnosis{opacity:.7;cursor:not-allowed}.disabled-diagnosis .custom-checkbox{cursor:not-allowed}.disabled-diagnosis .text-muted,.text-muted{opacity:.7;font-size:12px;color:#868e96}.warning-icon{height:50px;width:50px}.erorr-container{height:150px;background-color:#faf7fc;border-radius:10px;width:100%}.ayu-report-panel{background-color:#f9fffc!important;border:1px solid #B5F2DF;padding:20px;margin:auto}.ayu-report-container{margin:auto;display:flex;gap:20px}.left-section{flex:2;border-radius:10px;margin-bottom:-42px}.right-section{flex:1;border-radius:10px;display:flex;flex-direction:column;gap:20px}.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}.header h2{font-weight:500;margin:0}.warning{background-color:#f6e3d9;border:.8px solid rgba(255,71,93,.0784313725);padding:10px;border-radius:8px;font-size:15px;margin-bottom:14px;font-weight:500;color:#000}.warning .report-link{color:#c0392b;font-weight:700;text-decoration:underline;cursor:pointer;margin-left:6px;white-space:nowrap}.warning .report-link:hover{opacity:.85}.diagnosis-box h4{margin:0}.diagnosis-box p{margin:4px 0;font-size:14px}.diagnosis-box ul{padding-left:25px}.diagnosis-box li{word-break:break-word;width:520px}.diagnosis-box.full-width li{width:100%}.read-more{font-size:12px;cursor:pointer;text-align:right;border:1px solid #B5F2DF;background:#fff;float:right;border-radius:4px;padding:0 7px;color:gray;transition:all .2s ease;position:relative;bottom:32px}.read-more:hover{background:#b5f2df;color:gray;border-color:#0fd197}.report-box{background:radial-gradient(50% 50% at 50% 50%,#ccfff00f,#0dd4980f);border:1px solid #75DEBE;border-radius:10px;padding:16px 20px}.report-box h3{margin-top:0;margin-bottom:10px;font-size:18px}.report-box ul{padding-left:20px;margin:0}.report-box li{margin-bottom:10px;font-size:14px}.question-box{background-color:#fff;border:1px solid #d3f9d8;border-radius:10px;padding:16px 20px}.question-header{display:flex;justify-content:space-between;font-size:16px;margin-bottom:10px}.question-list{padding-left:20px;margin:0;font-size:14px}.question-list li{margin-bottom:8px}::ng-deep .mat-menu-content:not(:empty){padding:0!important}.active-btn{border:1px solid #B5F2DF;background:#b5f2df}.intel-expansion-con ::ng-deep .mat-expansion-panel{box-shadow:none!important;border-radius:12px!important;margin-bottom:0;overflow:visible!important}.intel-expansion-con ::ng-deep .mat-expansion-panel-header{height:20px!important}.intel-expansion-con ::ng-deep .mat-expansion-panel-header.mat-expanded{height:20px!important}.intel-expansion-con ::ng-deep .mat-expansion-panel-body{padding:16px 24px}.intel-expansion-con ::ng-deep .mat-expansion-panel-content .mat-expansion-panel-body{padding:0;margin-top:20px!important;position:relative;border-top:0}.intel-expansion-con ::ng-deep .mat-expansion-panel-content .mat-expansion-panel-body:after{display:none!important}::ng-deep .tooltip.show{opacity:1!important;z-index:9999!important;filter:drop-shadow(0px 2px 6px rgba(0,0,0,.15))}::ng-deep .tooltip-inner{max-width:400px!important;width:400px!important;padding:16px!important;background:#e6fff3!important;text-align:left!important;border-radius:8px!important;margin-left:-322px!important;margin-top:-1px!important}::ng-deep .bs-tooltip-top{padding:8px 0!important}::ng-deep .bs-tooltip-top .arrow{left:40px!important;top:auto!important;bottom:5px!important}::ng-deep .bs-tooltip-top .arrow:before{border-width:10px 10px 0 10px!important;border-style:solid;border-color:#E6FFF3 transparent transparent transparent!important;content:\"\"!important;background:transparent!important}::ng-deep .bs-tooltip-bottom{padding:8px 0!important}::ng-deep .bs-tooltip-bottom .arrow{left:auto!important;right:40px!important;top:5px!important}::ng-deep .bs-tooltip-bottom .arrow:before{border-width:0 10px 10px 10px!important;border-style:solid;border-color:transparent transparent #E6FFF3 transparent!important;content:\"\"!important;background:transparent!important}.tooltip-container{width:100%;box-sizing:border-box}.tooltip-container .tooltip-box{width:100%}.tooltip-container .tooltip-box .tooltip-header{display:flex;align-items:baseline;gap:8px;margin-bottom:16px;flex-wrap:wrap;width:100%}.tooltip-container .tooltip-box .tooltip-header strong{font-size:16px;font-weight:600;color:#000;word-break:break-word}.tooltip-container .tooltip-box .tooltip-header .status{font-size:14px;color:gray;font-weight:400;word-break:break-word}.tooltip-container .tooltip-box .bullet-points{list-style-type:disc!important;padding-left:24px;margin:0;color:#000;box-sizing:border-box}.tooltip-container .tooltip-box .bullet-points li{margin-bottom:12px;color:#000;display:list-item!important;width:100%;box-sizing:border-box}.tooltip-container .tooltip-box .bullet-points li:last-child{margin-bottom:0}.tooltip-container .tooltip-box .bullet-points li p{margin:0;font-size:14px;line-height:1.6;color:#000;display:block;word-break:break-word;white-space:normal;box-sizing:border-box}.tooltip-container .tooltip-box .bullet-points li p strong{color:#000;font-weight:600;margin-right:4px}.space{margin-top:40px}\n"], dependencies: [{ kind: "directive", type: i2$1.NgClass, selector: "[ngClass]", inputs: ["class", "ngClass"] }, { kind: "directive", type: i2$1.NgForOf, selector: "[ngFor][ngForOf]", inputs: ["ngForOf", "ngForTrackBy", "ngForTemplate"] }, { kind: "directive", type: i2$1.NgIf, selector: "[ngIf]", inputs: ["ngIf", "ngIfThen", "ngIfElse"] }, { kind: "directive", type: i2$1.NgStyle, selector: "[ngStyle]", inputs: ["ngStyle"] }, { kind: "component", type: i5.MatExpansionPanel, selector: "mat-expansion-panel", inputs: ["disabled", "expanded", "hideToggle", "togglePosition"], outputs: ["opened", "closed", "expandedChange", "afterExpand", "afterCollapse"], exportAs: ["matExpansionPanel"] }, { kind: "component", type: i5.MatExpansionPanelHeader, selector: "mat-expansion-panel-header", inputs: ["tabIndex", "expandedHeight", "collapsedHeight"] }, { kind: "directive", type: i5.MatExpansionPanelTitle, selector: "mat-panel-title" }, { kind: "directive", type: i6.NgbTooltip, selector: "[ngbTooltip]", inputs: ["animation", "autoClose", "placement", "triggers", "container", "disableTooltip", "tooltipClass", "openDelay", "closeDelay", "ngbTooltip"], outputs: ["shown", "hidden"], exportAs: ["ngbTooltip"] }, { kind: "pipe", type: i4.TranslatePipe, name: "translate" }] });
+}
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AillmddxComponent, decorators: [{
+            type: Component,
+            args: [{ selector: 'app-aillmddx', template: "<ng-container *ngIf=\"!diagnosisList.length\">\n  <div class=\"d-flex justify-content-center mt-3\">\n    <div class=\"erorr-container alert text-center p-4 d-flex flex-column align-items-center\">\n      <ng-container *ngIf=\"!isLoading && (hasError || noData || apiResponseChanged)\">\n        <div class=\"text-danger\" [ngStyle]=\"{ 'margin-top': hasError ? '15px' : '40px' }\">\n          <span><img class=\"mb-1\" src=\"assets/svgs/alert-triangle.svg\" alt=\"\" /></span>\n          <span *ngIf=\"hasError\" class=\"ml-2\">No suggestions at this moment</span>\n          <span *ngIf=\"apiResponseChanged\" class=\"ml-2\">The response format has changed. Please contact support or try again later.</span>\n          <span *ngIf=\"noData\" class=\"ml-2\">The input provided does not have enough clinical details for an AI-assistant assessment.</span>\n        </div>\n        <button *ngIf=\"!noData\" type=\"button\" class=\"try-again-btn mt-3\" (click)=\"onTryAgain()\">{{'Try again'|translate}}</button>\n      </ng-container>\n\n      <button *ngIf=\"isLoading\" class=\"stats-loading\">\n        <div class=\"eins\"></div>\n        <div class=\"zwei\"></div>\n        <div class=\"drei\"></div>\n      </button>\n\n      <div *ngIf=\"isLoading\" class=\"mt-3\">\n        <i class=\"bi bi-exclamation-triangle-fill\"></i>\n        <span class=\"ms-2 loading-text\">Please wait while the results are being generated.</span>\n      </div>\n    </div>\n  </div>\n</ng-container>\n\n<div class=\"intel-expansion-con mt-3\">\n  <mat-expansion-panel [expanded]=\"reportExpanded\" (opened)=\"onReportOpened()\" class=\"ayu-report-panel\" *ngIf=\"diagnosisList.length\">\n    <mat-expansion-panel-header class=\"custom-header\">\n      <mat-panel-title>\n        <div class=\"intel-accordion-title\">\n          <img src=\"assets/svgs/ayu-ddx.svg\" alt=\"\" />\n          <h6 class=\"mb-0 ml-2\">{{ \"Ayu's Detailed Report\" | translate }}</h6>\n        </div>\n      </mat-panel-title>\n    </mat-expansion-panel-header>\n\n    <!-- <div class=\"mat-elevation-z8\"> -->\n    <ng-container class=\"mt-2\">\n      <div class=\"ayu-report-container\">\n        <!-- Left: Rationale -->\n        <div class=\"left-section\">\n            <div class=\"warning\">\n            <img class=\"mb-1 mr-2\" src=\"assets/svgs/info-ddx.svg\" alt=\"\" />This AI-generated suggestion is intended to support\u2014not replace\u2014your clinical judgement and may not account for all relevant factors.<strong> Please use your own judgement before acting.</strong>\n            <a class=\"report-link\" (click)=\"onReportIssue()\">{{ 'Is something wrong? Report it' | translate }}</a>\n          </div>\n            <div class=\"header\">\n            <h2> Rationale </h2>\n          </div>\n          <div class=\"diagnosis-box\" [class.full-width]=\"!conclusion?.trim?.()\">\n            <div *ngFor=\"let rationale of diagnosisList; let i = index\"\n             [ngClass]=\"{ 'rationale-item': i < diagnosisList.length-1 }\" class=\" mb-2\">\n              <div>\n                <h4><span style=\"font-weight: bold;\">{{ rationale.diagnosis }}</span>\n                  <span class=\"text-muted ms-2\"> ({{ rationale.likelihood }} likely)</span>\n                </h4>\n                <ul>\n                  <li *ngFor=\"let point of rationale.summarised_rationale; let i = index\">\n                    <ng-container *ngIf=\"isObject(point); else directString\">\n                      <span>{{point[i+1]}}</span>\n                    </ng-container>\n                    <ng-template #directString>\n                      <span>{{ point }}</span>\n                    </ng-template>\n                  </li>\n                </ul>   \n                <button \n                  class=\"read-more\" \n                  [ngbTooltip]=\"tipContent\" \n                  [placement]=\"i === 0 ? 'bottom' : 'top'\"\n                  [ngClass]=\"{ 'active-btn': isActive && selectedIndex === i }\"\n                  (mouseenter)=\"setMenuContent(rationale.diagnosis, rationale.likelihood, rationale.rationale);\"\n                >\n                  Read more\n                </button>\n              </div>\n            </div>\n          </div>\n        </div>\n\n        <!-- Right: Conclusion and Questions -->\n        <div class=\"right-section\" *ngIf=\"conclusion?.trim?.()\">\n          <div class=\"report-box\">\n            <h3 style=\"font-weight: bold;\">Conclusion</h3>\n            {{conclusion}}\n          </div>\n        </div>\n      </div>\n\n      <ng-template #tipContent>\n        <div class=\"tooltip-container\">\n          <div class=\"tooltip-box\">\n            <div class=\"tooltip-header\">\n              <strong>{{diagnosisName[0]}}</strong>\n              <span class=\"text-muted ms-2\">({{diagnosisName[1]}} likely)</span>\n            </div>\n            <ul class=\"bullet-points\">\n              <li *ngFor=\"let item of menuContent\">\n                <p><strong>{{ item.key }}:</strong> {{ item.value }}</p>\n              </li>\n            </ul>\n          </div>\n        </div>\n      </ng-template>\n    </ng-container>\n  </mat-expansion-panel>\n</div>\n\n\n<!-- <div *ngIf=\"furtherQuestionsList.length\" class=\"rationale-container\">\n    <h2 class=\"fw-bold\">Further questions</h2>\n    <div *ngFor=\"let question of furtherQuestionsList; let i = index\" class=\"fq-item\">\n        <li>{{ question }}</li>\n    </div>\n</div> -->\n<!-- <div class=\"diagnosis-container p-3\">\n      <div *ngFor=\"let diagnosis of diagnosisList\" \n          class=\"d-flex align-items-center mb-2\"\n          [class.disabled-diagnosis]=\"isDiagnosisExists(diagnosis.diagnosis)\">\n          <input type=\"checkbox\" class=\"custom-checkbox me-2\"\n              [checked]=\"isDiagnosisSelected(diagnosis.diagnosis)\"\n              [disabled]=\"isDiagnosisExists(diagnosis.diagnosis)\"\n              (change)=\"onAIDiagnosisChange(diagnosis.diagnosis)\">\n          <label class=\"fw-bold\" [class.text-muted]=\"isDiagnosisExists(diagnosis.diagnosis)\">\n              {{ diagnosis.diagnosis }}\n              <span class=\"text-muted ms-2\">(likely {{ diagnosis.likelihood }})</span>\n          </label>\n      </div>\n  </div> -->\n\n<!-- <div *ngIf=\"furtherQuestionsList.length\" class=\"rationale-container\">\n    <h2 class=\"fw-bold\">Further questions</h2>\n    <div *ngFor=\"let question of furtherQuestionsList; let i = index\" class=\"fq-item\">\n        <li>{{ question }}</li>\n    </div>\n</div> -->", styles: ["@charset \"UTF-8\";.try-again-btn{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;background-color:var(--color-darkBlue);color:#fff}.diffrential-diagnosis{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.diagnosis-list{font-weight:400;font-size:14px;line-height:21px;letter-spacing:0%}.diagnosis-container{background-color:#faf7fc;border-radius:10px;padding:15px}.custom-checkbox{appearance:none;width:18px;height:18px;flex-shrink:0;border:1px solid #B0ADBE;border-radius:4px;position:relative;cursor:pointer;background-color:transparent;margin-right:10px;margin-bottom:9px}.custom-checkbox:checked{background-color:#0fd197}.custom-checkbox:checked:after{content:\"\\2713\";font-size:14px;font-weight:700;color:#fff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}.rationale-container{background-color:#faf7fc;border-radius:10px;padding:15px}.rationale-container h2{font-size:16px;font-weight:700;line-height:24px;color:#101828}.rationale-container .fq-item{margin-left:20px}.rationale-item{border-bottom:1.5px solid rgba(178,175,190,.2)}.rationale{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.rationale-description{font-weight:400;font-size:16px;line-height:24px;letter-spacing:0%;margin-left:13px}.stats-loading{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;color:var(--color-darkBlue)}.stats-loading div{background:#0060ff;display:inline-block;height:8px;width:8px;border-radius:100%;animation:bouncedelay 1.4s infinite ease-in-out;animation-fill-mode:both}.stats-loading div.eins{animation-delay:-.32s}.stats-loading div.zwei{animation-delay:-.16s}.alert{background:#fff;border:1px solid rgba(178,175,190,.2);border-radius:8px;margin-bottom:0}.alert-icon{position:relative;bottom:2px;right:6px}.text-reminder{color:#dc3545!important;font-size:15px;font-weight:700}@keyframes bouncedelay{0%,80%,to{transform:scale(0);opacity:0}40%{transform:scale(1);opacity:100}}.loading-text{font-weight:400;font-size:12px;line-height:18px;color:#7f7b92}.conclusion-card{background:#fff;border-radius:10px;margin:20px 0;box-shadow:0 1px 3px #1018281a,0 1px 2px #1018280f}.conclusion-card .conclusion-header{padding:16px 24px;border-bottom:1px solid #EAECF0}.conclusion-card .conclusion-header h2{font-size:16px;font-weight:700;line-height:24px;margin:0;color:#101828}.conclusion-card .conclusion-body{padding:24px}.conclusion-card .conclusion-body p{margin:0;font-size:14px;line-height:20px;color:#344054;font-weight:400}.note-con{border-radius:4px;font-size:14px;line-height:20px;color:#6c757d}.note-con .note-label{font-weight:600;margin-right:4px;color:#dc3545}.disabled-diagnosis{opacity:.7;cursor:not-allowed}.disabled-diagnosis .custom-checkbox{cursor:not-allowed}.disabled-diagnosis .text-muted,.text-muted{opacity:.7;font-size:12px;color:#868e96}.warning-icon{height:50px;width:50px}.erorr-container{height:150px;background-color:#faf7fc;border-radius:10px;width:100%}.ayu-report-panel{background-color:#f9fffc!important;border:1px solid #B5F2DF;padding:20px;margin:auto}.ayu-report-container{margin:auto;display:flex;gap:20px}.left-section{flex:2;border-radius:10px;margin-bottom:-42px}.right-section{flex:1;border-radius:10px;display:flex;flex-direction:column;gap:20px}.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}.header h2{font-weight:500;margin:0}.warning{background-color:#f6e3d9;border:.8px solid rgba(255,71,93,.0784313725);padding:10px;border-radius:8px;font-size:15px;margin-bottom:14px;font-weight:500;color:#000}.warning .report-link{color:#c0392b;font-weight:700;text-decoration:underline;cursor:pointer;margin-left:6px;white-space:nowrap}.warning .report-link:hover{opacity:.85}.diagnosis-box h4{margin:0}.diagnosis-box p{margin:4px 0;font-size:14px}.diagnosis-box ul{padding-left:25px}.diagnosis-box li{word-break:break-word;width:520px}.diagnosis-box.full-width li{width:100%}.read-more{font-size:12px;cursor:pointer;text-align:right;border:1px solid #B5F2DF;background:#fff;float:right;border-radius:4px;padding:0 7px;color:gray;transition:all .2s ease;position:relative;bottom:32px}.read-more:hover{background:#b5f2df;color:gray;border-color:#0fd197}.report-box{background:radial-gradient(50% 50% at 50% 50%,#ccfff00f,#0dd4980f);border:1px solid #75DEBE;border-radius:10px;padding:16px 20px}.report-box h3{margin-top:0;margin-bottom:10px;font-size:18px}.report-box ul{padding-left:20px;margin:0}.report-box li{margin-bottom:10px;font-size:14px}.question-box{background-color:#fff;border:1px solid #d3f9d8;border-radius:10px;padding:16px 20px}.question-header{display:flex;justify-content:space-between;font-size:16px;margin-bottom:10px}.question-list{padding-left:20px;margin:0;font-size:14px}.question-list li{margin-bottom:8px}::ng-deep .mat-menu-content:not(:empty){padding:0!important}.active-btn{border:1px solid #B5F2DF;background:#b5f2df}.intel-expansion-con ::ng-deep .mat-expansion-panel{box-shadow:none!important;border-radius:12px!important;margin-bottom:0;overflow:visible!important}.intel-expansion-con ::ng-deep .mat-expansion-panel-header{height:20px!important}.intel-expansion-con ::ng-deep .mat-expansion-panel-header.mat-expanded{height:20px!important}.intel-expansion-con ::ng-deep .mat-expansion-panel-body{padding:16px 24px}.intel-expansion-con ::ng-deep .mat-expansion-panel-content .mat-expansion-panel-body{padding:0;margin-top:20px!important;position:relative;border-top:0}.intel-expansion-con ::ng-deep .mat-expansion-panel-content .mat-expansion-panel-body:after{display:none!important}::ng-deep .tooltip.show{opacity:1!important;z-index:9999!important;filter:drop-shadow(0px 2px 6px rgba(0,0,0,.15))}::ng-deep .tooltip-inner{max-width:400px!important;width:400px!important;padding:16px!important;background:#e6fff3!important;text-align:left!important;border-radius:8px!important;margin-left:-322px!important;margin-top:-1px!important}::ng-deep .bs-tooltip-top{padding:8px 0!important}::ng-deep .bs-tooltip-top .arrow{left:40px!important;top:auto!important;bottom:5px!important}::ng-deep .bs-tooltip-top .arrow:before{border-width:10px 10px 0 10px!important;border-style:solid;border-color:#E6FFF3 transparent transparent transparent!important;content:\"\"!important;background:transparent!important}::ng-deep .bs-tooltip-bottom{padding:8px 0!important}::ng-deep .bs-tooltip-bottom .arrow{left:auto!important;right:40px!important;top:5px!important}::ng-deep .bs-tooltip-bottom .arrow:before{border-width:0 10px 10px 10px!important;border-style:solid;border-color:transparent transparent #E6FFF3 transparent!important;content:\"\"!important;background:transparent!important}.tooltip-container{width:100%;box-sizing:border-box}.tooltip-container .tooltip-box{width:100%}.tooltip-container .tooltip-box .tooltip-header{display:flex;align-items:baseline;gap:8px;margin-bottom:16px;flex-wrap:wrap;width:100%}.tooltip-container .tooltip-box .tooltip-header strong{font-size:16px;font-weight:600;color:#000;word-break:break-word}.tooltip-container .tooltip-box .tooltip-header .status{font-size:14px;color:gray;font-weight:400;word-break:break-word}.tooltip-container .tooltip-box .bullet-points{list-style-type:disc!important;padding-left:24px;margin:0;color:#000;box-sizing:border-box}.tooltip-container .tooltip-box .bullet-points li{margin-bottom:12px;color:#000;display:list-item!important;width:100%;box-sizing:border-box}.tooltip-container .tooltip-box .bullet-points li:last-child{margin-bottom:0}.tooltip-container .tooltip-box .bullet-points li p{margin:0;font-size:14px;line-height:1.6;color:#000;display:block;word-break:break-word;white-space:normal;box-sizing:border-box}.tooltip-container .tooltip-box .bullet-points li p strong{color:#000;font-weight:600;margin-right:4px}.space{margin-top:40px}\n"] }]
+        }], ctorParameters: function () { return [{ type: AiddxService }, { type: i2.MatDialog }, { type: i3.ToastrService }, { type: undefined, decorators: [{
+                    type: Optional
+                }, {
+                    type: Inject,
+                    args: [ENVIRONMENT]
+                }] }]; }, propDecorators: { patientInfo: [{
+                type: Input
+            }], visit: [{
+                type: Input
+            }], existingDiagnosis: [{
+                type: Input
+            }], diagnosisSelected: [{
+                type: Output
+            }], furtherQuestionsListReceived: [{
+                type: Output
+            }], diagnosisReceived: [{
+                type: Output
+            }], rationaleOpened: [{
+                type: Output
+            }], reportIssue: [{
+                type: Output
+            }], notes: [{
+                type: Input
+            }], visitCompleted: [{
+                type: Input
+            }], reportExpanded: [{
+                type: Input
+            }], useJsonVisitSummary: [{
+                type: Input
+            }] } });
+
+class AillmtxMedicationComponent {
+    TxService;
+    patientInfo;
+    visit;
+    useJsonVisitSummary;
+    visitSummaryJson = null;
+    existingMedication = [];
+    medicationSelected = new EventEmitter();
+    reportPanelIssue = new EventEmitter();
+    reportSuggestionIssue = new EventEmitter();
+    requestTreatmentPlan = new EventEmitter();
+    treatmentDisabled = false;
+    treatmentLoading = false;
+    diagnosisName;
+    notesss;
+    patientAllergies = '';
+    patientCurrentMedications = '';
+    allergyDataStatus = 'empty';
+    visitCompleted = false;
+    isLoading = false;
+    hasError = false;
+    noData = false;
+    insufficientData = false;
+    conclusion = '';
+    medicationList = [];
+    furtherQuestionsList = [];
+    selectedMedicine = [];
+    loggedError;
+    reminderMessages = [];
+    reportOpenFor = null;
+    reportReason = null;
+    reportNote = '';
+    constructor(TxService) {
+        this.TxService = TxService;
+    }
+    ngOnInit() {
+        this.updateReminderMessage();
+    }
+    resolveVisitSummaryJson() {
+        this.visitSummaryJson = this.TxService.resolveVisitSummaryJson(this.visit, this.useJsonVisitSummary);
+        return this.visitSummaryJson;
+    }
+    ngOnChanges(changes) {
+        if (changes['patientAllergies'] || changes['patientCurrentMedications'] || changes['allergyDataStatus']) {
+            this.updateReminderMessage();
+        }
+    }
+    /**
+     * Cleans medication string by removing phrases like "Name of Medications" and "Medication Name".
+     * @param rawMedicationString - The raw medication string to clean.
+     * @returns Cleaned medication string, or an empty string if input is invalid.
+     */
+    extractCleanMedicationNames(rawMedicationString) {
+        if (!rawMedicationString?.trim())
+            return '';
+        let cleaned = rawMedicationString;
+        cleaned = cleaned.replace(/Name\s+of\s+Medications\s*-?\s*/gi, '');
+        cleaned = cleaned.replace(/Medication\s+Name\s*-?\s*/g, '');
+        return cleaned.trim();
+    }
+    /**
+     * Checks if a value indicates a negative response (e.g., "no known allergies").
+     */
+    isNegativeValue = (value) => {
+        if (!value?.trim())
+            return true;
+        const lowerValue = value.toLowerCase().trim();
+        const negativePatterns = [
+            /^no known/i, /^no recent/i, /^none\.?$/i, /^nil\.?$/i, /^n\/a\.?$/i, /^na\.?$/i,
+            /^not applicable/i, /^skipped/i, /^empty/i, /^no allergies/i, /^no medication/i,
+            /^no drug/i, /patient denied/i, /has no h\/o/i
+        ];
+        return negativePatterns.some(pattern => pattern.test(lowerValue));
+    };
+    /**
+     * Updates reminder messages based on patient's allergies and current medications.
+     */
+    updateReminderMessage() {
+        this.reminderMessages = [];
+        const hasAllergies = this.patientAllergies && !this.isNegativeValue(this.patientAllergies);
+        const hasMedications = this.patientCurrentMedications && !this.isNegativeValue(this.patientCurrentMedications);
+        const cleanMedications = hasMedications ? this.extractCleanMedicationNames(this.patientCurrentMedications) : '';
+        if (!hasAllergies && !hasMedications) {
+            this.reminderMessages.push('<strong>Allergy</strong> and <strong>Current Medication status unknown</strong> — confirmation required before prescribing.');
+        }
+        else if (hasAllergies && hasMedications) {
+            this.reminderMessages.push(`Patient is currently taking <strong>${cleanMedications}</strong>, and Patient reports the following allergies to <strong>${this.patientAllergies}</strong>. Please prescribe accordingly.`);
+        }
+        else if (!hasAllergies && hasMedications) {
+            this.reminderMessages.push('<strong>Allergy status unknown</strong> — confirmation required before prescribing.');
+            this.reminderMessages.push(`Patient is currently taking <strong>${cleanMedications}</strong>. Please prescribe accordingly.`);
+        }
+        else if (hasAllergies && !hasMedications) {
+            this.reminderMessages.push(`Patient reports the following allergies to <strong>${this.patientAllergies}</strong>. Please prescribe accordingly.`);
+        }
+    }
+    getAIMedical(diagnosis) {
+        const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
+        this.isLoading = true;
+        this.medicationList = [];
+        this.furtherQuestionsList = [];
+        this.TxService.getAITTx(payload, diagnosis, this.visit.uuid, this.visitCompleted).subscribe({
+            next: (data) => {
+                if (data.result.data.result.length > 0) {
+                    this.noData = false;
+                    this.medicationList = data.result.data.result.map(v => {
+                        return {
+                            ...v,
+                        };
+                    });
+                }
+                else {
+                    this.noData = true;
+                }
+            },
+            error: (err) => {
+                this.hasError = true;
+                this.isLoading = false;
+            },
+            complete: () => {
+                this.isLoading = false;
+            }
+        });
+    }
+    getAIMedicalWithRetry(diagnosis) {
+        const MAX_RETRIES = 1;
+        let retryCount = 0;
+        const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
+        const attemptDiagnosis = () => {
+            this.isLoading = true;
+            this.medicationList = [];
+            this.furtherQuestionsList = [];
+            this.TxService.getAITTx(payload, diagnosis, this.visit.uuid, this.visitCompleted).subscribe({
+                next: (data) => {
+                    if (data.result.data.success && data.result.data.medications.length > 0) {
+                        this.noData = false;
+                        const mapped = data.result.data.medications.map(v => ({
+                            ...v,
+                            name: v.name || v.medication,
+                        }));
+                        const hasNumericRank = mapped.some(v => { const r = Number(v?.rank); return !isNaN(r) && r >= 1; });
+                        this.medicationList = hasNumericRank
+                            ? mapped.filter(v => { const rank = Number(v?.rank); return rank >= 1 && rank <= 5; }).sort((a, b) => Number(a.rank) - Number(b.rank))
+                            : mapped.slice(0, 5);
+                    }
+                    else if (!data.result.data.success) {
+                        this.hasError = true;
+                        this.loggedError = data.result.data?.error;
+                    }
+                    else {
+                        this.noData = true;
+                    }
+                    this.isLoading = false;
+                },
+                error: (err) => {
+                    retryCount++;
+                    if (retryCount < MAX_RETRIES) {
+                        console.log(`Retry attempt ${retryCount} for getAITX`);
+                        setTimeout(() => {
+                            attemptDiagnosis();
+                        }, 1000);
+                    }
+                    else {
+                        this.hasError = true;
+                        this.isLoading = false;
+                        this.loggedError = err;
+                        console.error('Failed to get AI diagnosis after 3 attempts:', err);
+                    }
+                },
+                complete: () => {
+                    this.isLoading = false;
+                }
+            });
+        };
+        attemptDiagnosis();
+    }
+    onTryAgain() {
+        this.getAIMedicalWithRetry(this.diagnosisName);
+    }
+    openReport(medicine) {
+        this.reportOpenFor = medicine;
+        this.reportReason = null;
+        this.reportNote = '';
+    }
+    closeReport() {
+        this.reportOpenFor = null;
+        this.reportReason = null;
+        this.reportNote = '';
+    }
+    sendReport(medicine) {
+        if (!this.reportReason) {
+            return;
+        }
+        this.reportSuggestionIssue.emit({
+            suggestion_ref: medicine?.name,
+            reason: this.reportReason,
+            details: this.reportNote?.trim() || undefined,
+            raw_suggestion: medicine,
+        });
+        this.closeReport();
+    }
+    onAIMedicineChange(event) {
+        if (!event) {
+            this.selectedMedicine = [];
+        }
+        else if (Array.isArray(event)) {
+            this.selectedMedicine = [...event];
+        }
+        else {
+            const index = this.selectedMedicine.findIndex(m => m.name === event.name);
+            if (index > -1) {
+                this.selectedMedicine = this.selectedMedicine.filter(m => m.name !== event.name);
+            }
+            else {
+                const medicineData = {
+                    name: event.name,
+                    dosage: event.dosage,
+                    frequency: event.frequency,
+                    duration: event.duration,
+                    duration_unit: event.duration_unit,
+                    instructions: event.instructions,
+                    uuid: event.uuid,
+                    likelihood: event.likelihood,
+                    rationale: event.rationale
+                };
+                this.selectedMedicine = [...this.selectedMedicine, medicineData];
+            }
+        }
+        this.medicationSelected.emit(this.selectedMedicine);
+    }
+    isMedicineExists(medicine) {
+        return this.existingMedication.some(d => d.drug === medicine);
+    }
+    isMedicineSelected(medicine) {
+        return this.selectedMedicine.some(m => m.name === medicine.name) || this.existingMedication.some(d => d.drug === medicine.name);
+    }
+    static ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AillmtxMedicationComponent, deps: [{ token: AiTxService }], target: i0.ɵɵFactoryTarget.Component });
+    static ɵcmp = i0.ɵɵngDeclareComponent({ minVersion: "14.0.0", version: "14.3.0", type: AillmtxMedicationComponent, selector: "lib-aillmtx-medication", inputs: { patientInfo: "patientInfo", visit: "visit", useJsonVisitSummary: "useJsonVisitSummary", existingMedication: "existingMedication", treatmentDisabled: "treatmentDisabled", treatmentLoading: "treatmentLoading", diagnosisName: "diagnosisName", notesss: "notesss", patientAllergies: "patientAllergies", patientCurrentMedications: "patientCurrentMedications", allergyDataStatus: "allergyDataStatus", visitCompleted: "visitCompleted" }, outputs: { medicationSelected: "medicationSelected", reportPanelIssue: "reportPanelIssue", reportSuggestionIssue: "reportSuggestionIssue", requestTreatmentPlan: "requestTreatmentPlan" }, usesOnChanges: true, ngImport: i0, template: "<ng-container *ngIf=\"!medicationList.length && (hasError || !noData)\">\n    <div class=\"d-flex justify-content-center mt-3 mb-3\">\n        <div class=\"erorr-container alert text-center p-4 d-flex flex-column align-items-center\">\n\n            <div *ngIf=\"!hasError && !isLoading\" class=\"no-data-container text-center\">\n                <div class=\"conclusion-header d-flex flex-column align-items-center\">\n                    <i class=\"bi bi-exclamation-triangle-fill text-danger mb-2\" style=\"font-size: 2rem;\"></i>\n                    <img src=\"assets/images/login/interneticon.png\" alt=\"Warning\" class=\"warning-icon\" />\n                    <h3 class=\"text-danger\">No diagnosis Provided</h3>\n                    <p class=\"text-muted\">Press the Confirm button to fetch AI-assisted Medicines suggestions</p>\n                    <button type=\"button\" class=\"suggest-tx-btn mt-2\" [disabled]=\"treatmentDisabled\" (click)=\"requestTreatmentPlan.emit()\">\n                        <ng-container *ngIf=\"!treatmentLoading\">\n                            <img src=\"assets/svgs/ayu-ddx.svg\" alt=\"\" class=\"mr-2\" />{{ 'Confirm & Suggest Treatment Plan' | translate }}\n                        </ng-container>\n                        <ng-container *ngIf=\"treatmentLoading\">\n                            {{ 'Suggesting treatment plan...' | translate }}\n                        </ng-container>\n                    </button>\n                </div>\n            </div>\n\n            <ng-container *ngIf=\"!isLoading && hasError\">\n                <div *ngIf=\"!isLoading && hasError\" class=\"text-danger txt-position\">\n                     <span><img class=\"mb-1\" src=\"assets/svgs/alert-triangle.svg\" alt=\"\" /> </span>\n                     <span *ngIf=\"!loggedError\" class=\"ml-2\">No suggestions at this moment</span>\n                     <span *ngIf=\"loggedError\" class=\"ml-2\">{{ loggedError }}</span>\n                    <!-- <span *ngIf=\"hasError\" class=\"ms-2\">An unexpected issue occurred</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">The input provided does not have enough clinical details for an AI-assistant assessment.</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">No suggestions at this moment</span> -->\n                </div>\n                <button *ngIf=\"!noData\" type=\"button\" class=\"try-again-btn mt-5\" (click)=\"onTryAgain()\">\n                    {{'Try again'|translate}}\n                </button>\n            </ng-container>\n\n            <button *ngIf=\"isLoading\" class=\"stats-loading\">\n                <div class=\"eins\"></div>\n                <div class=\"zwei\"></div>\n                <div class=\"drei\"></div>\n            </button>\n\n            <div *ngIf=\"isLoading\" class=\"mt-3\">\n                <i class=\"bi bi-exclamation-triangle-fill\"></i>\n                <span class=\"ms-2 loading-text\">Please wait while the results are being generated.</span>\n            </div>\n\n        </div>\n    </div>\n</ng-container>\n\n<ng-container *ngIf=\"medicationList.length || (!isLoading && (hasError && noData))\">\n\n    <!-- Reminder - Always show when there are reminder messages -->\n  <div *ngFor=\"let message of reminderMessages\" class=\"reminder-alert mt-3\">\n     <span class=\"reminder-msg\"><img class=\"mb-1\" src=\"assets/svgs/alert-triangle.svg\" alt=\"\" /> Reminder: </span>\n     <span class=\"reminder\" [innerHTML]=\"message\"></span>\n  </div>\n\n    <div class=\"mt-3 mb-3 ayu-suggestion-container p-3 border border-gray-300 bg-green-50\">\n        <div class=\"mb-2 flex items-center ayu-header\">\n             <img class=\"mr-2\"  src=\"assets/svgs/ayu-ddx.svg\" alt=\"\" /> Ayu suggested medication\n        </div>\n\n         <div class=\"warning\">\n            <img class=\"mb-1 mr-2\" src=\"assets/svgs/info-ddx.svg\" alt=\"\" />This AI-generated suggestion is intended to support\u2014not replace\u2014your clinical judgement and may not account for all relevant factors.<strong> Please carefully review for potential adverse drug reactions (ADRs)</strong>, including drug\u2013drug, drug\u2013condition, and drug\u2013allergy interactions before finalizing the prescription.<strong> Please use your own judgement before acting.</strong>\n            <a class=\"report-link\" (click)=\"reportPanelIssue.emit({ medication_count: medicationList?.length || 0 })\">{{ 'Is something wrong? Report it' | translate }}</a>\n          </div>\n\n        <div *ngIf=\"medicationList.length\" class=\"med-scroll-wrapper\" [ngClass]=\"{ 'scroll-enabled': medicationList.length > 6 }\">\n        <div class=\"med-grid\">\n            <div *ngFor=\"let medicine of medicationList\" class=\"med-card\">\n                <div class=\"med-header\">\n                    <label class=\"checkbox-label\">\n                        <input type=\"checkbox\" [ngClass]=\"{ 'selected-med': medicine.selected }\" class=\"custom-checkbox me-2\"  [(ngModel)]=\"medicine.selected\"  [checked]=\"isMedicineSelected(medicine)\"\n                         [disabled]=\"isMedicineExists(medicine.name)\" (change)=\"onAIMedicineChange(medicine)\" />\n                        <span class=\"med-name\"  [class.text-muted]=\"isMedicineExists(medicine.name)\">{{ medicine.name }}</span>\n                    </label>\n                    <span class=\"med-severity\"  [class.text-muted]=\"isMedicineExists(medicine.name)\">({{ medicine.confidence ? (medicine.confidence.charAt(0).toUpperCase() + medicine.confidence.slice(1).toLowerCase()) : '' }})</span>\n                    <button type=\"button\" class=\"med-flag-btn\" title=\"{{ 'Report this suggestion' | translate }}\" (click)=\"openReport(medicine)\">\n                        <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#C0392B\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z\"/><line x1=\"4\" y1=\"22\" x2=\"4\" y2=\"15\"/></svg>\n                    </button>\n                </div>\n                <div class=\"report-popover\" *ngIf=\"reportOpenFor === medicine\">\n                    <div class=\"rp-title\">{{ 'Report this AI suggestion' | translate }}</div>\n                    <div class=\"rp-sub\">{{ medicine.name }}</div>\n                    <div class=\"rp-chips\">\n                        <button type=\"button\" class=\"rp-chip\" [class.active]=\"reportReason === 'wrong_dose'\" (click)=\"reportReason = 'wrong_dose'\">{{ 'Wrong dose' | translate }}</button>\n                        <button type=\"button\" class=\"rp-chip\" [class.active]=\"reportReason === 'unsafe'\" (click)=\"reportReason = 'unsafe'\">{{ 'Unsafe' | translate }}</button>\n                        <button type=\"button\" class=\"rp-chip\" [class.active]=\"reportReason === 'other'\" (click)=\"reportReason = 'other'\">{{ 'Other' | translate }}</button>\n                    </div>\n                    <textarea class=\"rp-note\" rows=\"3\" placeholder=\"{{ 'Add a note (optional)' | translate }}\" [(ngModel)]=\"reportNote\"></textarea>\n                    <div class=\"rp-actions\">\n                        <button type=\"button\" class=\"rp-cancel\" (click)=\"closeReport()\">{{ 'Cancel' | translate }}</button>\n                        <button type=\"button\" class=\"rp-send\" [disabled]=\"!reportReason\" (click)=\"sendReport(medicine)\">{{ 'Send' | translate }}</button>\n                    </div>\n                </div>\n                <ul class=\"med-details\" [class.text-muted]=\"isMedicineExists(medicine.name)\">\n                    <li *ngIf=\"medicine.dosage\">{{ medicine.dosage }}</li>\n                    <li *ngIf=\"medicine.frequency\">{{ medicine.frequency }}</li>\n                    <li *ngIf=\"medicine.duration\">{{ medicine.duration }} {{medicine.duration_unit}}</li>\n                    <li *ngIf=\"medicine.instructions\">{{ medicine.instructions }}</li>\n                </ul>\n                <div *ngIf=\"medicine.rationale\" class=\"med-rationale\" [class.text-muted]=\"isMedicineExists(medicine.name)\">\n                    <strong>Rationale:</strong> {{ medicine.rationale }}\n                </div>\n            </div>\n        </div>\n    </div>\n     <div class=\"textalign\" *ngIf=\"!isLoading && !hasError && noData\">\n        <span>No medicines are recommended based on the information provided.</span>\n    </div>\n    </div>\n\n</ng-container>", styles: ["@charset \"UTF-8\";.try-again-btn{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;background-color:var(--color-darkBlue);color:#fff}.diffrential-diagnosis{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.diagnosis-list{font-weight:400;font-size:14px;line-height:21px;letter-spacing:0%}.diagnosis-container{background-color:#faf7fc;border-radius:10px;padding:15px}.custom-checkbox{appearance:none;width:16px;height:16px;flex-shrink:0;border:1px solid #B0ADBE;border-radius:4px;position:relative;cursor:pointer;background-color:transparent;margin-top:3px;margin-right:9px;margin-bottom:9px}.custom-checkbox:checked{background-color:#0fd197}.custom-checkbox:checked:after{content:\"\\2713\";font-size:14px;font-weight:700;color:#fff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}.rationale-container{background-color:#faf7fc;border-radius:10px;padding:15px}.rationale-container h2{font-size:16px;font-weight:700;line-height:24px;color:#101828}.rationale-container .fq-item{margin-left:20px}.rationale-item{border-bottom:1.5px solid rgba(178,175,190,.2)}.rationale{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.rationale-description{font-weight:400;font-size:16px;line-height:24px;letter-spacing:0%;margin-left:13px}.stats-loading{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;color:var(--color-darkBlue)}.stats-loading div{background:#0060ff;display:inline-block;height:8px;width:8px;border-radius:100%;animation:bouncedelay 1.4s infinite ease-in-out;animation-fill-mode:both}.stats-loading div.eins{animation-delay:-.32s}.stats-loading div.zwei{animation-delay:-.16s}.alert{background:#fff;border:1px solid rgba(178,175,190,.2);border-radius:8px;margin-bottom:0}.alert-icon{position:relative;bottom:2px;right:6px}.text-reminder{color:#dc3545!important;font-size:15px;font-weight:700}@keyframes bouncedelay{0%,80%,to{transform:scale(0);opacity:0}40%{transform:scale(1);opacity:100}}.loading-text{font-weight:400;font-size:12px;line-height:18px;color:#7f7b92}.conclusion-card{background:#fff;border-radius:10px;margin:20px 0;box-shadow:0 1px 3px #1018281a,0 1px 2px #1018280f}.conclusion-card .conclusion-header{padding:16px 24px;border-bottom:1px solid #EAECF0}.conclusion-card .conclusion-header h2{font-size:16px;font-weight:700;line-height:24px;margin:0;color:#101828}.conclusion-card .conclusion-body{padding:24px}.conclusion-card .conclusion-body p{margin:0;font-size:14px;line-height:20px;color:#344054;font-weight:400}.note-con{border-radius:4px;font-size:14px;line-height:20px;color:#6c757d}.note-con .note-label{font-weight:600;margin-right:4px;color:#dc3545}.disabled-diagnosis{opacity:.7;cursor:not-allowed}.disabled-diagnosis .custom-checkbox{cursor:not-allowed}.disabled-diagnosis .text-muted{opacity:.7}.warning-icon{height:50px;width:50px}.erorr-container{min-height:150px;background-color:#faf7fc;border-radius:10px;width:100%;padding-bottom:8px}.txt-position{position:relative;top:24px}.conclusion-header{position:relative;bottom:16px}.reminder-msg{font-size:14px;font-weight:700}.reminder{font-weight:500;font-size:14px;color:#1b163a}.ayu-suggestion-container{background-color:#f9fffc;border:1px solid #B5F2DF!important;border-radius:12px}.ayu-suggestion-container .ayu-header{font-size:16px;color:#1b163a;font-weight:700}.ayu-suggestion-container .warning{background-color:#f6e3d9;border:.8px solid rgba(255,71,93,.0784313725);padding:10px;border-radius:8px;font-size:15px;margin-bottom:14px;color:#000;font-weight:500}.med-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}.med-card{background:#fff;padding:12px 16px;border-radius:6px;box-shadow:0 0 4px #00000014;border:1px solid rgba(178,175,190,.2);position:relative}.ai-disclaimer-prominent{background:linear-gradient(135deg,#fff5e6,#ffe8cc);border:2px solid #ff9800;border-left:5px solid #ff6b00;padding:16px 20px;border-radius:10px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px;box-shadow:0 2px 8px #ff980026}.ai-disclaimer-prominent .disclaimer-icon{width:24px;height:24px;margin-top:2px;flex-shrink:0}.ai-disclaimer-prominent .disclaimer-text{font-size:15px;line-height:1.6;font-weight:600;color:#1a1a1a;letter-spacing:.3px}.med-header{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;padding-right:22px}.checkbox-label{display:flex;gap:8px;flex:1 1 auto;min-width:0}.med-flag-btn{position:absolute;top:12px;right:12px;background:none;border:none;outline:none;padding:0;cursor:pointer;line-height:0;opacity:.85;z-index:2}.med-flag-btn:hover{opacity:1}.report-popover{position:absolute;top:34px;right:8px;z-index:20;width:260px;background:#fff;border:1px solid #E4E2EC;border-radius:12px;box-shadow:0 8px 24px #1b163a29;padding:14px;text-align:left}.report-popover .rp-title{font-family:DM Sans;font-weight:700;font-size:14px;color:#1b163a}.report-popover .rp-sub{font-family:DM Sans;font-size:12px;color:#7f7b92;margin:2px 0 10px;word-break:break-word}.report-popover .rp-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}.report-popover .rp-chip{background:#fff;border:1px solid #D8D6E0;border-radius:16px;padding:4px 12px;font-size:12px;color:#1b163a;cursor:pointer}.report-popover .rp-chip.active{background:#eef0ff;border-color:#6a5ae0;color:#6a5ae0;font-weight:600}.report-popover .rp-note{width:100%;border:1px solid #D8D6E0;border-radius:8px;padding:8px;font-size:12px;resize:vertical;outline:none;box-sizing:border-box}.report-popover .rp-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}.report-popover .rp-cancel{background:#fff;border:1px solid #6A5AE0;color:#6a5ae0;border-radius:8px;padding:6px 16px;font-size:13px;font-weight:600;cursor:pointer}.report-popover .rp-send{background:#6a5ae0;border:none;color:#fff;border-radius:8px;padding:6px 18px;font-size:13px;font-weight:600;cursor:pointer}.report-popover .rp-send:disabled{opacity:.5;cursor:not-allowed}.med-name{font-family:DM Sans;font-weight:500;font-size:14px;line-height:150%;letter-spacing:0%;word-break:break-word;min-width:0;flex:1 1 auto;color:#1b163a}.med-severity{font-family:DM Sans;font-weight:400;font-size:12px;color:#7f7b92;white-space:nowrap;flex-shrink:0}.med-details{font-family:DM Sans;font-weight:400;font-size:14px;padding-left:35px}.med-rationale{font-family:DM Sans;font-weight:400;font-size:13px;line-height:1.5;color:#5a5768;margin-top:8px;padding-top:8px;border-top:1px solid #F0EFF2}.med-rationale strong{font-weight:600;color:#1b163a}.selected-med{background-color:#0fd197;color:#fff}.reminder-alert{color:#ff475d;background-color:#fff;border:1px solid #F0EFF2;padding:16px;font-size:14px;border-radius:12px}.warning{margin-right:8px}.warning .report-link{color:#c0392b;font-weight:700;text-decoration:underline;cursor:pointer;margin-left:6px;white-space:nowrap}.warning .report-link:hover{opacity:.85}.suggest-tx-btn{display:inline-flex;align-items:center;justify-content:center;border:none;border-radius:10px;padding:12px 18px;font-weight:600;color:#fff;background:linear-gradient(90deg,#4a2fd6,#3a1eb0);cursor:pointer}.suggest-tx-btn img{width:18px;height:18px;filter:brightness(0) invert(1)}.suggest-tx-btn:disabled{opacity:.5;cursor:not-allowed}.suggest-tx-btn:not(:disabled):hover{background:linear-gradient(90deg,#3f27bd,#311a97)}.med-scroll-wrapper{max-height:unset;overflow-y:unset}.med-scroll-wrapper.scroll-enabled{max-height:400px;overflow-y:auto;padding-right:4px;border:1px solid #ccc;border-radius:6px}.med-scroll-wrapper.scroll-enabled::-webkit-scrollbar{width:6px}.med-scroll-wrapper.scroll-enabled::-webkit-scrollbar-thumb{background-color:#bbb;border-radius:4px}.textalign{text-align:center;color:#7f7b92;margin-top:15px}@media (max-width: 768px){.erorr-container{min-height:180px;background-color:#faf7fc;border-radius:10px;width:100%}}\n"], dependencies: [{ kind: "directive", type: i2$1.NgClass, selector: "[ngClass]", inputs: ["class", "ngClass"] }, { kind: "directive", type: i2$1.NgForOf, selector: "[ngFor][ngForOf]", inputs: ["ngForOf", "ngForTrackBy", "ngForTemplate"] }, { kind: "directive", type: i2$1.NgIf, selector: "[ngIf]", inputs: ["ngIf", "ngIfThen", "ngIfElse"] }, { kind: "directive", type: i3$1.DefaultValueAccessor, selector: "input:not([type=checkbox])[formControlName],textarea[formControlName],input:not([type=checkbox])[formControl],textarea[formControl],input:not([type=checkbox])[ngModel],textarea[ngModel],[ngDefaultControl]" }, { kind: "directive", type: i3$1.CheckboxControlValueAccessor, selector: "input[type=checkbox][formControlName],input[type=checkbox][formControl],input[type=checkbox][ngModel]" }, { kind: "directive", type: i3$1.NgControlStatus, selector: "[formControlName],[ngModel],[formControl]" }, { kind: "directive", type: i3$1.NgModel, selector: "[ngModel]:not([formControlName]):not([formControl])", inputs: ["name", "disabled", "ngModel", "ngModelOptions"], outputs: ["ngModelChange"], exportAs: ["ngModel"] }, { kind: "pipe", type: i4.TranslatePipe, name: "translate" }] });
+}
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AillmtxMedicationComponent, decorators: [{
+            type: Component,
+            args: [{ selector: 'lib-aillmtx-medication', template: "<ng-container *ngIf=\"!medicationList.length && (hasError || !noData)\">\n    <div class=\"d-flex justify-content-center mt-3 mb-3\">\n        <div class=\"erorr-container alert text-center p-4 d-flex flex-column align-items-center\">\n\n            <div *ngIf=\"!hasError && !isLoading\" class=\"no-data-container text-center\">\n                <div class=\"conclusion-header d-flex flex-column align-items-center\">\n                    <i class=\"bi bi-exclamation-triangle-fill text-danger mb-2\" style=\"font-size: 2rem;\"></i>\n                    <img src=\"assets/images/login/interneticon.png\" alt=\"Warning\" class=\"warning-icon\" />\n                    <h3 class=\"text-danger\">No diagnosis Provided</h3>\n                    <p class=\"text-muted\">Press the Confirm button to fetch AI-assisted Medicines suggestions</p>\n                    <button type=\"button\" class=\"suggest-tx-btn mt-2\" [disabled]=\"treatmentDisabled\" (click)=\"requestTreatmentPlan.emit()\">\n                        <ng-container *ngIf=\"!treatmentLoading\">\n                            <img src=\"assets/svgs/ayu-ddx.svg\" alt=\"\" class=\"mr-2\" />{{ 'Confirm & Suggest Treatment Plan' | translate }}\n                        </ng-container>\n                        <ng-container *ngIf=\"treatmentLoading\">\n                            {{ 'Suggesting treatment plan...' | translate }}\n                        </ng-container>\n                    </button>\n                </div>\n            </div>\n\n            <ng-container *ngIf=\"!isLoading && hasError\">\n                <div *ngIf=\"!isLoading && hasError\" class=\"text-danger txt-position\">\n                     <span><img class=\"mb-1\" src=\"assets/svgs/alert-triangle.svg\" alt=\"\" /> </span>\n                     <span *ngIf=\"!loggedError\" class=\"ml-2\">No suggestions at this moment</span>\n                     <span *ngIf=\"loggedError\" class=\"ml-2\">{{ loggedError }}</span>\n                    <!-- <span *ngIf=\"hasError\" class=\"ms-2\">An unexpected issue occurred</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">The input provided does not have enough clinical details for an AI-assistant assessment.</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">No suggestions at this moment</span> -->\n                </div>\n                <button *ngIf=\"!noData\" type=\"button\" class=\"try-again-btn mt-5\" (click)=\"onTryAgain()\">\n                    {{'Try again'|translate}}\n                </button>\n            </ng-container>\n\n            <button *ngIf=\"isLoading\" class=\"stats-loading\">\n                <div class=\"eins\"></div>\n                <div class=\"zwei\"></div>\n                <div class=\"drei\"></div>\n            </button>\n\n            <div *ngIf=\"isLoading\" class=\"mt-3\">\n                <i class=\"bi bi-exclamation-triangle-fill\"></i>\n                <span class=\"ms-2 loading-text\">Please wait while the results are being generated.</span>\n            </div>\n\n        </div>\n    </div>\n</ng-container>\n\n<ng-container *ngIf=\"medicationList.length || (!isLoading && (hasError && noData))\">\n\n    <!-- Reminder - Always show when there are reminder messages -->\n  <div *ngFor=\"let message of reminderMessages\" class=\"reminder-alert mt-3\">\n     <span class=\"reminder-msg\"><img class=\"mb-1\" src=\"assets/svgs/alert-triangle.svg\" alt=\"\" /> Reminder: </span>\n     <span class=\"reminder\" [innerHTML]=\"message\"></span>\n  </div>\n\n    <div class=\"mt-3 mb-3 ayu-suggestion-container p-3 border border-gray-300 bg-green-50\">\n        <div class=\"mb-2 flex items-center ayu-header\">\n             <img class=\"mr-2\"  src=\"assets/svgs/ayu-ddx.svg\" alt=\"\" /> Ayu suggested medication\n        </div>\n\n         <div class=\"warning\">\n            <img class=\"mb-1 mr-2\" src=\"assets/svgs/info-ddx.svg\" alt=\"\" />This AI-generated suggestion is intended to support\u2014not replace\u2014your clinical judgement and may not account for all relevant factors.<strong> Please carefully review for potential adverse drug reactions (ADRs)</strong>, including drug\u2013drug, drug\u2013condition, and drug\u2013allergy interactions before finalizing the prescription.<strong> Please use your own judgement before acting.</strong>\n            <a class=\"report-link\" (click)=\"reportPanelIssue.emit({ medication_count: medicationList?.length || 0 })\">{{ 'Is something wrong? Report it' | translate }}</a>\n          </div>\n\n        <div *ngIf=\"medicationList.length\" class=\"med-scroll-wrapper\" [ngClass]=\"{ 'scroll-enabled': medicationList.length > 6 }\">\n        <div class=\"med-grid\">\n            <div *ngFor=\"let medicine of medicationList\" class=\"med-card\">\n                <div class=\"med-header\">\n                    <label class=\"checkbox-label\">\n                        <input type=\"checkbox\" [ngClass]=\"{ 'selected-med': medicine.selected }\" class=\"custom-checkbox me-2\"  [(ngModel)]=\"medicine.selected\"  [checked]=\"isMedicineSelected(medicine)\"\n                         [disabled]=\"isMedicineExists(medicine.name)\" (change)=\"onAIMedicineChange(medicine)\" />\n                        <span class=\"med-name\"  [class.text-muted]=\"isMedicineExists(medicine.name)\">{{ medicine.name }}</span>\n                    </label>\n                    <span class=\"med-severity\"  [class.text-muted]=\"isMedicineExists(medicine.name)\">({{ medicine.confidence ? (medicine.confidence.charAt(0).toUpperCase() + medicine.confidence.slice(1).toLowerCase()) : '' }})</span>\n                    <button type=\"button\" class=\"med-flag-btn\" title=\"{{ 'Report this suggestion' | translate }}\" (click)=\"openReport(medicine)\">\n                        <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#C0392B\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z\"/><line x1=\"4\" y1=\"22\" x2=\"4\" y2=\"15\"/></svg>\n                    </button>\n                </div>\n                <div class=\"report-popover\" *ngIf=\"reportOpenFor === medicine\">\n                    <div class=\"rp-title\">{{ 'Report this AI suggestion' | translate }}</div>\n                    <div class=\"rp-sub\">{{ medicine.name }}</div>\n                    <div class=\"rp-chips\">\n                        <button type=\"button\" class=\"rp-chip\" [class.active]=\"reportReason === 'wrong_dose'\" (click)=\"reportReason = 'wrong_dose'\">{{ 'Wrong dose' | translate }}</button>\n                        <button type=\"button\" class=\"rp-chip\" [class.active]=\"reportReason === 'unsafe'\" (click)=\"reportReason = 'unsafe'\">{{ 'Unsafe' | translate }}</button>\n                        <button type=\"button\" class=\"rp-chip\" [class.active]=\"reportReason === 'other'\" (click)=\"reportReason = 'other'\">{{ 'Other' | translate }}</button>\n                    </div>\n                    <textarea class=\"rp-note\" rows=\"3\" placeholder=\"{{ 'Add a note (optional)' | translate }}\" [(ngModel)]=\"reportNote\"></textarea>\n                    <div class=\"rp-actions\">\n                        <button type=\"button\" class=\"rp-cancel\" (click)=\"closeReport()\">{{ 'Cancel' | translate }}</button>\n                        <button type=\"button\" class=\"rp-send\" [disabled]=\"!reportReason\" (click)=\"sendReport(medicine)\">{{ 'Send' | translate }}</button>\n                    </div>\n                </div>\n                <ul class=\"med-details\" [class.text-muted]=\"isMedicineExists(medicine.name)\">\n                    <li *ngIf=\"medicine.dosage\">{{ medicine.dosage }}</li>\n                    <li *ngIf=\"medicine.frequency\">{{ medicine.frequency }}</li>\n                    <li *ngIf=\"medicine.duration\">{{ medicine.duration }} {{medicine.duration_unit}}</li>\n                    <li *ngIf=\"medicine.instructions\">{{ medicine.instructions }}</li>\n                </ul>\n                <div *ngIf=\"medicine.rationale\" class=\"med-rationale\" [class.text-muted]=\"isMedicineExists(medicine.name)\">\n                    <strong>Rationale:</strong> {{ medicine.rationale }}\n                </div>\n            </div>\n        </div>\n    </div>\n     <div class=\"textalign\" *ngIf=\"!isLoading && !hasError && noData\">\n        <span>No medicines are recommended based on the information provided.</span>\n    </div>\n    </div>\n\n</ng-container>", styles: ["@charset \"UTF-8\";.try-again-btn{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;background-color:var(--color-darkBlue);color:#fff}.diffrential-diagnosis{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.diagnosis-list{font-weight:400;font-size:14px;line-height:21px;letter-spacing:0%}.diagnosis-container{background-color:#faf7fc;border-radius:10px;padding:15px}.custom-checkbox{appearance:none;width:16px;height:16px;flex-shrink:0;border:1px solid #B0ADBE;border-radius:4px;position:relative;cursor:pointer;background-color:transparent;margin-top:3px;margin-right:9px;margin-bottom:9px}.custom-checkbox:checked{background-color:#0fd197}.custom-checkbox:checked:after{content:\"\\2713\";font-size:14px;font-weight:700;color:#fff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}.rationale-container{background-color:#faf7fc;border-radius:10px;padding:15px}.rationale-container h2{font-size:16px;font-weight:700;line-height:24px;color:#101828}.rationale-container .fq-item{margin-left:20px}.rationale-item{border-bottom:1.5px solid rgba(178,175,190,.2)}.rationale{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.rationale-description{font-weight:400;font-size:16px;line-height:24px;letter-spacing:0%;margin-left:13px}.stats-loading{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;color:var(--color-darkBlue)}.stats-loading div{background:#0060ff;display:inline-block;height:8px;width:8px;border-radius:100%;animation:bouncedelay 1.4s infinite ease-in-out;animation-fill-mode:both}.stats-loading div.eins{animation-delay:-.32s}.stats-loading div.zwei{animation-delay:-.16s}.alert{background:#fff;border:1px solid rgba(178,175,190,.2);border-radius:8px;margin-bottom:0}.alert-icon{position:relative;bottom:2px;right:6px}.text-reminder{color:#dc3545!important;font-size:15px;font-weight:700}@keyframes bouncedelay{0%,80%,to{transform:scale(0);opacity:0}40%{transform:scale(1);opacity:100}}.loading-text{font-weight:400;font-size:12px;line-height:18px;color:#7f7b92}.conclusion-card{background:#fff;border-radius:10px;margin:20px 0;box-shadow:0 1px 3px #1018281a,0 1px 2px #1018280f}.conclusion-card .conclusion-header{padding:16px 24px;border-bottom:1px solid #EAECF0}.conclusion-card .conclusion-header h2{font-size:16px;font-weight:700;line-height:24px;margin:0;color:#101828}.conclusion-card .conclusion-body{padding:24px}.conclusion-card .conclusion-body p{margin:0;font-size:14px;line-height:20px;color:#344054;font-weight:400}.note-con{border-radius:4px;font-size:14px;line-height:20px;color:#6c757d}.note-con .note-label{font-weight:600;margin-right:4px;color:#dc3545}.disabled-diagnosis{opacity:.7;cursor:not-allowed}.disabled-diagnosis .custom-checkbox{cursor:not-allowed}.disabled-diagnosis .text-muted{opacity:.7}.warning-icon{height:50px;width:50px}.erorr-container{min-height:150px;background-color:#faf7fc;border-radius:10px;width:100%;padding-bottom:8px}.txt-position{position:relative;top:24px}.conclusion-header{position:relative;bottom:16px}.reminder-msg{font-size:14px;font-weight:700}.reminder{font-weight:500;font-size:14px;color:#1b163a}.ayu-suggestion-container{background-color:#f9fffc;border:1px solid #B5F2DF!important;border-radius:12px}.ayu-suggestion-container .ayu-header{font-size:16px;color:#1b163a;font-weight:700}.ayu-suggestion-container .warning{background-color:#f6e3d9;border:.8px solid rgba(255,71,93,.0784313725);padding:10px;border-radius:8px;font-size:15px;margin-bottom:14px;color:#000;font-weight:500}.med-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}.med-card{background:#fff;padding:12px 16px;border-radius:6px;box-shadow:0 0 4px #00000014;border:1px solid rgba(178,175,190,.2);position:relative}.ai-disclaimer-prominent{background:linear-gradient(135deg,#fff5e6,#ffe8cc);border:2px solid #ff9800;border-left:5px solid #ff6b00;padding:16px 20px;border-radius:10px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px;box-shadow:0 2px 8px #ff980026}.ai-disclaimer-prominent .disclaimer-icon{width:24px;height:24px;margin-top:2px;flex-shrink:0}.ai-disclaimer-prominent .disclaimer-text{font-size:15px;line-height:1.6;font-weight:600;color:#1a1a1a;letter-spacing:.3px}.med-header{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;padding-right:22px}.checkbox-label{display:flex;gap:8px;flex:1 1 auto;min-width:0}.med-flag-btn{position:absolute;top:12px;right:12px;background:none;border:none;outline:none;padding:0;cursor:pointer;line-height:0;opacity:.85;z-index:2}.med-flag-btn:hover{opacity:1}.report-popover{position:absolute;top:34px;right:8px;z-index:20;width:260px;background:#fff;border:1px solid #E4E2EC;border-radius:12px;box-shadow:0 8px 24px #1b163a29;padding:14px;text-align:left}.report-popover .rp-title{font-family:DM Sans;font-weight:700;font-size:14px;color:#1b163a}.report-popover .rp-sub{font-family:DM Sans;font-size:12px;color:#7f7b92;margin:2px 0 10px;word-break:break-word}.report-popover .rp-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}.report-popover .rp-chip{background:#fff;border:1px solid #D8D6E0;border-radius:16px;padding:4px 12px;font-size:12px;color:#1b163a;cursor:pointer}.report-popover .rp-chip.active{background:#eef0ff;border-color:#6a5ae0;color:#6a5ae0;font-weight:600}.report-popover .rp-note{width:100%;border:1px solid #D8D6E0;border-radius:8px;padding:8px;font-size:12px;resize:vertical;outline:none;box-sizing:border-box}.report-popover .rp-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}.report-popover .rp-cancel{background:#fff;border:1px solid #6A5AE0;color:#6a5ae0;border-radius:8px;padding:6px 16px;font-size:13px;font-weight:600;cursor:pointer}.report-popover .rp-send{background:#6a5ae0;border:none;color:#fff;border-radius:8px;padding:6px 18px;font-size:13px;font-weight:600;cursor:pointer}.report-popover .rp-send:disabled{opacity:.5;cursor:not-allowed}.med-name{font-family:DM Sans;font-weight:500;font-size:14px;line-height:150%;letter-spacing:0%;word-break:break-word;min-width:0;flex:1 1 auto;color:#1b163a}.med-severity{font-family:DM Sans;font-weight:400;font-size:12px;color:#7f7b92;white-space:nowrap;flex-shrink:0}.med-details{font-family:DM Sans;font-weight:400;font-size:14px;padding-left:35px}.med-rationale{font-family:DM Sans;font-weight:400;font-size:13px;line-height:1.5;color:#5a5768;margin-top:8px;padding-top:8px;border-top:1px solid #F0EFF2}.med-rationale strong{font-weight:600;color:#1b163a}.selected-med{background-color:#0fd197;color:#fff}.reminder-alert{color:#ff475d;background-color:#fff;border:1px solid #F0EFF2;padding:16px;font-size:14px;border-radius:12px}.warning{margin-right:8px}.warning .report-link{color:#c0392b;font-weight:700;text-decoration:underline;cursor:pointer;margin-left:6px;white-space:nowrap}.warning .report-link:hover{opacity:.85}.suggest-tx-btn{display:inline-flex;align-items:center;justify-content:center;border:none;border-radius:10px;padding:12px 18px;font-weight:600;color:#fff;background:linear-gradient(90deg,#4a2fd6,#3a1eb0);cursor:pointer}.suggest-tx-btn img{width:18px;height:18px;filter:brightness(0) invert(1)}.suggest-tx-btn:disabled{opacity:.5;cursor:not-allowed}.suggest-tx-btn:not(:disabled):hover{background:linear-gradient(90deg,#3f27bd,#311a97)}.med-scroll-wrapper{max-height:unset;overflow-y:unset}.med-scroll-wrapper.scroll-enabled{max-height:400px;overflow-y:auto;padding-right:4px;border:1px solid #ccc;border-radius:6px}.med-scroll-wrapper.scroll-enabled::-webkit-scrollbar{width:6px}.med-scroll-wrapper.scroll-enabled::-webkit-scrollbar-thumb{background-color:#bbb;border-radius:4px}.textalign{text-align:center;color:#7f7b92;margin-top:15px}@media (max-width: 768px){.erorr-container{min-height:180px;background-color:#faf7fc;border-radius:10px;width:100%}}\n"] }]
+        }], ctorParameters: function () { return [{ type: AiTxService }]; }, propDecorators: { patientInfo: [{
+                type: Input
+            }], visit: [{
+                type: Input
+            }], useJsonVisitSummary: [{
+                type: Input
+            }], existingMedication: [{
+                type: Input
+            }], medicationSelected: [{
+                type: Output
+            }], reportPanelIssue: [{
+                type: Output
+            }], reportSuggestionIssue: [{
+                type: Output
+            }], requestTreatmentPlan: [{
+                type: Output
+            }], treatmentDisabled: [{
+                type: Input
+            }], treatmentLoading: [{
+                type: Input
+            }], diagnosisName: [{
+                type: Input
+            }], notesss: [{
+                type: Input
+            }], patientAllergies: [{
+                type: Input
+            }], patientCurrentMedications: [{
+                type: Input
+            }], allergyDataStatus: [{
+                type: Input
+            }], visitCompleted: [{
+                type: Input
+            }] } });
+
+class AillmtxAdviceComponent {
+    TxService;
+    patientInfo;
+    visit;
+    useJsonVisitSummary;
+    visitSummaryJson = null;
+    existingAdvice = [];
+    adviceSelected = new EventEmitter();
+    diagnosisName;
+    notesss;
+    isLoading = false;
+    hasError = false;
+    noData = false;
+    insufficientData = false;
+    conclusion = '';
+    adviceList = [];
+    furtherQuestionsList = [];
+    selectedAdvice = [];
+    loggedError;
+    constructor(TxService) {
+        this.TxService = TxService;
+    }
+    ngOnInit() { }
+    getAIAdvice(diagnosis) {
+        const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
+        this.isLoading = true;
+        this.adviceList = [];
+        this.furtherQuestionsList = [];
+        this.TxService.getAITTx(payload, diagnosis, this.visit.uuid).subscribe({
+            next: (data) => {
+                if (data.result.data.result.length > 0) {
+                    this.noData = false;
+                    this.adviceList = data.result.data.result.map(v => {
+                        return {
+                            ...v,
+                        };
+                    });
+                }
+                else {
+                    this.noData = true;
+                }
+            },
+            error: (err) => {
+                this.hasError = true;
+                this.isLoading = false;
+            },
+            complete: () => {
+                this.isLoading = false;
+            }
+        });
+    }
+    resolveVisitSummaryJson() {
+        this.visitSummaryJson = this.TxService.resolveVisitSummaryJson(this.visit, this.useJsonVisitSummary);
+        return this.visitSummaryJson;
+    }
+    getAIAdviceWithRetry(diagnosis) {
+        const MAX_RETRIES = 1;
+        let retryCount = 0;
+        const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
+        const attemptDiagnosis = () => {
+            this.isLoading = true;
+            this.adviceList = [];
+            this.furtherQuestionsList = [];
+            this.TxService.getAITTx(payload, diagnosis, this.visit.uuid).subscribe({
+                next: (data) => {
+                    if (data.result.data.success && data.result.data.medical_advice.length > 0) {
+                        this.noData = false;
+                        this.adviceList = data.result.data.medical_advice.map(v => {
+                            return {
+                                v
+                            };
+                        });
+                    }
+                    else if (!data.data.success) {
+                        this.hasError = true;
+                        this.loggedError = data.data?.error;
+                    }
+                    else {
+                        this.noData = true;
+                    }
+                    this.isLoading = false;
+                },
+                error: (err) => {
+                    retryCount++;
+                    if (retryCount < MAX_RETRIES) {
+                        console.log(`Retry attempt ${retryCount} for getAITX`);
+                        setTimeout(() => {
+                            attemptDiagnosis();
+                        }, 1000);
+                    }
+                    else {
+                        this.hasError = true;
+                        this.loggedError = err;
+                        this.isLoading = false;
+                        console.error('Failed to get AI diagnosis after 3 attempts:', err);
+                    }
+                },
+                complete: () => {
+                    this.isLoading = false;
+                }
+            });
+        };
+        attemptDiagnosis();
+    }
+    onTryAgain() {
+        console.log(this.diagnosisName, "Retrying AI Follow Up");
+        this.getAIAdviceWithRetry(this.diagnosisName);
+    }
+    onAIAdviceChange(advice) {
+        if (!advice) {
+            this.selectedAdvice = [];
+        }
+        else if (Array.isArray(advice)) {
+            this.selectedAdvice = [...advice];
+        }
+        else {
+            if (typeof advice === 'string') {
+                this.selectedAdvice = this.selectedAdvice.filter(a => a !== advice);
+            }
+            else {
+                const index = this.selectedAdvice.indexOf(advice.v);
+                if (index > -1) {
+                    this.selectedAdvice = this.selectedAdvice.filter(a => a !== advice.v);
+                }
+                else {
+                    this.selectedAdvice = [...this.selectedAdvice, advice.v];
+                }
+            }
+        }
+        this.adviceSelected.emit([...this.selectedAdvice]);
+    }
+    isAdviceExists(advice) {
+        return this.existingAdvice.some(a => a.value === advice);
+    }
+    isAdviceSelected(advice) {
+        return this.selectedAdvice.includes(advice.v) || this.existingAdvice.some(a => a.value === advice.v);
+    }
+    static ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AillmtxAdviceComponent, deps: [{ token: AiTxService }], target: i0.ɵɵFactoryTarget.Component });
+    static ɵcmp = i0.ɵɵngDeclareComponent({ minVersion: "14.0.0", version: "14.3.0", type: AillmtxAdviceComponent, selector: "lib-aillmtx-advice", inputs: { patientInfo: "patientInfo", visit: "visit", useJsonVisitSummary: "useJsonVisitSummary", existingAdvice: "existingAdvice", diagnosisName: "diagnosisName", notesss: "notesss" }, outputs: { adviceSelected: "adviceSelected" }, ngImport: i0, template: "<ng-container *ngIf=\"!adviceList.length && (hasError || !noData)\">\n    <div class=\"d-flex justify-content-center mt-3 mb-3\">\n        <div class=\"erorr-container alert text-center p-4 d-flex flex-column align-items-center\">\n\n            <div *ngIf=\"!hasError && !isLoading\" class=\"no-data-container text-center\">\n                <div class=\"conclusion-header d-flex flex-column align-items-center\">\n                    <i class=\"bi bi-exclamation-triangle-fill text-danger mb-2\" style=\"font-size: 2rem;\"></i>\n                    <img src=\"assets/images/login/interneticon.png\" alt=\"Warning\" class=\"warning-icon\" />\n                    <h3 class=\"text-danger\">No diagnosis Provided</h3>\n                    <p class=\"text-muted\">Please add the required diagnosis details to fetch AI-assisted Advices\n                        suggestions.</p>\n                </div>\n            </div>\n\n            <ng-container *ngIf=\"!isLoading && hasError\">\n                <div *ngIf=\"!isLoading && hasError\" class=\"text-danger txt-position\">\n                    <span><img class=\"mb-1\" src=\"assets/svgs/alert-triangle.svg\" alt=\"\" /> </span>\n                    <span *ngIf=\"!loggedError\" class=\"ml-2\">No suggestions at this moment</span>\n                    <span *ngIf=\"loggedError\" class=\"ml-2\">{{ loggedError }}</span>\n                    <!-- <span *ngIf=\"hasError\" class=\"ms-2\">An unexpected issue occurred</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">The input provided does not have enough clinical details for an AI-assistant assessment.</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">No suggestions at this moment</span> -->\n                </div>\n                <button *ngIf=\"!noData\" type=\"button\" class=\"try-again-btn mt-5\" (click)=\"onTryAgain()\">\n                    {{'Try again'|translate}}\n                </button>\n            </ng-container>\n\n            <button *ngIf=\"isLoading\" class=\"stats-loading\">\n                <div class=\"eins\"></div>\n                <div class=\"zwei\"></div>\n                <div class=\"drei\"></div>\n            </button>\n\n            <div *ngIf=\"isLoading\" class=\"mt-3\">\n                <i class=\"bi bi-exclamation-triangle-fill\"></i>\n                <span class=\"ms-2 loading-text\">Please wait while the results are being generated.</span>\n            </div>\n\n        </div>\n    </div>\n</ng-container>\n\n<ng-container *ngIf=\"adviceList.length || (!isLoading && (hasError && noData))\" class=\"mt-2\">\n    <div class=\"mt-3 mb-3 ayu-suggestion-container p-3 border border-gray-300 bg-green-50\">\n        <div class=\"mb-2 flex items-center ayu-header\">\n            <img class=\"mr-2\" src=\"assets/svgs/ayu-ddx.svg\" alt=\"\" /> Ayu suggested advice\n        </div>\n        <div class=\"warning\">\n            <img class=\"mb-1 mr-2\" src=\"assets/svgs/info-ddx.svg\" alt=\"\" />\n            This AI-generated suggestion is intended to support\u2014not replace\u2014your clinical judgement and may not account\n            for all relevant factors; please use your own judgement before acting.\n        </div>\n        <div *ngIf=\"adviceList.length\" class=\"advice-container\">\n            <div  *ngFor=\"let advice of adviceList\" class=\"advice-card\">\n                <div class=\"advice-content\">\n                        <input type=\"checkbox\" [ngClass]=\"{ 'selected-med': advice.selected }\" class=\"custom-checkbox me-2\"  [(ngModel)]=\"advice.selected\"  [checked]=\"isAdviceSelected(advice)\"\n                       [disabled]=\"isAdviceExists(advice.v)\" (change)=\"onAIAdviceChange(advice)\"/>\n                        <div class=\"med-name\"[class.text-muted]=\"isAdviceExists(advice.v)\">{{ advice.v }}</div>\n                </div>\n            </div>\n       </div>\n         <div class=\"textalign\" *ngIf=\"!isLoading && !hasError && noData\">\n        <span>No advice are recommended based on the information provided.</span>\n    </div>\n    </div>\n</ng-container>", styles: ["@charset \"UTF-8\";.try-again-btn{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;background-color:var(--color-darkBlue);color:#fff}.diffrential-diagnosis{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.diagnosis-list{font-weight:400;font-size:14px;line-height:21px;letter-spacing:0%}.diagnosis-container,.rationale-container{background-color:#faf7fc;border-radius:10px;padding:15px}.rationale-container h2{font-size:16px;font-weight:700;line-height:24px;color:#101828}.rationale-container .fq-item{margin-left:20px}.rationale-item{border-bottom:1.5px solid rgba(178,175,190,.2)}.rationale{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.rationale-description{font-weight:400;font-size:16px;line-height:24px;letter-spacing:0%;margin-left:13px}.stats-loading{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;color:var(--color-darkBlue)}.stats-loading div{background:#0060ff;display:inline-block;height:8px;width:8px;border-radius:100%;animation:bouncedelay 1.4s infinite ease-in-out;animation-fill-mode:both}.stats-loading div.eins{animation-delay:-.32s}.stats-loading div.zwei{animation-delay:-.16s}.alert{background:#fff;border:1px solid rgba(178,175,190,.2);border-radius:8px;margin-bottom:0}.alert-icon{position:relative;bottom:2px;right:6px}.text-reminder{color:#dc3545!important;font-size:15px;font-weight:700}@keyframes bouncedelay{0%,80%,to{transform:scale(0);opacity:0}40%{transform:scale(1);opacity:100}}.loading-text{font-weight:400;font-size:12px;line-height:18px;color:#7f7b92}.conclusion-card{background:#fff;border-radius:10px;margin:20px 0;box-shadow:0 1px 3px #1018281a,0 1px 2px #1018280f}.conclusion-card .conclusion-header{padding:16px 24px;border-bottom:1px solid #EAECF0}.conclusion-card .conclusion-header h2{font-size:16px;font-weight:700;line-height:24px;margin:0;color:#101828}.conclusion-card .conclusion-body{padding:24px}.conclusion-card .conclusion-body p{margin:0;font-size:14px;line-height:20px;color:#344054;font-weight:400}.note-con{border-radius:4px;font-size:14px;line-height:20px;color:#6c757d}.note-con .note-label{font-weight:600;margin-right:4px;color:#dc3545}.disabled-diagnosis{opacity:.7;cursor:not-allowed}.disabled-diagnosis .custom-checkbox{cursor:not-allowed}.disabled-diagnosis .text-muted{opacity:.7}.warning-icon{height:50px;width:50px}.erorr-container{height:150px;background-color:#faf7fc;border-radius:10px;width:100%}.txt-position{position:relative;top:24px}.conclusion-header{position:relative;bottom:16px}.ayu-suggestion-container{background-color:#f9fffc;border:1px solid #B5F2DF!important;border-radius:12px}.ayu-suggestion-container .ayu-header{font-size:16px;color:#1b163a;font-weight:700}.ayu-suggestion-container .warning{background-color:#fff7f3;border:.8px solid rgba(255,71,93,.0784313725);padding:10px;border-radius:8px;font-size:12px;margin-bottom:14px}.med-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}.med-card{background:#fff;padding:7px 14px;border-radius:12px;box-shadow:0 0 4px #00000014;border:1px solid rgba(178,175,190,.2)}.med-card .input{margin:0!important}.med-header{display:flex}.checkbox-label{display:flex;align-items:center;gap:8px}.med-name{font-family:DM Sans;font-weight:500;font-size:14px;line-height:150%;letter-spacing:0%;word-break:break-word;width:100%;color:#1b163a}.custom-checkbox{appearance:none;width:18px;height:16px;flex-shrink:0;border:1px solid #B0ADBE;border-radius:4px;position:relative;cursor:pointer;background-color:transparent}.custom-checkbox:checked{background-color:#0fd197}.custom-checkbox:checked:after{content:\"\\2713\";font-size:14px;font-weight:700;color:#fff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}.selected-med{background-color:#0fd197;color:#fff}.advice-container{display:flex;flex-wrap:wrap;gap:16px}.advice-card{flex:1 1 30%;min-height:100%;display:flex;align-items:center;border:1px solid rgba(178,175,190,.2);border-radius:12px;padding:16px;background-color:#fff;box-shadow:0 2px 5px #0000000d}.advice-content{display:flex;align-items:center;gap:14px;font-size:14px;line-height:1.5;color:#1b163a;text-align:left}.textalign{text-align:center;color:#7f7b92;margin-top:15px}@media (max-width: 768px){.erorr-container{height:180px;background-color:#faf7fc;border-radius:10px;width:100%}}\n"], dependencies: [{ kind: "directive", type: i2$1.NgClass, selector: "[ngClass]", inputs: ["class", "ngClass"] }, { kind: "directive", type: i2$1.NgForOf, selector: "[ngFor][ngForOf]", inputs: ["ngForOf", "ngForTrackBy", "ngForTemplate"] }, { kind: "directive", type: i2$1.NgIf, selector: "[ngIf]", inputs: ["ngIf", "ngIfThen", "ngIfElse"] }, { kind: "directive", type: i3$1.CheckboxControlValueAccessor, selector: "input[type=checkbox][formControlName],input[type=checkbox][formControl],input[type=checkbox][ngModel]" }, { kind: "directive", type: i3$1.NgControlStatus, selector: "[formControlName],[ngModel],[formControl]" }, { kind: "directive", type: i3$1.NgModel, selector: "[ngModel]:not([formControlName]):not([formControl])", inputs: ["name", "disabled", "ngModel", "ngModelOptions"], outputs: ["ngModelChange"], exportAs: ["ngModel"] }, { kind: "pipe", type: i4.TranslatePipe, name: "translate" }] });
+}
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AillmtxAdviceComponent, decorators: [{
+            type: Component,
+            args: [{ selector: 'lib-aillmtx-advice', template: "<ng-container *ngIf=\"!adviceList.length && (hasError || !noData)\">\n    <div class=\"d-flex justify-content-center mt-3 mb-3\">\n        <div class=\"erorr-container alert text-center p-4 d-flex flex-column align-items-center\">\n\n            <div *ngIf=\"!hasError && !isLoading\" class=\"no-data-container text-center\">\n                <div class=\"conclusion-header d-flex flex-column align-items-center\">\n                    <i class=\"bi bi-exclamation-triangle-fill text-danger mb-2\" style=\"font-size: 2rem;\"></i>\n                    <img src=\"assets/images/login/interneticon.png\" alt=\"Warning\" class=\"warning-icon\" />\n                    <h3 class=\"text-danger\">No diagnosis Provided</h3>\n                    <p class=\"text-muted\">Please add the required diagnosis details to fetch AI-assisted Advices\n                        suggestions.</p>\n                </div>\n            </div>\n\n            <ng-container *ngIf=\"!isLoading && hasError\">\n                <div *ngIf=\"!isLoading && hasError\" class=\"text-danger txt-position\">\n                    <span><img class=\"mb-1\" src=\"assets/svgs/alert-triangle.svg\" alt=\"\" /> </span>\n                    <span *ngIf=\"!loggedError\" class=\"ml-2\">No suggestions at this moment</span>\n                    <span *ngIf=\"loggedError\" class=\"ml-2\">{{ loggedError }}</span>\n                    <!-- <span *ngIf=\"hasError\" class=\"ms-2\">An unexpected issue occurred</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">The input provided does not have enough clinical details for an AI-assistant assessment.</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">No suggestions at this moment</span> -->\n                </div>\n                <button *ngIf=\"!noData\" type=\"button\" class=\"try-again-btn mt-5\" (click)=\"onTryAgain()\">\n                    {{'Try again'|translate}}\n                </button>\n            </ng-container>\n\n            <button *ngIf=\"isLoading\" class=\"stats-loading\">\n                <div class=\"eins\"></div>\n                <div class=\"zwei\"></div>\n                <div class=\"drei\"></div>\n            </button>\n\n            <div *ngIf=\"isLoading\" class=\"mt-3\">\n                <i class=\"bi bi-exclamation-triangle-fill\"></i>\n                <span class=\"ms-2 loading-text\">Please wait while the results are being generated.</span>\n            </div>\n\n        </div>\n    </div>\n</ng-container>\n\n<ng-container *ngIf=\"adviceList.length || (!isLoading && (hasError && noData))\" class=\"mt-2\">\n    <div class=\"mt-3 mb-3 ayu-suggestion-container p-3 border border-gray-300 bg-green-50\">\n        <div class=\"mb-2 flex items-center ayu-header\">\n            <img class=\"mr-2\" src=\"assets/svgs/ayu-ddx.svg\" alt=\"\" /> Ayu suggested advice\n        </div>\n        <div class=\"warning\">\n            <img class=\"mb-1 mr-2\" src=\"assets/svgs/info-ddx.svg\" alt=\"\" />\n            This AI-generated suggestion is intended to support\u2014not replace\u2014your clinical judgement and may not account\n            for all relevant factors; please use your own judgement before acting.\n        </div>\n        <div *ngIf=\"adviceList.length\" class=\"advice-container\">\n            <div  *ngFor=\"let advice of adviceList\" class=\"advice-card\">\n                <div class=\"advice-content\">\n                        <input type=\"checkbox\" [ngClass]=\"{ 'selected-med': advice.selected }\" class=\"custom-checkbox me-2\"  [(ngModel)]=\"advice.selected\"  [checked]=\"isAdviceSelected(advice)\"\n                       [disabled]=\"isAdviceExists(advice.v)\" (change)=\"onAIAdviceChange(advice)\"/>\n                        <div class=\"med-name\"[class.text-muted]=\"isAdviceExists(advice.v)\">{{ advice.v }}</div>\n                </div>\n            </div>\n       </div>\n         <div class=\"textalign\" *ngIf=\"!isLoading && !hasError && noData\">\n        <span>No advice are recommended based on the information provided.</span>\n    </div>\n    </div>\n</ng-container>", styles: ["@charset \"UTF-8\";.try-again-btn{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;background-color:var(--color-darkBlue);color:#fff}.diffrential-diagnosis{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.diagnosis-list{font-weight:400;font-size:14px;line-height:21px;letter-spacing:0%}.diagnosis-container,.rationale-container{background-color:#faf7fc;border-radius:10px;padding:15px}.rationale-container h2{font-size:16px;font-weight:700;line-height:24px;color:#101828}.rationale-container .fq-item{margin-left:20px}.rationale-item{border-bottom:1.5px solid rgba(178,175,190,.2)}.rationale{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.rationale-description{font-weight:400;font-size:16px;line-height:24px;letter-spacing:0%;margin-left:13px}.stats-loading{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;color:var(--color-darkBlue)}.stats-loading div{background:#0060ff;display:inline-block;height:8px;width:8px;border-radius:100%;animation:bouncedelay 1.4s infinite ease-in-out;animation-fill-mode:both}.stats-loading div.eins{animation-delay:-.32s}.stats-loading div.zwei{animation-delay:-.16s}.alert{background:#fff;border:1px solid rgba(178,175,190,.2);border-radius:8px;margin-bottom:0}.alert-icon{position:relative;bottom:2px;right:6px}.text-reminder{color:#dc3545!important;font-size:15px;font-weight:700}@keyframes bouncedelay{0%,80%,to{transform:scale(0);opacity:0}40%{transform:scale(1);opacity:100}}.loading-text{font-weight:400;font-size:12px;line-height:18px;color:#7f7b92}.conclusion-card{background:#fff;border-radius:10px;margin:20px 0;box-shadow:0 1px 3px #1018281a,0 1px 2px #1018280f}.conclusion-card .conclusion-header{padding:16px 24px;border-bottom:1px solid #EAECF0}.conclusion-card .conclusion-header h2{font-size:16px;font-weight:700;line-height:24px;margin:0;color:#101828}.conclusion-card .conclusion-body{padding:24px}.conclusion-card .conclusion-body p{margin:0;font-size:14px;line-height:20px;color:#344054;font-weight:400}.note-con{border-radius:4px;font-size:14px;line-height:20px;color:#6c757d}.note-con .note-label{font-weight:600;margin-right:4px;color:#dc3545}.disabled-diagnosis{opacity:.7;cursor:not-allowed}.disabled-diagnosis .custom-checkbox{cursor:not-allowed}.disabled-diagnosis .text-muted{opacity:.7}.warning-icon{height:50px;width:50px}.erorr-container{height:150px;background-color:#faf7fc;border-radius:10px;width:100%}.txt-position{position:relative;top:24px}.conclusion-header{position:relative;bottom:16px}.ayu-suggestion-container{background-color:#f9fffc;border:1px solid #B5F2DF!important;border-radius:12px}.ayu-suggestion-container .ayu-header{font-size:16px;color:#1b163a;font-weight:700}.ayu-suggestion-container .warning{background-color:#fff7f3;border:.8px solid rgba(255,71,93,.0784313725);padding:10px;border-radius:8px;font-size:12px;margin-bottom:14px}.med-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}.med-card{background:#fff;padding:7px 14px;border-radius:12px;box-shadow:0 0 4px #00000014;border:1px solid rgba(178,175,190,.2)}.med-card .input{margin:0!important}.med-header{display:flex}.checkbox-label{display:flex;align-items:center;gap:8px}.med-name{font-family:DM Sans;font-weight:500;font-size:14px;line-height:150%;letter-spacing:0%;word-break:break-word;width:100%;color:#1b163a}.custom-checkbox{appearance:none;width:18px;height:16px;flex-shrink:0;border:1px solid #B0ADBE;border-radius:4px;position:relative;cursor:pointer;background-color:transparent}.custom-checkbox:checked{background-color:#0fd197}.custom-checkbox:checked:after{content:\"\\2713\";font-size:14px;font-weight:700;color:#fff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}.selected-med{background-color:#0fd197;color:#fff}.advice-container{display:flex;flex-wrap:wrap;gap:16px}.advice-card{flex:1 1 30%;min-height:100%;display:flex;align-items:center;border:1px solid rgba(178,175,190,.2);border-radius:12px;padding:16px;background-color:#fff;box-shadow:0 2px 5px #0000000d}.advice-content{display:flex;align-items:center;gap:14px;font-size:14px;line-height:1.5;color:#1b163a;text-align:left}.textalign{text-align:center;color:#7f7b92;margin-top:15px}@media (max-width: 768px){.erorr-container{height:180px;background-color:#faf7fc;border-radius:10px;width:100%}}\n"] }]
+        }], ctorParameters: function () { return [{ type: AiTxService }]; }, propDecorators: { patientInfo: [{
+                type: Input
+            }], visit: [{
+                type: Input
+            }], useJsonVisitSummary: [{
+                type: Input
+            }], existingAdvice: [{
+                type: Input
+            }], adviceSelected: [{
+                type: Output
+            }], diagnosisName: [{
+                type: Input
+            }], notesss: [{
+                type: Input
+            }] } });
+
+class AillmtxTestComponent {
+    TxService;
+    patientInfo;
+    visit;
+    useJsonVisitSummary;
+    visitSummaryJson = null;
+    existingTest = [];
+    testSelected = new EventEmitter();
+    diagnosisName;
+    notesss;
+    isLoading = false;
+    hasError = false;
+    noData = false;
+    insufficientData = false;
+    conclusion = '';
+    testList = [];
+    furtherQuestionsList = [];
+    selectedTest = [];
+    loggedError;
+    constructor(TxService) {
+        this.TxService = TxService;
+    }
+    ngOnInit() { }
+    getAITest(diagnosis) {
+        const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
+        this.isLoading = true;
+        this.testList = [];
+        this.furtherQuestionsList = [];
+        this.TxService.getAITTx(payload, diagnosis, this.visit.uuid).subscribe({
+            next: (data) => {
+                if (data.result.data.result.length > 0) {
+                    this.noData = false;
+                    this.testList = data.result.data.result.map(v => {
+                        return {
+                            ...v,
+                        };
+                    });
+                }
+                else {
+                    this.noData = true;
+                }
+            },
+            error: (err) => {
+                this.hasError = true;
+                this.isLoading = false;
+            },
+            complete: () => {
+                this.isLoading = false;
+            }
+        });
+    }
+    resolveVisitSummaryJson() {
+        this.visitSummaryJson = this.TxService.resolveVisitSummaryJson(this.visit, this.useJsonVisitSummary);
+        return this.visitSummaryJson;
+    }
+    getAITestWithRetry(diagnosis) {
+        const MAX_RETRIES = 1;
+        let retryCount = 0;
+        const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
+        const attemptDiagnosis = () => {
+            this.isLoading = true;
+            this.testList = [];
+            this.furtherQuestionsList = [];
+            this.TxService.getAITTx(payload, diagnosis, this.visit.uuid).subscribe({
+                next: (data) => {
+                    if (data.result.data.success && data.result.data.tests_to_be_done.length > 0) {
+                        this.noData = false;
+                        this.testList = data.result.data.tests_to_be_done.map(v => {
+                            return {
+                                ...v,
+                                rationale: this.TxService.markdownit(v?.rationale)
+                            };
+                        });
+                    }
+                    else if (!data.data.success) {
+                        this.hasError = true;
+                        this.loggedError = data.data?.error;
+                    }
+                    else {
+                        this.noData = true;
+                    }
+                    this.isLoading = false;
+                },
+                error: (err) => {
+                    retryCount++;
+                    if (retryCount < MAX_RETRIES) {
+                        console.log(`Retry attempt ${retryCount} for getAITX`);
+                        setTimeout(() => {
+                            attemptDiagnosis();
+                        }, 1000);
+                    }
+                    else {
+                        this.hasError = true;
+                        this.isLoading = false;
+                        this.loggedError = err;
+                        console.error('Failed to get AI diagnosis after 3 attempts:', err);
+                    }
+                },
+                complete: () => {
+                    this.isLoading = false;
+                }
+            });
+        };
+        attemptDiagnosis();
+    }
+    onTryAgain() {
+        this.getAITestWithRetry(this.diagnosisName);
+    }
+    onAITestChange(test) {
+        if (!test) {
+            this.selectedTest = [];
+        }
+        else if (Array.isArray(test)) {
+            this.selectedTest = test.map(t => t.test_name || t);
+        }
+        else {
+            const testName = test.test_name || test;
+            if (this.selectedTest.includes(testName)) {
+                this.selectedTest = this.selectedTest.filter(t => t !== testName);
+            }
+            else {
+                this.selectedTest = [...this.selectedTest, testName];
+            }
+        }
+        this.testSelected.emit([...this.selectedTest]);
+    }
+    isTestExists(test) {
+        return this.existingTest.some(a => a.value === test);
+    }
+    isTestSelected(test) {
+        const testName = test.test_name || test;
+        return this.selectedTest.includes(testName) || this.existingTest.some(a => a.value === testName);
+    }
+    static ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AillmtxTestComponent, deps: [{ token: AiTxService }], target: i0.ɵɵFactoryTarget.Component });
+    static ɵcmp = i0.ɵɵngDeclareComponent({ minVersion: "14.0.0", version: "14.3.0", type: AillmtxTestComponent, selector: "lib-aillmtx-test", inputs: { patientInfo: "patientInfo", visit: "visit", useJsonVisitSummary: "useJsonVisitSummary", existingTest: "existingTest", diagnosisName: "diagnosisName", notesss: "notesss" }, outputs: { testSelected: "testSelected" }, ngImport: i0, template: "<ng-container *ngIf=\"!testList.length && (hasError || !noData)\">\n    <div class=\"d-flex justify-content-center mt-3 mb-3\">\n        <div class=\"erorr-container alert text-center p-4 d-flex flex-column align-items-center\">\n\n            <div *ngIf=\"!hasError && !isLoading\" class=\"no-data-container text-center\">\n                <div class=\"conclusion-header d-flex flex-column align-items-center\">\n                    <i class=\"bi bi-exclamation-triangle-fill text-danger mb-2\" style=\"font-size: 2rem;\"></i>\n                    <img src=\"assets/images/login/interneticon.png\" alt=\"Warning\" class=\"warning-icon\" />\n                    <h3 class=\"text-danger\">No diagnosis Provided</h3>\n                    <p class=\"text-muted\">Please add the required diagnosis details to fetch AI-assisted Tests\n                        suggestions.</p>\n                </div>\n            </div>\n\n            <ng-container *ngIf=\"!isLoading && hasError\">\n                <div *ngIf=\"!isLoading && hasError\" class=\"text-danger txt-position\">\n                   <span><img class=\"mb-1\" src=\"assets/svgs/alert-triangle.svg\" alt=\"\" /> </span>\n                    <span *ngIf=\"!loggedError\" class=\"ml-2\">No suggestions at this moment</span>\n                    <span *ngIf=\"loggedError\" class=\"ml-2\">{{ loggedError }}</span>\n                    <!-- <span *ngIf=\"hasError\" class=\"ms-2\">An unexpected issue occurred</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">The input provided does not have enough clinical details for an AI-assistant assessment.</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">No suggestions at this moment</span> -->\n                </div>\n                <button *ngIf=\"!noData\" type=\"button\" class=\"try-again-btn mt-5\" (click)=\"onTryAgain()\">\n                    {{'Try again'|translate}}\n                </button>\n            </ng-container>\n\n            <button *ngIf=\"isLoading\" class=\"stats-loading\">\n                <div class=\"eins\"></div>\n                <div class=\"zwei\"></div>\n                <div class=\"drei\"></div>\n            </button>\n\n            <div *ngIf=\"isLoading\" class=\"mt-3\">\n                <i class=\"bi bi-exclamation-triangle-fill\"></i>\n                <span class=\"ms-2 loading-text\">Please wait while the results are being generated.</span>\n            </div>\n\n        </div>\n    </div>\n</ng-container>\n\n<ng-container *ngIf=\"testList.length || (!isLoading && (hasError && noData))\" class=\"mt-2\">\n    <div class=\"mt-3 ayu-suggestion-container p-3 border border-gray-300 bg-green-50\">\n        <div class=\"mb-2 flex items-center ayu-header\">\n            <img class=\"mr-2\" src=\"assets/svgs/ayu-ddx.svg\" alt=\"\" /> Ayu suggested investigations\n        </div>\n        <div class=\"warning\">\n            <img class=\"mb-1 mr-2\" src=\"assets/svgs/info-ddx.svg\" alt=\"\" />\n            This AI-generated suggestion is intended to support\u2014not replace\u2014your clinical judgement and may not account\n            for all relevant factors; please use your own judgement before acting.\n        </div>\n        <div *ngIf=\"testList.length\"  class=\"advice-container\">\n            <div *ngFor=\"let test of testList\" class=\"advice-card\">\n                <div class=\"advice-content\">\n                        <input type=\"checkbox\" [ngClass]=\"{ 'selected-med': test.selected }\"\n                            class=\"custom-checkbox me-2\" [(ngModel)]=\"test.selected\" [checked]=\"isTestSelected(test)\"\n                            [disabled]=\"isTestExists(test.test_name)\" (change)=\"onAITestChange(test)\" />\n                        <span class=\"med-name\" [class.text-muted]=\"isTestExists(test.test_name)\"> {{ test.test_name\n                            }}</span>\n                </div>\n            </div>\n        </div>\n        <div class=\"textalign\" *ngIf=\"!isLoading && !hasError && noData\">\n        <span>No tests are recommended based on the information provided.</span>\n    </div>\n    </div>\n</ng-container>", styles: ["@charset \"UTF-8\";.try-again-btn{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;background-color:var(--color-darkBlue);color:#fff}.diffrential-diagnosis{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.diagnosis-list{font-weight:400;font-size:14px;line-height:21px;letter-spacing:0%}.diagnosis-container{background-color:#faf7fc;border-radius:10px;padding:15px}.custom-checkbox{appearance:none;width:18px;height:16px;flex-shrink:0;border-width:1px;border:1px solid #B0ADBE;border-radius:4px;position:relative;cursor:pointer;background-color:transparent}.custom-checkbox:checked{background-color:#0fd197}.custom-checkbox:checked:after{content:\"\\2713\";font-size:14px;font-weight:700;color:#fff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}.ayu-suggestion-container{background-color:#f9fffc;border:1px solid #B5F2DF!important;border-radius:12px}.ayu-suggestion-container .ayu-header{font-size:16px;color:#1b163a;font-weight:700}.ayu-suggestion-container .warning{background-color:#fff7f3;border:.8px solid rgba(255,71,93,.0784313725);padding:10px;border-radius:8px;font-size:12px;margin-bottom:14px}.med-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}.med-card{background:#fff;padding:10px;border-radius:12px;box-shadow:0 0 4px #00000014;border:1px solid rgba(178,175,190,.2)}.med-header{display:flex;justify-content:space-between}.checkbox-label{display:flex;align-items:center;gap:8px}.med-name{font-family:DM Sans;font-weight:500;font-size:14px;line-height:150%;letter-spacing:0%;word-break:break-word;width:100%;color:#1b163a}.selected-med{background-color:#0fd197;color:#fff}.rationale-container{background-color:#faf7fc;border-radius:10px;padding:15px}.rationale-container h2{font-size:16px;font-weight:700;line-height:24px;color:#101828}.rationale-container .fq-item{margin-left:20px}.rationale-item{border-bottom:1.5px solid rgba(178,175,190,.2)}.rationale{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.rationale-description{font-weight:400;font-size:16px;line-height:24px;letter-spacing:0%;margin-left:13px}.stats-loading{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;color:var(--color-darkBlue)}.stats-loading div{background:#0060ff;display:inline-block;height:8px;width:8px;border-radius:100%;animation:bouncedelay 1.4s infinite ease-in-out;animation-fill-mode:both}.stats-loading div.eins{animation-delay:-.32s}.stats-loading div.zwei{animation-delay:-.16s}.alert{background:#fff;border:1px solid rgba(178,175,190,.2);border-radius:8px;margin-bottom:0}.alert-icon{position:relative;bottom:2px;right:6px}.text-reminder{color:#dc3545!important;font-size:15px;font-weight:700}.advice-content{display:flex;align-items:center;gap:14px;font-size:14px;line-height:1.5;color:#1b163a;text-align:left}@keyframes bouncedelay{0%,80%,to{transform:scale(0);opacity:0}40%{transform:scale(1);opacity:100}}.loading-text{font-weight:400;font-size:12px;line-height:18px;color:#7f7b92}.conclusion-card{background:#fff;border-radius:10px;margin:20px 0;box-shadow:0 1px 3px #1018281a,0 1px 2px #1018280f}.conclusion-card .conclusion-header{padding:16px 24px;border-bottom:1px solid #EAECF0}.conclusion-card .conclusion-header h2{font-size:16px;font-weight:700;line-height:24px;margin:0;color:#101828}.conclusion-card .conclusion-body{padding:24px}.conclusion-card .conclusion-body p{margin:0;font-size:14px;line-height:20px;color:#344054;font-weight:400}.note-con{border-radius:4px;font-size:14px;line-height:20px;color:#6c757d}.note-con .note-label{font-weight:600;margin-right:4px;color:#dc3545}.disabled-diagnosis{opacity:.7;cursor:not-allowed}.disabled-diagnosis .custom-checkbox{cursor:not-allowed}.disabled-diagnosis .text-muted{opacity:.7}.warning-icon{height:50px;width:50px}.erorr-container{height:150px;background-color:#faf7fc;border-radius:10px;width:100%}.txt-position{position:relative;top:24px}.conclusion-header{position:relative;bottom:16px}.advice-container{display:flex;flex-wrap:wrap;gap:16px}.advice-card{flex:1 1 30%;min-height:100%;display:flex;align-items:center;border:1px solid rgba(178,175,190,.2);border-radius:12px;padding:16px;background-color:#fff;box-shadow:0 2px 5px #0000000d}.advice-content{display:flex;align-items:center;gap:12px;font-size:14px;line-height:1.5;color:#1b163a;text-align:left}.textalign{text-align:center;color:#7f7b92;margin-top:15px}@media (max-width: 768px){.erorr-container{height:180px;background-color:#faf7fc;border-radius:10px;width:100%}}\n"], dependencies: [{ kind: "directive", type: i2$1.NgClass, selector: "[ngClass]", inputs: ["class", "ngClass"] }, { kind: "directive", type: i2$1.NgForOf, selector: "[ngFor][ngForOf]", inputs: ["ngForOf", "ngForTrackBy", "ngForTemplate"] }, { kind: "directive", type: i2$1.NgIf, selector: "[ngIf]", inputs: ["ngIf", "ngIfThen", "ngIfElse"] }, { kind: "directive", type: i3$1.CheckboxControlValueAccessor, selector: "input[type=checkbox][formControlName],input[type=checkbox][formControl],input[type=checkbox][ngModel]" }, { kind: "directive", type: i3$1.NgControlStatus, selector: "[formControlName],[ngModel],[formControl]" }, { kind: "directive", type: i3$1.NgModel, selector: "[ngModel]:not([formControlName]):not([formControl])", inputs: ["name", "disabled", "ngModel", "ngModelOptions"], outputs: ["ngModelChange"], exportAs: ["ngModel"] }, { kind: "pipe", type: i4.TranslatePipe, name: "translate" }] });
+}
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AillmtxTestComponent, decorators: [{
+            type: Component,
+            args: [{ selector: 'lib-aillmtx-test', template: "<ng-container *ngIf=\"!testList.length && (hasError || !noData)\">\n    <div class=\"d-flex justify-content-center mt-3 mb-3\">\n        <div class=\"erorr-container alert text-center p-4 d-flex flex-column align-items-center\">\n\n            <div *ngIf=\"!hasError && !isLoading\" class=\"no-data-container text-center\">\n                <div class=\"conclusion-header d-flex flex-column align-items-center\">\n                    <i class=\"bi bi-exclamation-triangle-fill text-danger mb-2\" style=\"font-size: 2rem;\"></i>\n                    <img src=\"assets/images/login/interneticon.png\" alt=\"Warning\" class=\"warning-icon\" />\n                    <h3 class=\"text-danger\">No diagnosis Provided</h3>\n                    <p class=\"text-muted\">Please add the required diagnosis details to fetch AI-assisted Tests\n                        suggestions.</p>\n                </div>\n            </div>\n\n            <ng-container *ngIf=\"!isLoading && hasError\">\n                <div *ngIf=\"!isLoading && hasError\" class=\"text-danger txt-position\">\n                   <span><img class=\"mb-1\" src=\"assets/svgs/alert-triangle.svg\" alt=\"\" /> </span>\n                    <span *ngIf=\"!loggedError\" class=\"ml-2\">No suggestions at this moment</span>\n                    <span *ngIf=\"loggedError\" class=\"ml-2\">{{ loggedError }}</span>\n                    <!-- <span *ngIf=\"hasError\" class=\"ms-2\">An unexpected issue occurred</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">The input provided does not have enough clinical details for an AI-assistant assessment.</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">No suggestions at this moment</span> -->\n                </div>\n                <button *ngIf=\"!noData\" type=\"button\" class=\"try-again-btn mt-5\" (click)=\"onTryAgain()\">\n                    {{'Try again'|translate}}\n                </button>\n            </ng-container>\n\n            <button *ngIf=\"isLoading\" class=\"stats-loading\">\n                <div class=\"eins\"></div>\n                <div class=\"zwei\"></div>\n                <div class=\"drei\"></div>\n            </button>\n\n            <div *ngIf=\"isLoading\" class=\"mt-3\">\n                <i class=\"bi bi-exclamation-triangle-fill\"></i>\n                <span class=\"ms-2 loading-text\">Please wait while the results are being generated.</span>\n            </div>\n\n        </div>\n    </div>\n</ng-container>\n\n<ng-container *ngIf=\"testList.length || (!isLoading && (hasError && noData))\" class=\"mt-2\">\n    <div class=\"mt-3 ayu-suggestion-container p-3 border border-gray-300 bg-green-50\">\n        <div class=\"mb-2 flex items-center ayu-header\">\n            <img class=\"mr-2\" src=\"assets/svgs/ayu-ddx.svg\" alt=\"\" /> Ayu suggested investigations\n        </div>\n        <div class=\"warning\">\n            <img class=\"mb-1 mr-2\" src=\"assets/svgs/info-ddx.svg\" alt=\"\" />\n            This AI-generated suggestion is intended to support\u2014not replace\u2014your clinical judgement and may not account\n            for all relevant factors; please use your own judgement before acting.\n        </div>\n        <div *ngIf=\"testList.length\"  class=\"advice-container\">\n            <div *ngFor=\"let test of testList\" class=\"advice-card\">\n                <div class=\"advice-content\">\n                        <input type=\"checkbox\" [ngClass]=\"{ 'selected-med': test.selected }\"\n                            class=\"custom-checkbox me-2\" [(ngModel)]=\"test.selected\" [checked]=\"isTestSelected(test)\"\n                            [disabled]=\"isTestExists(test.test_name)\" (change)=\"onAITestChange(test)\" />\n                        <span class=\"med-name\" [class.text-muted]=\"isTestExists(test.test_name)\"> {{ test.test_name\n                            }}</span>\n                </div>\n            </div>\n        </div>\n        <div class=\"textalign\" *ngIf=\"!isLoading && !hasError && noData\">\n        <span>No tests are recommended based on the information provided.</span>\n    </div>\n    </div>\n</ng-container>", styles: ["@charset \"UTF-8\";.try-again-btn{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;background-color:var(--color-darkBlue);color:#fff}.diffrential-diagnosis{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.diagnosis-list{font-weight:400;font-size:14px;line-height:21px;letter-spacing:0%}.diagnosis-container{background-color:#faf7fc;border-radius:10px;padding:15px}.custom-checkbox{appearance:none;width:18px;height:16px;flex-shrink:0;border-width:1px;border:1px solid #B0ADBE;border-radius:4px;position:relative;cursor:pointer;background-color:transparent}.custom-checkbox:checked{background-color:#0fd197}.custom-checkbox:checked:after{content:\"\\2713\";font-size:14px;font-weight:700;color:#fff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}.ayu-suggestion-container{background-color:#f9fffc;border:1px solid #B5F2DF!important;border-radius:12px}.ayu-suggestion-container .ayu-header{font-size:16px;color:#1b163a;font-weight:700}.ayu-suggestion-container .warning{background-color:#fff7f3;border:.8px solid rgba(255,71,93,.0784313725);padding:10px;border-radius:8px;font-size:12px;margin-bottom:14px}.med-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}.med-card{background:#fff;padding:10px;border-radius:12px;box-shadow:0 0 4px #00000014;border:1px solid rgba(178,175,190,.2)}.med-header{display:flex;justify-content:space-between}.checkbox-label{display:flex;align-items:center;gap:8px}.med-name{font-family:DM Sans;font-weight:500;font-size:14px;line-height:150%;letter-spacing:0%;word-break:break-word;width:100%;color:#1b163a}.selected-med{background-color:#0fd197;color:#fff}.rationale-container{background-color:#faf7fc;border-radius:10px;padding:15px}.rationale-container h2{font-size:16px;font-weight:700;line-height:24px;color:#101828}.rationale-container .fq-item{margin-left:20px}.rationale-item{border-bottom:1.5px solid rgba(178,175,190,.2)}.rationale{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.rationale-description{font-weight:400;font-size:16px;line-height:24px;letter-spacing:0%;margin-left:13px}.stats-loading{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;color:var(--color-darkBlue)}.stats-loading div{background:#0060ff;display:inline-block;height:8px;width:8px;border-radius:100%;animation:bouncedelay 1.4s infinite ease-in-out;animation-fill-mode:both}.stats-loading div.eins{animation-delay:-.32s}.stats-loading div.zwei{animation-delay:-.16s}.alert{background:#fff;border:1px solid rgba(178,175,190,.2);border-radius:8px;margin-bottom:0}.alert-icon{position:relative;bottom:2px;right:6px}.text-reminder{color:#dc3545!important;font-size:15px;font-weight:700}.advice-content{display:flex;align-items:center;gap:14px;font-size:14px;line-height:1.5;color:#1b163a;text-align:left}@keyframes bouncedelay{0%,80%,to{transform:scale(0);opacity:0}40%{transform:scale(1);opacity:100}}.loading-text{font-weight:400;font-size:12px;line-height:18px;color:#7f7b92}.conclusion-card{background:#fff;border-radius:10px;margin:20px 0;box-shadow:0 1px 3px #1018281a,0 1px 2px #1018280f}.conclusion-card .conclusion-header{padding:16px 24px;border-bottom:1px solid #EAECF0}.conclusion-card .conclusion-header h2{font-size:16px;font-weight:700;line-height:24px;margin:0;color:#101828}.conclusion-card .conclusion-body{padding:24px}.conclusion-card .conclusion-body p{margin:0;font-size:14px;line-height:20px;color:#344054;font-weight:400}.note-con{border-radius:4px;font-size:14px;line-height:20px;color:#6c757d}.note-con .note-label{font-weight:600;margin-right:4px;color:#dc3545}.disabled-diagnosis{opacity:.7;cursor:not-allowed}.disabled-diagnosis .custom-checkbox{cursor:not-allowed}.disabled-diagnosis .text-muted{opacity:.7}.warning-icon{height:50px;width:50px}.erorr-container{height:150px;background-color:#faf7fc;border-radius:10px;width:100%}.txt-position{position:relative;top:24px}.conclusion-header{position:relative;bottom:16px}.advice-container{display:flex;flex-wrap:wrap;gap:16px}.advice-card{flex:1 1 30%;min-height:100%;display:flex;align-items:center;border:1px solid rgba(178,175,190,.2);border-radius:12px;padding:16px;background-color:#fff;box-shadow:0 2px 5px #0000000d}.advice-content{display:flex;align-items:center;gap:12px;font-size:14px;line-height:1.5;color:#1b163a;text-align:left}.textalign{text-align:center;color:#7f7b92;margin-top:15px}@media (max-width: 768px){.erorr-container{height:180px;background-color:#faf7fc;border-radius:10px;width:100%}}\n"] }]
+        }], ctorParameters: function () { return [{ type: AiTxService }]; }, propDecorators: { patientInfo: [{
+                type: Input
+            }], visit: [{
+                type: Input
+            }], useJsonVisitSummary: [{
+                type: Input
+            }], existingTest: [{
+                type: Input
+            }], testSelected: [{
+                type: Output
+            }], diagnosisName: [{
+                type: Input
+            }], notesss: [{
+                type: Input
+            }] } });
+
+class AillmtxFollowupComponent {
+    TxService;
+    patientInfo;
+    visit;
+    useJsonVisitSummary;
+    visitSummaryJson = null;
+    existingFollowUp = [];
+    followUpSelected = new EventEmitter();
+    diagnosisName;
+    notesss;
+    isLoading = false;
+    hasError = false;
+    noData = false;
+    insufficientData = false;
+    conclusion = '';
+    followUpList = [];
+    furtherQuestionsList = [];
+    selectedFollowUp = [];
+    loggedError;
+    constructor(TxService) {
+        this.TxService = TxService;
+    }
+    ngOnInit() { }
+    getAIFollowUp(diagnosis) {
+        const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
+        this.isLoading = true;
+        this.followUpList = [];
+        this.furtherQuestionsList = [];
+        this.TxService.getAITTx(payload, diagnosis, this.visit.uuid).subscribe({
+            next: (data) => {
+                if (data.result.data.result.length > 0) {
+                    this.noData = false;
+                    this.followUpList = data.result.data.result.map(v => {
+                        return {
+                            ...v,
+                        };
+                    });
+                }
+                else {
+                    this.noData = true;
+                }
+            },
+            error: (err) => {
+                this.hasError = true;
+                this.isLoading = false;
+            },
+            complete: () => {
+                this.isLoading = false;
+            }
+        });
+    }
+    resolveVisitSummaryJson() {
+        this.visitSummaryJson = this.TxService.resolveVisitSummaryJson(this.visit, this.useJsonVisitSummary);
+        return this.visitSummaryJson;
+    }
+    getAIFollowUpWithRetry(diagnosis) {
+        const MAX_RETRIES = 1;
+        let retryCount = 0;
+        const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
+        const attemptDiagnosis = () => {
+            this.isLoading = true;
+            this.followUpList = [];
+            this.furtherQuestionsList = [];
+            this.TxService.getAITTx(payload, diagnosis, this.visit.uuid).subscribe({
+                next: (data) => {
+                    if (data.result.data.success && data.result.data.follow_up.length > 0 && data.result.data.follow_up[0]?.follow_up_duration) {
+                        this.noData = false;
+                        this.followUpList = data.result.data.follow_up.map(v => {
+                            return {
+                                ...v,
+                            };
+                        });
+                    }
+                    else if (!data.result.data.success) {
+                        this.hasError = true;
+                        this.loggedError = data.result.data?.error;
+                    }
+                    else {
+                        this.noData = true;
+                    }
+                    this.isLoading = false;
+                },
+                error: (err) => {
+                    retryCount++;
+                    if (retryCount < MAX_RETRIES) {
+                        console.log(`Retry attempt ${retryCount} for getAITX`);
+                        setTimeout(() => {
+                            attemptDiagnosis();
+                        }, 1000);
+                    }
+                    else {
+                        this.hasError = true;
+                        this.isLoading = false;
+                        this.loggedError = err;
+                        console.error('Failed to get AI diagnosis after 3 attempts:', err);
+                    }
+                },
+                complete: () => {
+                    this.isLoading = false;
+                }
+            });
+        };
+        attemptDiagnosis();
+    }
+    onTryAgain() {
+        console.log(this.diagnosisName, "Retrying AI Follow Up");
+        this.getAIFollowUpWithRetry(this.diagnosisName);
+    }
+    onAIFollowUpChange(event) {
+        if (!event) {
+            this.selectedFollowUp = [];
+        }
+        else if (Array.isArray(event)) {
+            this.selectedFollowUp = [...event];
+        }
+        else {
+            const index = this.selectedFollowUp.findIndex(f => f.reason_for_follow_up === event.reason_for_follow_up);
+            if (index > -1) {
+                this.selectedFollowUp = this.selectedFollowUp.filter(f => f.reason_for_follow_up !== event.reason_for_follow_up);
+            }
+            else {
+                const followUpData = {
+                    reason_for_follow_up: event.reason_for_follow_up,
+                    follow_up_duration: event.follow_up_duration,
+                    follow_up_required: event.follow_up_required,
+                };
+                this.selectedFollowUp = [...this.selectedFollowUp, followUpData];
+            }
+        }
+        this.followUpSelected.emit(this.selectedFollowUp);
+    }
+    isFollowUpExists(followup) {
+        return this.existingFollowUp.some(f => f.followUpReason === followup);
+    }
+    isFollowUpSelected(followup) {
+        return this.selectedFollowUp.some(f => f.reason_for_follow_up === followup.reason_for_follow_up) || this.existingFollowUp.some(f => f.followUpReason === followup.reason_for_follow_up);
+    }
+    static ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AillmtxFollowupComponent, deps: [{ token: AiTxService }], target: i0.ɵɵFactoryTarget.Component });
+    static ɵcmp = i0.ɵɵngDeclareComponent({ minVersion: "14.0.0", version: "14.3.0", type: AillmtxFollowupComponent, selector: "lib-aillmtx-followup", inputs: { patientInfo: "patientInfo", visit: "visit", useJsonVisitSummary: "useJsonVisitSummary", existingFollowUp: "existingFollowUp", diagnosisName: "diagnosisName", notesss: "notesss" }, outputs: { followUpSelected: "followUpSelected" }, ngImport: i0, template: "<ng-container *ngIf=\"!followUpList.length && (hasError || !noData)\">\n    <div class=\"d-flex justify-content-center mt-3 mb-3\">\n        <div class=\"erorr-container alert text-center p-4 d-flex flex-column align-items-center\">\n\n            <div *ngIf=\"!hasError && !isLoading\" class=\"no-data-container text-center\">\n                <div class=\"conclusion-header d-flex flex-column align-items-center\">\n                    <i class=\"bi bi-exclamation-triangle-fill text-danger mb-2\" style=\"font-size: 2rem;\"></i>\n                    <img src=\"assets/images/login/interneticon.png\" alt=\"Warning\" class=\"warning-icon\" />\n                    <h3 class=\"text-danger\">No diagnosis Provided</h3>\n                    <p class=\"text-muted\">Please add the required diagnosis details to fetch AI-assisted Follow-up\n                        suggestions.</p>\n                </div>\n            </div>\n\n            <ng-container *ngIf=\"!isLoading && hasError\">\n                <div *ngIf=\"!isLoading && hasError\" class=\"text-danger txt-position\">\n                    <span><img class=\"mb-1\" src=\"assets/svgs/alert-triangle.svg\" alt=\"\" /> </span>\n                    <span *ngIf=\"!loggedError\" class=\"ml-2\">No suggestions at this moment</span>\n                    <span *ngIf=\"loggedError\" class=\"ml-2\">{{ loggedError }}</span>\n                    <!-- <span *ngIf=\"hasError\" class=\"ms-2\">An unexpected issue occurred</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">The input provided does not have enough clinical details for an AI-assistant assessment.</span> -->\n                </div> \n                    <button *ngIf=\"!noData\" type=\"button\" class=\"try-again-btn mt-5\" (click)=\"onTryAgain()\">\n                        {{'Try again'|translate}}\n                    </button>\n            </ng-container>\n\n            <button *ngIf=\"isLoading\" class=\"stats-loading\">\n                <div class=\"eins\"></div>\n                <div class=\"zwei\"></div>\n                <div class=\"drei\"></div>\n            </button>\n\n            <div *ngIf=\"isLoading\" class=\"mt-3\">\n                <i class=\"bi bi-exclamation-triangle-fill\"></i>\n                <span class=\"ms-2 loading-text\">Please wait while the results are being generated.</span>\n            </div>\n\n        </div>\n    </div>\n</ng-container>\n\n<ng-container *ngIf=\"followUpList.length || (!isLoading && (hasError && noData))\" class=\"mt-2\">\n    <div class=\"mt-3 mb-3 ayu-suggestion-container p-3 border border-gray-300 bg-green-50\">\n        <div class=\"mb-2 flex items-center ayu-header\">\n            <img class=\"mr-2\" src=\"assets/svgs/ayu-ddx.svg\" alt=\"\" /> Ayu suggested follow-up\n        </div>\n        <div class=\"warning\">\n            <img class=\"mb-1 mr-2\" src=\"assets/svgs/info-ddx.svg\" alt=\"\" />\n            This AI-generated suggestion is intended to support\u2014not replace\u2014your clinical judgement and may not account\n            for all relevant factors; please use your own judgement before acting.\n        </div>\n        <div *ngIf=\"followUpList.length\">\n            <div *ngFor=\"let followup of followUpList\" class=\"med-card\">\n                <div>\n                    <label class=\"checkbox-label\">\n                        <input type=\"checkbox\" [ngClass]=\"{ 'selected-med': followup.selected }\"\n                            class=\"custom-checkbox me-2\" [(ngModel)]=\"followup.selected\"\n                            [checked]=\"isFollowUpSelected(followup)\"\n                            [disabled]=\"isFollowUpExists(followup.reason_for_follow_up)\"\n                            (change)=\"onAIFollowUpChange(followup)\">\n                        <span class=\"med-name\" [class.text-muted]=\"isFollowUpExists(followup.reason_for_follow_up)\">{{\n                            followup.follow_up_duration }}</span>\n                    </label>\n                </div>\n                <ul class=\"med-details\" [class.text-muted]=\"isFollowUpExists(followup.reason_for_follow_up)\">\n                    <li>{{ followup.reason_for_follow_up }}</li>\n                </ul>\n            </div>\n        </div>\n     <div class=\"textalign\" *ngIf=\"!isLoading && !hasError && noData\">\n        <span>No follow-up are recommended based on the information provided.</span>\n    </div>\n    </div>\n</ng-container>", styles: ["@charset \"UTF-8\";.try-again-btn{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;background-color:var(--color-darkBlue);color:#fff}.diffrential-diagnosis{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.diagnosis-list{font-weight:400;font-size:14px;line-height:21px;letter-spacing:0%}.diagnosis-container{background-color:#faf7fc;border-radius:10px;padding:15px}.custom-checkbox{appearance:none;width:18px;height:16px;flex-shrink:0;border:1px solid #B0ADBE;border-radius:4px;position:relative;cursor:pointer;background-color:transparent;margin-right:10px}.custom-checkbox:checked{background-color:#0fd197}.custom-checkbox:checked:after{content:\"\\2713\";font-size:14px;font-weight:700;color:#fff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}.rationale-container{background-color:#faf7fc;border-radius:10px;padding:15px}.rationale-container h2{font-size:16px;font-weight:700;line-height:24px;color:#101828}.rationale-container .fq-item{margin-left:20px}.rationale-item{border-bottom:1.5px solid rgba(178,175,190,.2)}.rationale{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.rationale-description{font-weight:400;font-size:16px;line-height:24px;letter-spacing:0%;margin-left:13px}.stats-loading{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;color:var(--color-darkBlue)}.stats-loading div{background:#0060ff;display:inline-block;height:8px;width:8px;border-radius:100%;animation:bouncedelay 1.4s infinite ease-in-out;animation-fill-mode:both}.stats-loading div.eins{animation-delay:-.32s}.stats-loading div.zwei{animation-delay:-.16s}.alert{background:#fff;border:1px solid rgba(178,175,190,.2);border-radius:8px;margin-bottom:0}.alert-icon{position:relative;bottom:2px;right:6px}.text-reminder{color:#dc3545!important;font-size:15px;font-weight:700}@keyframes bouncedelay{0%,80%,to{transform:scale(0);opacity:0}40%{transform:scale(1);opacity:100}}.loading-text{font-weight:400;font-size:12px;line-height:18px;color:#7f7b92}.conclusion-card{background:#fff;border-radius:10px;margin:20px 0;box-shadow:0 1px 3px #1018281a,0 1px 2px #1018280f}.conclusion-card .conclusion-header{padding:16px 24px;border-bottom:1px solid #EAECF0}.conclusion-card .conclusion-header h2{font-size:16px;font-weight:700;line-height:24px;margin:0;color:#101828}.conclusion-card .conclusion-body{padding:24px}.conclusion-card .conclusion-body p{margin:0;font-size:14px;line-height:20px;color:#344054;font-weight:400}.note-con{border-radius:4px;font-size:14px;line-height:20px;color:#6c757d}.note-con .note-label{font-weight:600;margin-right:4px;color:#dc3545}.disabled-diagnosis{opacity:.7;cursor:not-allowed}.disabled-diagnosis .custom-checkbox{cursor:not-allowed}.disabled-diagnosis .text-muted{opacity:.7}.warning-icon{height:50px;width:50px}.erorr-container{height:150px;background-color:#faf7fc;border-radius:10px;width:100%}.txt-position{position:relative;top:24px}.conclusion-header{position:relative;bottom:16px}.ayu-suggestion-container{background-color:#f9fffc;border:1px solid #B5F2DF!important;border-radius:12px}.ayu-suggestion-container .ayu-header{font-size:16px;color:#1b163a;font-weight:700}.ayu-suggestion-container .warning{background-color:#fff7f3;border:.8px solid rgba(255,71,93,.0784313725);padding:10px;border-radius:8px;font-size:12px;margin-bottom:14px}.med-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}.med-card{background:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 0 4px #00000014;border:1px solid rgba(178,175,190,.2)}.med-header{display:flex;justify-content:space-between}.checkbox-label{display:flex;gap:8px}.med-name{font-family:DM Sans;font-weight:500;font-size:14px;line-height:150%;letter-spacing:0%;word-break:break-word;width:100%;color:#1b163a}.med-details{font-family:DM Sans;font-weight:400;font-size:14px;margin-bottom:0;padding-left:35px}.selected-med{background-color:#0fd197;color:#fff}.textalign{text-align:center;color:#7f7b92;margin-top:15px}@media (max-width: 768px){.erorr-container{height:180px;background-color:#faf7fc;border-radius:10px;width:100%}}\n"], dependencies: [{ kind: "directive", type: i2$1.NgClass, selector: "[ngClass]", inputs: ["class", "ngClass"] }, { kind: "directive", type: i2$1.NgForOf, selector: "[ngFor][ngForOf]", inputs: ["ngForOf", "ngForTrackBy", "ngForTemplate"] }, { kind: "directive", type: i2$1.NgIf, selector: "[ngIf]", inputs: ["ngIf", "ngIfThen", "ngIfElse"] }, { kind: "directive", type: i3$1.CheckboxControlValueAccessor, selector: "input[type=checkbox][formControlName],input[type=checkbox][formControl],input[type=checkbox][ngModel]" }, { kind: "directive", type: i3$1.NgControlStatus, selector: "[formControlName],[ngModel],[formControl]" }, { kind: "directive", type: i3$1.NgModel, selector: "[ngModel]:not([formControlName]):not([formControl])", inputs: ["name", "disabled", "ngModel", "ngModelOptions"], outputs: ["ngModelChange"], exportAs: ["ngModel"] }, { kind: "pipe", type: i4.TranslatePipe, name: "translate" }] });
+}
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AillmtxFollowupComponent, decorators: [{
+            type: Component,
+            args: [{ selector: 'lib-aillmtx-followup', template: "<ng-container *ngIf=\"!followUpList.length && (hasError || !noData)\">\n    <div class=\"d-flex justify-content-center mt-3 mb-3\">\n        <div class=\"erorr-container alert text-center p-4 d-flex flex-column align-items-center\">\n\n            <div *ngIf=\"!hasError && !isLoading\" class=\"no-data-container text-center\">\n                <div class=\"conclusion-header d-flex flex-column align-items-center\">\n                    <i class=\"bi bi-exclamation-triangle-fill text-danger mb-2\" style=\"font-size: 2rem;\"></i>\n                    <img src=\"assets/images/login/interneticon.png\" alt=\"Warning\" class=\"warning-icon\" />\n                    <h3 class=\"text-danger\">No diagnosis Provided</h3>\n                    <p class=\"text-muted\">Please add the required diagnosis details to fetch AI-assisted Follow-up\n                        suggestions.</p>\n                </div>\n            </div>\n\n            <ng-container *ngIf=\"!isLoading && hasError\">\n                <div *ngIf=\"!isLoading && hasError\" class=\"text-danger txt-position\">\n                    <span><img class=\"mb-1\" src=\"assets/svgs/alert-triangle.svg\" alt=\"\" /> </span>\n                    <span *ngIf=\"!loggedError\" class=\"ml-2\">No suggestions at this moment</span>\n                    <span *ngIf=\"loggedError\" class=\"ml-2\">{{ loggedError }}</span>\n                    <!-- <span *ngIf=\"hasError\" class=\"ms-2\">An unexpected issue occurred</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">The input provided does not have enough clinical details for an AI-assistant assessment.</span> -->\n                </div> \n                    <button *ngIf=\"!noData\" type=\"button\" class=\"try-again-btn mt-5\" (click)=\"onTryAgain()\">\n                        {{'Try again'|translate}}\n                    </button>\n            </ng-container>\n\n            <button *ngIf=\"isLoading\" class=\"stats-loading\">\n                <div class=\"eins\"></div>\n                <div class=\"zwei\"></div>\n                <div class=\"drei\"></div>\n            </button>\n\n            <div *ngIf=\"isLoading\" class=\"mt-3\">\n                <i class=\"bi bi-exclamation-triangle-fill\"></i>\n                <span class=\"ms-2 loading-text\">Please wait while the results are being generated.</span>\n            </div>\n\n        </div>\n    </div>\n</ng-container>\n\n<ng-container *ngIf=\"followUpList.length || (!isLoading && (hasError && noData))\" class=\"mt-2\">\n    <div class=\"mt-3 mb-3 ayu-suggestion-container p-3 border border-gray-300 bg-green-50\">\n        <div class=\"mb-2 flex items-center ayu-header\">\n            <img class=\"mr-2\" src=\"assets/svgs/ayu-ddx.svg\" alt=\"\" /> Ayu suggested follow-up\n        </div>\n        <div class=\"warning\">\n            <img class=\"mb-1 mr-2\" src=\"assets/svgs/info-ddx.svg\" alt=\"\" />\n            This AI-generated suggestion is intended to support\u2014not replace\u2014your clinical judgement and may not account\n            for all relevant factors; please use your own judgement before acting.\n        </div>\n        <div *ngIf=\"followUpList.length\">\n            <div *ngFor=\"let followup of followUpList\" class=\"med-card\">\n                <div>\n                    <label class=\"checkbox-label\">\n                        <input type=\"checkbox\" [ngClass]=\"{ 'selected-med': followup.selected }\"\n                            class=\"custom-checkbox me-2\" [(ngModel)]=\"followup.selected\"\n                            [checked]=\"isFollowUpSelected(followup)\"\n                            [disabled]=\"isFollowUpExists(followup.reason_for_follow_up)\"\n                            (change)=\"onAIFollowUpChange(followup)\">\n                        <span class=\"med-name\" [class.text-muted]=\"isFollowUpExists(followup.reason_for_follow_up)\">{{\n                            followup.follow_up_duration }}</span>\n                    </label>\n                </div>\n                <ul class=\"med-details\" [class.text-muted]=\"isFollowUpExists(followup.reason_for_follow_up)\">\n                    <li>{{ followup.reason_for_follow_up }}</li>\n                </ul>\n            </div>\n        </div>\n     <div class=\"textalign\" *ngIf=\"!isLoading && !hasError && noData\">\n        <span>No follow-up are recommended based on the information provided.</span>\n    </div>\n    </div>\n</ng-container>", styles: ["@charset \"UTF-8\";.try-again-btn{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;background-color:var(--color-darkBlue);color:#fff}.diffrential-diagnosis{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.diagnosis-list{font-weight:400;font-size:14px;line-height:21px;letter-spacing:0%}.diagnosis-container{background-color:#faf7fc;border-radius:10px;padding:15px}.custom-checkbox{appearance:none;width:18px;height:16px;flex-shrink:0;border:1px solid #B0ADBE;border-radius:4px;position:relative;cursor:pointer;background-color:transparent;margin-right:10px}.custom-checkbox:checked{background-color:#0fd197}.custom-checkbox:checked:after{content:\"\\2713\";font-size:14px;font-weight:700;color:#fff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}.rationale-container{background-color:#faf7fc;border-radius:10px;padding:15px}.rationale-container h2{font-size:16px;font-weight:700;line-height:24px;color:#101828}.rationale-container .fq-item{margin-left:20px}.rationale-item{border-bottom:1.5px solid rgba(178,175,190,.2)}.rationale{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.rationale-description{font-weight:400;font-size:16px;line-height:24px;letter-spacing:0%;margin-left:13px}.stats-loading{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;color:var(--color-darkBlue)}.stats-loading div{background:#0060ff;display:inline-block;height:8px;width:8px;border-radius:100%;animation:bouncedelay 1.4s infinite ease-in-out;animation-fill-mode:both}.stats-loading div.eins{animation-delay:-.32s}.stats-loading div.zwei{animation-delay:-.16s}.alert{background:#fff;border:1px solid rgba(178,175,190,.2);border-radius:8px;margin-bottom:0}.alert-icon{position:relative;bottom:2px;right:6px}.text-reminder{color:#dc3545!important;font-size:15px;font-weight:700}@keyframes bouncedelay{0%,80%,to{transform:scale(0);opacity:0}40%{transform:scale(1);opacity:100}}.loading-text{font-weight:400;font-size:12px;line-height:18px;color:#7f7b92}.conclusion-card{background:#fff;border-radius:10px;margin:20px 0;box-shadow:0 1px 3px #1018281a,0 1px 2px #1018280f}.conclusion-card .conclusion-header{padding:16px 24px;border-bottom:1px solid #EAECF0}.conclusion-card .conclusion-header h2{font-size:16px;font-weight:700;line-height:24px;margin:0;color:#101828}.conclusion-card .conclusion-body{padding:24px}.conclusion-card .conclusion-body p{margin:0;font-size:14px;line-height:20px;color:#344054;font-weight:400}.note-con{border-radius:4px;font-size:14px;line-height:20px;color:#6c757d}.note-con .note-label{font-weight:600;margin-right:4px;color:#dc3545}.disabled-diagnosis{opacity:.7;cursor:not-allowed}.disabled-diagnosis .custom-checkbox{cursor:not-allowed}.disabled-diagnosis .text-muted{opacity:.7}.warning-icon{height:50px;width:50px}.erorr-container{height:150px;background-color:#faf7fc;border-radius:10px;width:100%}.txt-position{position:relative;top:24px}.conclusion-header{position:relative;bottom:16px}.ayu-suggestion-container{background-color:#f9fffc;border:1px solid #B5F2DF!important;border-radius:12px}.ayu-suggestion-container .ayu-header{font-size:16px;color:#1b163a;font-weight:700}.ayu-suggestion-container .warning{background-color:#fff7f3;border:.8px solid rgba(255,71,93,.0784313725);padding:10px;border-radius:8px;font-size:12px;margin-bottom:14px}.med-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}.med-card{background:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 0 4px #00000014;border:1px solid rgba(178,175,190,.2)}.med-header{display:flex;justify-content:space-between}.checkbox-label{display:flex;gap:8px}.med-name{font-family:DM Sans;font-weight:500;font-size:14px;line-height:150%;letter-spacing:0%;word-break:break-word;width:100%;color:#1b163a}.med-details{font-family:DM Sans;font-weight:400;font-size:14px;margin-bottom:0;padding-left:35px}.selected-med{background-color:#0fd197;color:#fff}.textalign{text-align:center;color:#7f7b92;margin-top:15px}@media (max-width: 768px){.erorr-container{height:180px;background-color:#faf7fc;border-radius:10px;width:100%}}\n"] }]
+        }], ctorParameters: function () { return [{ type: AiTxService }]; }, propDecorators: { patientInfo: [{
+                type: Input
+            }], visit: [{
+                type: Input
+            }], useJsonVisitSummary: [{
+                type: Input
+            }], existingFollowUp: [{
+                type: Input
+            }], followUpSelected: [{
+                type: Output
+            }], diagnosisName: [{
+                type: Input
+            }], notesss: [{
+                type: Input
+            }] } });
+
+class AillmtxReferralComponent {
+    TxService;
+    patientInfo;
+    visit;
+    useJsonVisitSummary;
+    visitSummaryJson = null;
+    existingReferral = [];
+    referralSelected = new EventEmitter();
+    diagnosisName;
+    notesss;
+    isLoading = false;
+    hasError = false;
+    noData = false;
+    insufficientData = false;
+    conclusion = '';
+    referralList = [];
+    furtherQuestionsList = [];
+    selectedReferral = [];
+    loggedError;
+    constructor(TxService) {
+        this.TxService = TxService;
+    }
+    ngOnInit() { }
+    getAIReferral(diagnosis) {
+        const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
+        this.isLoading = true;
+        this.referralList = [];
+        this.furtherQuestionsList = [];
+        this.TxService.getAITTx(payload, diagnosis, this.visit.uuid).subscribe({
+            next: (data) => {
+                if (data?.result?.referral?.length > 0) {
+                    console.log("data?.result?.referral?.length", data?.result?.referral);
+                    this.noData = false;
+                    this.referralList = data.result.referral.map((v) => {
+                        return {
+                            ...v,
+                        };
+                    });
+                }
+                else {
+                    this.noData = true;
+                }
+            },
+            error: (err) => {
+                console.error('Error in getAIReferral:', err);
+                this.hasError = true;
+                this.isLoading = false;
+                this.noData = true;
+            },
+            complete: () => {
+                this.isLoading = false;
+            }
+        });
+    }
+    resolveVisitSummaryJson() {
+        this.visitSummaryJson = this.TxService.resolveVisitSummaryJson(this.visit, this.useJsonVisitSummary);
+        return this.visitSummaryJson;
+    }
+    getAIReferralWithRetry(diagnosis) {
+        const MAX_RETRIES = 1;
+        let retryCount = 0;
+        const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
+        const attemptDiagnosis = () => {
+            this.isLoading = true;
+            this.referralList = [];
+            this.furtherQuestionsList = [];
+            this.TxService.getAITTx(payload, diagnosis, this.visit.uuid).subscribe({
+                next: (data) => {
+                    if (data.result.data.success && data?.result?.data.referral?.length > 0) {
+                        this.noData = false;
+                        this.referralList = data.result.data.referral.map((v) => {
+                            return {
+                                ...v,
+                            };
+                        });
+                    }
+                    else if (data.result.data?.success) {
+                        this.hasError = true;
+                        this.loggedError = data.result.data?.error;
+                    }
+                    else {
+                        this.noData = true;
+                    }
+                    this.isLoading = false;
+                },
+                error: (err) => {
+                    retryCount++;
+                    if (retryCount < MAX_RETRIES) {
+                        console.log(`Retry attempt ${retryCount} for getAITX`);
+                        setTimeout(() => {
+                            attemptDiagnosis();
+                        }, 1000);
+                    }
+                    else {
+                        console.error('Failed to get AI referral after 3 attempts:', err);
+                        this.hasError = true;
+                        this.isLoading = false;
+                        this.loggedError = err;
+                    }
+                },
+                complete: () => {
+                    this.isLoading = false;
+                }
+            });
+        };
+        attemptDiagnosis();
+    }
+    onTryAgain() {
+        console.log(this.diagnosisName, "Retrying AI getAIReferralWithRetry");
+        this.getAIReferralWithRetry(this.diagnosisName);
+    }
+    onAIReferralChange(event) {
+        if (!event) {
+            this.selectedReferral = [];
+        }
+        else if (Array.isArray(event)) {
+            this.selectedReferral = [...event];
+        }
+        else {
+            const index = this.selectedReferral.findIndex(r => r.referral_to === event.referral_to);
+            if (index > -1) {
+                this.selectedReferral = this.selectedReferral.filter(r => r.referral_to !== event.referral_to);
+            }
+            else {
+                const referralData = {
+                    referral_facility: event.referral_facility,
+                    referral_required: event.referral_required,
+                    referral_to: event.referral_to,
+                    remark: event.remark
+                };
+                this.selectedReferral = [...this.selectedReferral, referralData];
+            }
+        }
+        this.referralSelected.emit(this.selectedReferral);
+    }
+    isReferralExists(referral) {
+        return this.existingReferral.some(d => d.speciality === referral);
+    }
+    isReferralSelected(referral) {
+        return this.selectedReferral.some(r => r.referral_to === referral.referral_to) || this.existingReferral.some(d => d.speciality === referral.referral_to);
+    }
+    static ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AillmtxReferralComponent, deps: [{ token: AiTxService }], target: i0.ɵɵFactoryTarget.Component });
+    static ɵcmp = i0.ɵɵngDeclareComponent({ minVersion: "14.0.0", version: "14.3.0", type: AillmtxReferralComponent, selector: "lib-aillmtx-referral", inputs: { patientInfo: "patientInfo", visit: "visit", useJsonVisitSummary: "useJsonVisitSummary", existingReferral: "existingReferral", diagnosisName: "diagnosisName", notesss: "notesss" }, outputs: { referralSelected: "referralSelected" }, ngImport: i0, template: "<ng-container *ngIf=\"!referralList.length && (hasError || !noData)\">\n    <div class=\"d-flex justify-content-center mt-3\">\n        <div class=\"erorr-container alert text-center p-4 d-flex flex-column align-items-center\">\n\n            <div *ngIf=\"!hasError && !isLoading\" class=\"no-data-container text-center\">\n                <div class=\"conclusion-header d-flex flex-column align-items-center\">\n                    <i class=\"bi bi-exclamation-triangle-fill text-danger mb-2\" style=\"font-size: 2rem;\"></i>\n                    <img src=\"assets/images/login/interneticon.png\" alt=\"Warning\" class=\"warning-icon\" />\n                    <h3 class=\"text-danger\">No diagnosis Provided</h3>\n                    <p class=\"text-muted\">Please add the required diagnosis details to fetch AI-assisted Referral\n                        suggestions.</p>\n                </div>\n            </div>\n\n            <ng-container *ngIf=\"!isLoading && hasError\">\n                <div *ngIf=\"!isLoading && hasError\" class=\"text-danger txt-position\">\n                   <span><img class=\"mb-1\" src=\"assets/svgs/alert-triangle.svg\" alt=\"\" /> </span>\n                    <span *ngIf=\"!loggedError\" class=\"ml-2\">No suggestions at this moment</span>\n                    <span *ngIf=\"loggedError\" class=\"ml-2\">{{ loggedError }}</span>\n                    <!-- <span *ngIf=\"hasError\" class=\"ms-2\">An unexpected issue occurred</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">The input provided does not have enough clinical details for an AI-assistant assessment.</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">No suggestions at this moment</span> -->\n                </div>\n                <button *ngIf=\"!noData\" type=\"button\" class=\"try-again-btn mt-5\" (click)=\"onTryAgain()\">\n                    {{'Try again'|translate}}\n                </button>\n            </ng-container>\n\n            <button *ngIf=\"isLoading\" class=\"stats-loading\">\n                <div class=\"eins\"></div>\n                <div class=\"zwei\"></div>\n                <div class=\"drei\"></div>\n            </button>\n\n            <div *ngIf=\"isLoading\" class=\"mt-3\">\n                <i class=\"bi bi-exclamation-triangle-fill\"></i>\n                <span class=\"ms-2 loading-text\">Please wait while the results are being generated.</span>\n            </div>\n\n        </div>\n    </div>\n</ng-container>\n\n<ng-container *ngIf=\"referralList.length || (!isLoading && (hasError && noData))\" class=\"mt-2\">\n    <div class=\"mt-3 mb-3 ayu-suggestion-container p-3 border border-gray-300 bg-green-50\">\n        <div class=\"mb-2 flex items-center ayu-header\">\n            <img class=\"mr-2\" src=\"assets/svgs/ayu-ddx.svg\" alt=\"\" /> Ayu suggested referrals\n        </div>\n        <div class=\"warning\">\n            <img class=\"mb-1 mr-2\" src=\"assets/svgs/info-ddx.svg\" alt=\"\" />\n            This AI-generated suggestion is intended to support\u2014not replace\u2014your clinical judgement and may not account\n            for all relevant factors; please use your own judgement before acting.\n        </div>\n        <div *ngIf=\"referralList.length\">\n            <div *ngFor=\"let refer of referralList\" class=\"med-card\">\n                <div class=\"checkbox-label\" *ngIf=\"refer.referral_to\">\n                    <input type=\"checkbox\" [ngClass]=\"{ 'selected-med': refer.selected }\"\n                        class=\"custom-checkbox me-2\" [(ngModel)]=\"refer.selected\"\n                        [checked]=\"isReferralSelected(refer)\" [disabled]=\"isReferralExists(refer.referral_to)\"\n                        (change)=\"onAIReferralChange(refer)\">\n                    <span class=\"med-name\" [class.text-muted]=\"isReferralExists(refer.referral_to)\">{{ refer.referral_to }}, {{ refer.referral_facility }}, {{ refer.remark }}</span>\n                </div>\n                <span *ngIf=\"refer.referral_to === ''\">Referral Not recommended</span>\n            </div>\n        </div>\n          <div class=\"textalign\" *ngIf=\"!isLoading && !hasError && noData\">\n        <span>No referrals are recommended based on the information provided.</span>\n    </div>\n    </div>\n  \n</ng-container>", styles: ["@charset \"UTF-8\";.try-again-btn{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;background-color:var(--color-darkBlue);color:#fff}.diffrential-diagnosis{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.diagnosis-list{font-weight:400;font-size:14px;line-height:21px;letter-spacing:0%}.diagnosis-container{background-color:#faf7fc;border-radius:10px;padding:15px}.custom-checkbox{appearance:none;width:18px;height:16px;flex-shrink:0;border:1px solid #B0ADBE;border-radius:4px;position:relative;cursor:pointer;background-color:transparent}.custom-checkbox:checked{background-color:#0fd197}.custom-checkbox:checked:after{content:\"\\2713\";font-size:14px;font-weight:700;color:#fff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}.rationale-container{background-color:#faf7fc;border-radius:10px;padding:15px}.rationale-container h2{font-size:16px;font-weight:700;line-height:24px;color:#101828}.rationale-container .fq-item{margin-left:20px}.rationale-item{border-bottom:1.5px solid rgba(178,175,190,.2)}.rationale{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.rationale-description{font-weight:400;font-size:16px;line-height:24px;letter-spacing:0%;margin-left:13px}.stats-loading{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;color:var(--color-darkBlue)}.stats-loading div{background:#0060ff;display:inline-block;height:8px;width:8px;border-radius:100%;animation:bouncedelay 1.4s infinite ease-in-out;animation-fill-mode:both}.stats-loading div.eins{animation-delay:-.32s}.stats-loading div.zwei{animation-delay:-.16s}.alert{background:#fff;border:1px solid rgba(178,175,190,.2);border-radius:8px;margin-bottom:0}.alert-icon{position:relative;bottom:2px;right:6px}.text-reminder{color:#dc3545!important;font-size:15px;font-weight:700}@keyframes bouncedelay{0%,80%,to{transform:scale(0);opacity:0}40%{transform:scale(1);opacity:100}}.loading-text{font-weight:400;font-size:12px;line-height:18px;color:#7f7b92}.conclusion-card{background:#fff;border-radius:10px;margin:20px 0;box-shadow:0 1px 3px #1018281a,0 1px 2px #1018280f}.conclusion-card .conclusion-header{padding:16px 24px;border-bottom:1px solid #EAECF0}.conclusion-card .conclusion-header h2{font-size:16px;font-weight:700;line-height:24px;margin:0;color:#101828}.conclusion-card .conclusion-body{padding:24px}.conclusion-card .conclusion-body p{margin:0;font-size:14px;line-height:20px;color:#344054;font-weight:400}.note-con{border-radius:4px;font-size:14px;line-height:20px;color:#6c757d}.note-con .note-label{font-weight:600;margin-right:4px;color:#dc3545}.disabled-diagnosis{opacity:.7;cursor:not-allowed}.disabled-diagnosis .custom-checkbox{cursor:not-allowed}.disabled-diagnosis .text-muted{opacity:.7}.warning-icon{height:50px;width:50px}.erorr-container{height:150px;background-color:#faf7fc;border-radius:10px;width:100%}.txt-position{position:relative;top:24px}.conclusion-header{position:relative;bottom:16px}.ayu-suggestion-container{background-color:#f9fffc;border:1px solid #B5F2DF!important;border-radius:12px}.ayu-suggestion-container .ayu-header{font-size:16px;color:#1b163a;font-weight:700}.ayu-suggestion-container .warning{background-color:#fff7f3;border:.8px solid rgba(255,71,93,.0784313725);padding:10px;border-radius:8px;font-size:12px;margin-bottom:14px}.med-grid{display:flex;flex-wrap:wrap;gap:16px}.med-card{flex:1 1 30%;min-height:100%;display:flex;align-items:center;border:1px solid rgba(178,175,190,.2);border-radius:12px;padding:16px;background-color:#fff;box-shadow:0 2px 5px #0000000d}.med-header{display:flex;justify-content:space-between}.checkbox-label{display:flex;align-items:center;gap:12px;font-size:14px;line-height:1.5;color:#1b163a;text-align:left}.med-name{font-family:DM Sans;font-weight:500;font-size:14px;line-height:150%;letter-spacing:0%;word-break:break-word;width:100%;color:#1b163a}.selected-med{background-color:#0fd197;color:#fff}.textalign{text-align:center;color:#7f7b92;margin-top:15px}@media (max-width: 768px){.erorr-container{height:180px;background-color:#faf7fc;border-radius:10px;width:100%}}\n"], dependencies: [{ kind: "directive", type: i2$1.NgClass, selector: "[ngClass]", inputs: ["class", "ngClass"] }, { kind: "directive", type: i2$1.NgForOf, selector: "[ngFor][ngForOf]", inputs: ["ngForOf", "ngForTrackBy", "ngForTemplate"] }, { kind: "directive", type: i2$1.NgIf, selector: "[ngIf]", inputs: ["ngIf", "ngIfThen", "ngIfElse"] }, { kind: "directive", type: i3$1.CheckboxControlValueAccessor, selector: "input[type=checkbox][formControlName],input[type=checkbox][formControl],input[type=checkbox][ngModel]" }, { kind: "directive", type: i3$1.NgControlStatus, selector: "[formControlName],[ngModel],[formControl]" }, { kind: "directive", type: i3$1.NgModel, selector: "[ngModel]:not([formControlName]):not([formControl])", inputs: ["name", "disabled", "ngModel", "ngModelOptions"], outputs: ["ngModelChange"], exportAs: ["ngModel"] }, { kind: "pipe", type: i4.TranslatePipe, name: "translate" }] });
+}
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AillmtxReferralComponent, decorators: [{
+            type: Component,
+            args: [{ selector: 'lib-aillmtx-referral', template: "<ng-container *ngIf=\"!referralList.length && (hasError || !noData)\">\n    <div class=\"d-flex justify-content-center mt-3\">\n        <div class=\"erorr-container alert text-center p-4 d-flex flex-column align-items-center\">\n\n            <div *ngIf=\"!hasError && !isLoading\" class=\"no-data-container text-center\">\n                <div class=\"conclusion-header d-flex flex-column align-items-center\">\n                    <i class=\"bi bi-exclamation-triangle-fill text-danger mb-2\" style=\"font-size: 2rem;\"></i>\n                    <img src=\"assets/images/login/interneticon.png\" alt=\"Warning\" class=\"warning-icon\" />\n                    <h3 class=\"text-danger\">No diagnosis Provided</h3>\n                    <p class=\"text-muted\">Please add the required diagnosis details to fetch AI-assisted Referral\n                        suggestions.</p>\n                </div>\n            </div>\n\n            <ng-container *ngIf=\"!isLoading && hasError\">\n                <div *ngIf=\"!isLoading && hasError\" class=\"text-danger txt-position\">\n                   <span><img class=\"mb-1\" src=\"assets/svgs/alert-triangle.svg\" alt=\"\" /> </span>\n                    <span *ngIf=\"!loggedError\" class=\"ml-2\">No suggestions at this moment</span>\n                    <span *ngIf=\"loggedError\" class=\"ml-2\">{{ loggedError }}</span>\n                    <!-- <span *ngIf=\"hasError\" class=\"ms-2\">An unexpected issue occurred</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">The input provided does not have enough clinical details for an AI-assistant assessment.</span> -->\n                    <!-- <span *ngIf=\"noData\" class=\"ms-2\">No suggestions at this moment</span> -->\n                </div>\n                <button *ngIf=\"!noData\" type=\"button\" class=\"try-again-btn mt-5\" (click)=\"onTryAgain()\">\n                    {{'Try again'|translate}}\n                </button>\n            </ng-container>\n\n            <button *ngIf=\"isLoading\" class=\"stats-loading\">\n                <div class=\"eins\"></div>\n                <div class=\"zwei\"></div>\n                <div class=\"drei\"></div>\n            </button>\n\n            <div *ngIf=\"isLoading\" class=\"mt-3\">\n                <i class=\"bi bi-exclamation-triangle-fill\"></i>\n                <span class=\"ms-2 loading-text\">Please wait while the results are being generated.</span>\n            </div>\n\n        </div>\n    </div>\n</ng-container>\n\n<ng-container *ngIf=\"referralList.length || (!isLoading && (hasError && noData))\" class=\"mt-2\">\n    <div class=\"mt-3 mb-3 ayu-suggestion-container p-3 border border-gray-300 bg-green-50\">\n        <div class=\"mb-2 flex items-center ayu-header\">\n            <img class=\"mr-2\" src=\"assets/svgs/ayu-ddx.svg\" alt=\"\" /> Ayu suggested referrals\n        </div>\n        <div class=\"warning\">\n            <img class=\"mb-1 mr-2\" src=\"assets/svgs/info-ddx.svg\" alt=\"\" />\n            This AI-generated suggestion is intended to support\u2014not replace\u2014your clinical judgement and may not account\n            for all relevant factors; please use your own judgement before acting.\n        </div>\n        <div *ngIf=\"referralList.length\">\n            <div *ngFor=\"let refer of referralList\" class=\"med-card\">\n                <div class=\"checkbox-label\" *ngIf=\"refer.referral_to\">\n                    <input type=\"checkbox\" [ngClass]=\"{ 'selected-med': refer.selected }\"\n                        class=\"custom-checkbox me-2\" [(ngModel)]=\"refer.selected\"\n                        [checked]=\"isReferralSelected(refer)\" [disabled]=\"isReferralExists(refer.referral_to)\"\n                        (change)=\"onAIReferralChange(refer)\">\n                    <span class=\"med-name\" [class.text-muted]=\"isReferralExists(refer.referral_to)\">{{ refer.referral_to }}, {{ refer.referral_facility }}, {{ refer.remark }}</span>\n                </div>\n                <span *ngIf=\"refer.referral_to === ''\">Referral Not recommended</span>\n            </div>\n        </div>\n          <div class=\"textalign\" *ngIf=\"!isLoading && !hasError && noData\">\n        <span>No referrals are recommended based on the information provided.</span>\n    </div>\n    </div>\n  \n</ng-container>", styles: ["@charset \"UTF-8\";.try-again-btn{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;background-color:var(--color-darkBlue);color:#fff}.diffrential-diagnosis{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.diagnosis-list{font-weight:400;font-size:14px;line-height:21px;letter-spacing:0%}.diagnosis-container{background-color:#faf7fc;border-radius:10px;padding:15px}.custom-checkbox{appearance:none;width:18px;height:16px;flex-shrink:0;border:1px solid #B0ADBE;border-radius:4px;position:relative;cursor:pointer;background-color:transparent}.custom-checkbox:checked{background-color:#0fd197}.custom-checkbox:checked:after{content:\"\\2713\";font-size:14px;font-weight:700;color:#fff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}.rationale-container{background-color:#faf7fc;border-radius:10px;padding:15px}.rationale-container h2{font-size:16px;font-weight:700;line-height:24px;color:#101828}.rationale-container .fq-item{margin-left:20px}.rationale-item{border-bottom:1.5px solid rgba(178,175,190,.2)}.rationale{font-weight:700;font-size:16px;line-height:24px;letter-spacing:0%}.rationale-description{font-weight:400;font-size:16px;line-height:24px;letter-spacing:0%;margin-left:13px}.stats-loading{padding:6px 24px;background:var(--color-lightGray);border-radius:8px;border:none;outline:none;font-family:DM Sans;font-weight:700;font-size:14px;line-height:150%;color:var(--color-darkBlue)}.stats-loading div{background:#0060ff;display:inline-block;height:8px;width:8px;border-radius:100%;animation:bouncedelay 1.4s infinite ease-in-out;animation-fill-mode:both}.stats-loading div.eins{animation-delay:-.32s}.stats-loading div.zwei{animation-delay:-.16s}.alert{background:#fff;border:1px solid rgba(178,175,190,.2);border-radius:8px;margin-bottom:0}.alert-icon{position:relative;bottom:2px;right:6px}.text-reminder{color:#dc3545!important;font-size:15px;font-weight:700}@keyframes bouncedelay{0%,80%,to{transform:scale(0);opacity:0}40%{transform:scale(1);opacity:100}}.loading-text{font-weight:400;font-size:12px;line-height:18px;color:#7f7b92}.conclusion-card{background:#fff;border-radius:10px;margin:20px 0;box-shadow:0 1px 3px #1018281a,0 1px 2px #1018280f}.conclusion-card .conclusion-header{padding:16px 24px;border-bottom:1px solid #EAECF0}.conclusion-card .conclusion-header h2{font-size:16px;font-weight:700;line-height:24px;margin:0;color:#101828}.conclusion-card .conclusion-body{padding:24px}.conclusion-card .conclusion-body p{margin:0;font-size:14px;line-height:20px;color:#344054;font-weight:400}.note-con{border-radius:4px;font-size:14px;line-height:20px;color:#6c757d}.note-con .note-label{font-weight:600;margin-right:4px;color:#dc3545}.disabled-diagnosis{opacity:.7;cursor:not-allowed}.disabled-diagnosis .custom-checkbox{cursor:not-allowed}.disabled-diagnosis .text-muted{opacity:.7}.warning-icon{height:50px;width:50px}.erorr-container{height:150px;background-color:#faf7fc;border-radius:10px;width:100%}.txt-position{position:relative;top:24px}.conclusion-header{position:relative;bottom:16px}.ayu-suggestion-container{background-color:#f9fffc;border:1px solid #B5F2DF!important;border-radius:12px}.ayu-suggestion-container .ayu-header{font-size:16px;color:#1b163a;font-weight:700}.ayu-suggestion-container .warning{background-color:#fff7f3;border:.8px solid rgba(255,71,93,.0784313725);padding:10px;border-radius:8px;font-size:12px;margin-bottom:14px}.med-grid{display:flex;flex-wrap:wrap;gap:16px}.med-card{flex:1 1 30%;min-height:100%;display:flex;align-items:center;border:1px solid rgba(178,175,190,.2);border-radius:12px;padding:16px;background-color:#fff;box-shadow:0 2px 5px #0000000d}.med-header{display:flex;justify-content:space-between}.checkbox-label{display:flex;align-items:center;gap:12px;font-size:14px;line-height:1.5;color:#1b163a;text-align:left}.med-name{font-family:DM Sans;font-weight:500;font-size:14px;line-height:150%;letter-spacing:0%;word-break:break-word;width:100%;color:#1b163a}.selected-med{background-color:#0fd197;color:#fff}.textalign{text-align:center;color:#7f7b92;margin-top:15px}@media (max-width: 768px){.erorr-container{height:180px;background-color:#faf7fc;border-radius:10px;width:100%}}\n"] }]
+        }], ctorParameters: function () { return [{ type: AiTxService }]; }, propDecorators: { patientInfo: [{
+                type: Input
+            }], visit: [{
+                type: Input
+            }], useJsonVisitSummary: [{
+                type: Input
+            }], existingReferral: [{
+                type: Input
+            }], referralSelected: [{
+                type: Output
+            }], diagnosisName: [{
+                type: Input
+            }], notesss: [{
+                type: Input
+            }] } });
+
+class AiddxLibraryModule {
+    static forRoot(config) {
+        return {
+            ngModule: AiddxLibraryModule,
+            providers: [
+                { provide: ENVIRONMENT, useValue: config.environment },
+            ]
+        };
+    }
+    static ɵfac = i0.ɵɵngDeclareFactory({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AiddxLibraryModule, deps: [], target: i0.ɵɵFactoryTarget.NgModule });
+    static ɵmod = i0.ɵɵngDeclareNgModule({ minVersion: "14.0.0", version: "14.3.0", ngImport: i0, type: AiddxLibraryModule, declarations: [AillmddxComponent,
+            AillmtxMedicationComponent,
+            AillmtxAdviceComponent,
+            AillmtxTestComponent,
+            AillmtxFollowupComponent,
+            AillmtxReferralComponent], imports: [CommonModule,
+            /* Required by [(ngModel)] in these components' templates. */
+            FormsModule,
+            TranslateModule,
+            MatMenuModule,
+            MatExpansionModule,
+            NgbTooltipModule], exports: [AillmddxComponent,
+            AillmtxMedicationComponent,
+            AillmtxAdviceComponent,
+            AillmtxTestComponent,
+            AillmtxFollowupComponent,
+            AillmtxReferralComponent] });
+    static ɵinj = i0.ɵɵngDeclareInjector({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AiddxLibraryModule, providers: [
+            { provide: ENVIRONMENT, useValue: {} },
+            AiddxService,
+            AiTxService
+        ], imports: [CommonModule,
+            /* Required by [(ngModel)] in these components' templates. */
+            FormsModule,
+            TranslateModule,
+            MatMenuModule,
+            MatExpansionModule,
+            NgbTooltipModule] });
+}
+i0.ɵɵngDeclareClassMetadata({ minVersion: "12.0.0", version: "14.3.0", ngImport: i0, type: AiddxLibraryModule, decorators: [{
+            type: NgModule,
+            args: [{
+                    declarations: [
+                        AillmddxComponent,
+                        AillmtxMedicationComponent,
+                        AillmtxAdviceComponent,
+                        AillmtxTestComponent,
+                        AillmtxFollowupComponent,
+                        AillmtxReferralComponent,
+                    ],
+                    imports: [
+                        CommonModule,
+                        /* Required by [(ngModel)] in these components' templates. */
+                        FormsModule,
+                        TranslateModule,
+                        MatMenuModule,
+                        MatExpansionModule,
+                        NgbTooltipModule
+                    ],
+                    exports: [
+                        AillmddxComponent,
+                        AillmtxMedicationComponent,
+                        AillmtxAdviceComponent,
+                        AillmtxTestComponent,
+                        AillmtxFollowupComponent,
+                        AillmtxReferralComponent
+                    ],
+                    providers: [
+                        { provide: ENVIRONMENT, useValue: {} },
+                        AiddxService,
+                        AiTxService
+                    ]
+                }]
+        }] });
+
+/*
+ * Public API Surface of aiddx-library
+ */
+
+/**
+ * Generated bundle index. Do not edit.
+ */
+
+export { ADULTINITIAL_ENCOUNTER, AiTxService, AiddxLibraryModule, AiddxService, AillmddxComponent, AillmtxAdviceComponent, AillmtxFollowupComponent, AillmtxMedicationComponent, AillmtxReferralComponent, AillmtxTestComponent, CONFIG_SERVICE, DIAGNOSIS_SERVICE, ENVIRONMENT, JSON_VISIT_SUMMARY_CONCEPT, JSON_VISIT_SUMMARY_CONFIG_KEY, dummyPayload, findObsByConcept, getEncounterByType, getObsRawValue, getVisitSummaryJson, isJsonVisitSummaryEnabled, response };
+//# sourceMappingURL=aiddx-library.mjs.map
