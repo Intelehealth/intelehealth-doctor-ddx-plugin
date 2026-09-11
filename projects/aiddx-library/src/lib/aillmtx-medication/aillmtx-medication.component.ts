@@ -9,6 +9,8 @@ import { AiTxService } from '../../services/aitx.service';
 export class AillmtxMedicationComponent implements OnInit, OnChanges {
   @Input() patientInfo: any;
   @Input() visit: any;
+  @Input() useJsonVisitSummary?: boolean;
+  public visitSummaryJson: any = null;
   @Input() existingMedication: any[] = [];
   @Output() medicationSelected = new EventEmitter<string[]>();
   @Output() reportPanelIssue = new EventEmitter<any>();
@@ -42,6 +44,11 @@ export class AillmtxMedicationComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.updateReminderMessage();
+  }
+
+  public resolveVisitSummaryJson(): any {
+    this.visitSummaryJson = this.TxService.resolveVisitSummaryJson(this.visit, this.useJsonVisitSummary);
+    return this.visitSummaryJson;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -100,7 +107,7 @@ export class AillmtxMedicationComponent implements OnInit, OnChanges {
   }
 
   public getAIMedical(diagnosis?: string) {
-    const payload = this.TxService.getTxPayload(this.patientInfo, this.visit);
+    const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
     this.isLoading = true;
     this.medicationList = [];
     this.furtherQuestionsList = [];
@@ -130,7 +137,7 @@ export class AillmtxMedicationComponent implements OnInit, OnChanges {
   public getAIMedicalWithRetry(diagnosis: any) {    
     const MAX_RETRIES = 1;
     let retryCount = 0;
-    const payload = this.TxService.getTxPayload(this.patientInfo, this.visit);
+    const payload = this.TxService.getTxPayload(this.patientInfo, this.visit, this.resolveVisitSummaryJson());
 
     const attemptDiagnosis = () => {
       this.isLoading = true;

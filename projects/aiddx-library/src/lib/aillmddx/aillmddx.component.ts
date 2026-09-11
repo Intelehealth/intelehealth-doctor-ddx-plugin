@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, Optional, Inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, Optional, Inject, OnChanges, SimpleChanges } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { AiddxService } from '../../services/aiddx.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -11,7 +11,7 @@ import { ENVIRONMENT } from "../../lib/token";
   styleUrls: ['./aillmddx.component.scss']
 })
 
-export class AillmddxComponent {
+export class AillmddxComponent implements OnChanges {
   @Input() patientInfo: any;
   @Input() visit: any;
   @Input() existingDiagnosis: any[] = [];
@@ -23,6 +23,8 @@ export class AillmddxComponent {
   @Input() notes: string;
   @Input() visitCompleted: boolean = false;
   @Input() reportExpanded = false;
+  @Input() useJsonVisitSummary?: boolean;
+  public visitSummaryJson: any = null;
   isLoading = false;
   hasError = false;
   noData = false;
@@ -62,8 +64,19 @@ export class AillmddxComponent {
 
   ngOnInit() {}
 
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['visit'] || changes['useJsonVisitSummary']) {
+      this.visitSummaryJson = this.resolveVisitSummaryJson();
+    }
+  }
+
+  public resolveVisitSummaryJson(): any {
+    return this.ddxSvc.resolveVisitSummaryJson(this.visit, this.useJsonVisitSummary);
+  }
+
   public getAIDiagnosis(notes?: string) {
-    const payload = this.ddxSvc.getDDxPayload(this.patientInfo, this.visit, notes);
+    this.visitSummaryJson = this.resolveVisitSummaryJson();
+    const payload = this.ddxSvc.getDDxPayload(this.patientInfo, this.visit, notes, this.visitSummaryJson);
     this.isLoading = true;
     this.diagnosisList = [];
     this.furtherQuestionsList = [];
@@ -121,7 +134,8 @@ export class AillmddxComponent {
   public getAIDiagnosisWithRetry(notes?: string) {
     const MAX_RETRIES = 3;
     let retryCount = 0;
-    const payload = this.ddxSvc.getDDxPayload(this.patientInfo, this.visit, notes);
+    this.visitSummaryJson = this.resolveVisitSummaryJson();
+    const payload = this.ddxSvc.getDDxPayload(this.patientInfo, this.visit, notes, this.visitSummaryJson);
 
     const attemptDiagnosis = () => {
       this.isLoading = true;
