@@ -71,7 +71,7 @@
             <div *ngFor="let medicine of medicationList" class="med-card">
                 <div class="med-header">
                     <label class="checkbox-label">
-                        <input type="checkbox" [ngClass]="{ 'selected-med': medicine.selected }" class="custom-checkbox me-2"  [(ngModel)]="medicine.selected"  [checked]="isMedicineSelected(medicine)"
+                        <input type="checkbox" [ngClass]="{ 'selected-med': isMedicineSelected(medicine) }" class="custom-checkbox me-2" [checked]="isMedicineSelected(medicine)"
                          [disabled]="isMedicineExists(medicine.name)" (change)="onAIMedicineChange(medicine)" />
                         <span class="med-name"  [class.text-muted]="isMedicineExists(medicine.name)">{{ medicine.name }}</span>
                     </label>
