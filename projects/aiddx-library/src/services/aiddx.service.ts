@@ -2,7 +2,11 @@ import { Inject, Injectable, Optional } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { CONFIG_SERVICE, ENVIRONMENT } from "../lib/token";
 import markdownit from "markdown-it";
+import { throwError } from "rxjs";
+import { switchMap } from "rxjs/operators";
 import { getVisitSummaryJson, isJsonVisitSummaryEnabled } from "../lib/visit-summary-json";
+
+const AI_DDX_PRECOMPUTE_CONFIG_KEY = "ai_ddx_precompute";
 
 @Injectable({
   providedIn: "root",
@@ -18,12 +22,24 @@ export class AiddxService {
     }
   }
 
+  isPrecomputeEnabled(): boolean {
+    return this.configService?.ai_llm?.[AI_DDX_PRECOMPUTE_CONFIG_KEY] !== false;
+  }
+
   getAIDiagnosis(casehistory: any, visitUuid: string, prescriptionShared: boolean = false) {
     if (prescriptionShared) {
       return this.http.post(`${this.env.mindmapURL}/ddxfinal`, { casehistory, visitUuid });
     }
-    /* Routed through the portal's authenticated wrapper. */
-    return this.http.post(`${this.env.mindmapURL}/ddx`, { casehistory, visitUuid });
+    if (!this.isPrecomputeEnabled()) {
+      return this.http.post(`${this.env.mindmapURL}/ddx`, { casehistory, visitUuid });
+    }
+    return this.http.get(`${this.env.mindmapURL}/ai-ddx/${visitUuid}`).pipe(
+      switchMap((res: any) =>
+        res?.status === "pending" || res?.status === "processing"
+          ? throwError(() => ({ status: 202, pending: true, message: res?.message }))
+          : [res]
+      )
+    );
   }
 
   getVisitSummaryJson(visit: any): any | null {
