@@ -1,7 +1,8 @@
-import { Component, Input, Output, EventEmitter, Optional, Inject, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, Optional, Inject, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { AiddxService } from '../../services/aiddx.service';
 import { MatDialog } from '@angular/material/dialog';
+import { Observable, Subscription } from 'rxjs';
 // import { dummyPayload, response } from '../token';
 import { ENVIRONMENT } from "../../lib/token";
 
@@ -11,7 +12,7 @@ import { ENVIRONMENT } from "../../lib/token";
   styleUrls: ['./aillmddx.component.scss']
 })
 
-export class AillmddxComponent implements OnChanges {
+export class AillmddxComponent implements OnChanges, OnDestroy {
   @Input() patientInfo: any;
   @Input() visit: any;
   @Input() existingDiagnosis: any[] = [];
@@ -27,6 +28,7 @@ export class AillmddxComponent implements OnChanges {
   public visitSummaryJson: any = null;
   isLoading = false;
   hasError = false;
+  errorMessage = '';
   noData = false;
   insufficientData = false;
   isActive = false;
@@ -50,6 +52,7 @@ export class AillmddxComponent implements OnChanges {
   furtherQuestionsList: any = []
   selectedDiagnosis: string[] = [];
   apiResponseChanged: boolean = false;
+  private diagnosisSub?: Subscription;
 
   constructor(
     private ddxSvc: AiddxService,
@@ -64,6 +67,10 @@ export class AillmddxComponent implements OnChanges {
 
   ngOnInit() {}
 
+  ngOnDestroy() {
+    this.diagnosisSub?.unsubscribe();
+  }
+
   ngOnChanges(changes: SimpleChanges) {
     if (changes['visit'] || changes['useJsonVisitSummary']) {
       this.visitSummaryJson = this.resolveVisitSummaryJson();
@@ -77,10 +84,18 @@ export class AillmddxComponent implements OnChanges {
   public getAIDiagnosis(notes?: string) {
     this.visitSummaryJson = this.resolveVisitSummaryJson();
     const payload = this.ddxSvc.getDDxPayload(this.patientInfo, this.visit, notes, this.visitSummaryJson);
+    this.loadDiagnosis(this.ddxSvc.getAIDiagnosis(payload, this.visit.uuid, this.visitCompleted));
+  }
+
+  private loadDiagnosis(source$: Observable<any>) {
     this.isLoading = true;
+    this.hasError = false;
+    this.errorMessage = '';
+    this.noData = false;
     this.diagnosisList = [];
     this.furtherQuestionsList = [];
-    this.ddxSvc.getAIDiagnosis(payload, this.visit.uuid, this.visitCompleted).subscribe({
+    this.diagnosisSub?.unsubscribe();
+    this.diagnosisSub = source$.subscribe({
       next: (data: any) => {
         // if (!this.isValidDdxResponse(data)) {
         //   this.apiResponseChanged = true;
@@ -123,6 +138,7 @@ export class AillmddxComponent implements OnChanges {
       },
       error: (err: any) => {
         this.hasError = true;
+        this.errorMessage = this.extractErrorMessage(err);
         this.isLoading = false;
       },
       complete: () => {
@@ -141,7 +157,8 @@ export class AillmddxComponent implements OnChanges {
       this.isLoading = true;
       this.diagnosisList = [];
       this.furtherQuestionsList = [];
-      this.ddxSvc.getAIDiagnosis(payload, this.visit.uuid, this.visitCompleted).subscribe({
+      this.diagnosisSub?.unsubscribe();
+      this.diagnosisSub = this.ddxSvc.getAIDiagnosis(payload, this.visit.uuid, this.visitCompleted).subscribe({
         next: (data: any) => {
           // if (!this.isValidDdxResponse(data)) {
           //   this.apiResponseChanged = true;
@@ -183,13 +200,15 @@ export class AillmddxComponent implements OnChanges {
         },
         error: (err: any) => {
           retryCount++;
-          if (retryCount < MAX_RETRIES) {
+          const isFinalAnswer = err?.pending || err?.status === 404;
+          if (!isFinalAnswer && retryCount < MAX_RETRIES) {
             console.warn('[AILLMDDX] Retry attempt scheduled', { retryAfterMs: 1000, nextAttempt: retryCount + 1 });
             setTimeout(() => {
               attemptDiagnosis();
             }, 1000);
           } else {
             this.hasError = true;
+            this.errorMessage = this.extractErrorMessage(err);
             this.isLoading = false;
             console.error('Failed to get AI diagnosis after 3 attempts:', err);
           }
@@ -204,7 +223,16 @@ export class AillmddxComponent implements OnChanges {
   }
 
   onTryAgain() {
-    this.getAIDiagnosis(this.notes);
+    if (!this.ddxSvc.usesPrecompute(this.visitCompleted)) {
+      this.getAIDiagnosis(this.notes);
+      return;
+    }
+    this.loadDiagnosis(this.ddxSvc.retryAIDiagnosis(this.visit.uuid));
+  }
+
+  private extractErrorMessage(err: any): string {
+    const message = err?.error?.message;
+    return typeof message === 'string' ? message : '';
   }
 
   onReportOpened() {

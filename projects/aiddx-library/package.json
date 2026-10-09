@@ -1,6 +1,6 @@
 {
   "name": "aiddx-library",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "scripts": {
     "dev": "ng build aiddx-library --watch",
     "build": "ng build aiddx-library --configuration production"
