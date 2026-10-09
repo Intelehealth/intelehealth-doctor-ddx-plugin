@@ -1,12 +1,15 @@
 import { Inject, Injectable, Optional } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { CONFIG_SERVICE, ENVIRONMENT } from "../lib/token";
+import { CONFIG_SERVICE, ENVIRONMENT, SOCKET_SERVICE } from "../lib/token";
 import markdownit from "markdown-it";
-import { throwError } from "rxjs";
-import { switchMap } from "rxjs/operators";
+import { Observable, of, throwError } from "rxjs";
+import { catchError, switchMap, take, timeout } from "rxjs/operators";
 import { getVisitSummaryJson, isJsonVisitSummaryEnabled } from "../lib/visit-summary-json";
 
 const AI_DDX_PRECOMPUTE_CONFIG_KEY = "ai_ddx_precompute";
+const AI_DDX_STATUS_EVENT = "ai_ddx_status";
+const AI_DDX_WAIT_TIMEOUT_MS = 5 * 60 * 1000;
+const AI_DDX_AUTO_RETRY_STATUSES = ["failed", "not_found"];
 
 @Injectable({
   providedIn: "root",
@@ -15,7 +18,8 @@ export class AiddxService {
   constructor(
     private http: HttpClient,
     @Optional() @Inject(ENVIRONMENT) private env?: any,
-    @Optional() @Inject(CONFIG_SERVICE) private configService?: any
+    @Optional() @Inject(CONFIG_SERVICE) private configService?: any,
+    @Optional() @Inject(SOCKET_SERVICE) private socketService?: any
   ) {
     if (!this.env) {
       console.warn("ENVIRONMENT is not provided!");
@@ -26,6 +30,10 @@ export class AiddxService {
     return this.configService?.ai_llm?.[AI_DDX_PRECOMPUTE_CONFIG_KEY] !== false;
   }
 
+  usesPrecompute(prescriptionShared: boolean = false): boolean {
+    return !prescriptionShared && this.isPrecomputeEnabled();
+  }
+
   getAIDiagnosis(casehistory: any, visitUuid: string, prescriptionShared: boolean = false) {
     if (prescriptionShared) {
       return this.http.post(`${this.env.mindmapURL}/ddxfinal`, { casehistory, visitUuid });
@@ -33,13 +41,70 @@ export class AiddxService {
     if (!this.isPrecomputeEnabled()) {
       return this.http.post(`${this.env.mindmapURL}/ddx`, { casehistory, visitUuid });
     }
-    return this.http.get(`${this.env.mindmapURL}/ai-ddx/${visitUuid}`).pipe(
-      switchMap((res: any) =>
-        res?.status === "pending" || res?.status === "processing"
-          ? throwError(() => ({ status: 202, pending: true, message: res?.message }))
-          : [res]
-      )
+    return this.fetchStoredDiagnosis(visitUuid).pipe(
+      catchError((err: any) => (this.isRetryable(err) ? of({ status: "retry" }) : throwError(err))),
+      switchMap((res: any) => {
+        if (res?.status === "retry") {
+          return this.retryAIDiagnosis(visitUuid);
+        }
+        return this.isPending(res) ? this.waitForStoredDiagnosis(visitUuid, res) : of(res);
+      })
     );
+  }
+
+  private isRetryable(err: any): boolean {
+    return err?.status === 404 && AI_DDX_AUTO_RETRY_STATUSES.includes(err?.error?.status);
+  }
+
+  retryAIDiagnosis(visitUuid: string): Observable<any> {
+    return this.http.post(`${this.env.mindmapURL}/ai-ddx/${visitUuid}/retry`, {}).pipe(
+      switchMap((res: any) => this.waitForStoredDiagnosis(visitUuid, res))
+    );
+  }
+
+  private fetchStoredDiagnosis(visitUuid: string): Observable<any> {
+    return this.http.get(`${this.env.mindmapURL}/ai-ddx/${visitUuid}`);
+  }
+
+  private isPending(res: any): boolean {
+    return res?.status === "pending" || res?.status === "processing";
+  }
+
+  private waitForStoredDiagnosis(visitUuid: string, pendingResponse: any): Observable<any> {
+    const pendingError = { status: 202, pending: true, error: pendingResponse };
+    if (!this.socketService?.socket && this.socketService?.initSocket) {
+      this.socketService.initSocket();
+    }
+    const socket = this.socketService?.socket;
+    if (!socket) {
+      return throwError(pendingError);
+    }
+    return this.statusEvents(socket, visitUuid).pipe(
+      take(1),
+      timeout(AI_DDX_WAIT_TIMEOUT_MS),
+      catchError((err: any) => throwError(err?.name === "TimeoutError" ? pendingError : err)),
+      switchMap(() => this.fetchStoredDiagnosis(visitUuid)),
+      switchMap((res: any) => (this.isPending(res) ? throwError(pendingError) : of(res)))
+    );
+  }
+
+  private statusEvents(socket: any, visitUuid: string): Observable<any> {
+    return new Observable<any>((observer) => {
+      const onStatus = (data: any) => {
+        if (data?.visitUuid === visitUuid) {
+          observer.next(data);
+        }
+      };
+      const watch = () => socket.emit("ai_ddx_watch", { visitUuid });
+      socket.on(AI_DDX_STATUS_EVENT, onStatus);
+      socket.on("connect", watch);
+      watch();
+      return () => {
+        socket.off(AI_DDX_STATUS_EVENT, onStatus);
+        socket.off("connect", watch);
+        socket.emit("ai_ddx_unwatch", { visitUuid });
+      };
+    });
   }
 
   getVisitSummaryJson(visit: any): any | null {
