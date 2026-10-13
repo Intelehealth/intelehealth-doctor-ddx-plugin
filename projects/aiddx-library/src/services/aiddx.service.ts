@@ -27,7 +27,7 @@ export class AiddxService {
   }
 
   isPrecomputeEnabled(): boolean {
-    return this.configService?.ai_llm?.[AI_DDX_PRECOMPUTE_CONFIG_KEY] !== false;
+    return this.configService?.ai_llm?.[AI_DDX_PRECOMPUTE_CONFIG_KEY] === true;
   }
 
   usesPrecompute(prescriptionShared: boolean = false): boolean {
