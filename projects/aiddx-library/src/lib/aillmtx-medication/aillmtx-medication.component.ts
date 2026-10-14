@@ -151,7 +151,7 @@ export class AillmtxMedicationComponent implements OnInit, OnChanges {
               ...v,
               name: v.name || v.medication,
             }));
-            const hasNumericRank = mapped.some(v => { const r = Number(v?.rank); return !isNaN(r) && r >= 1; });
+            const hasNumericRank = mapped.some(v => { const r = Number(v?.rank); return r >= 1 && r <= 5; });
             this.medicationList = hasNumericRank
               ? mapped.filter(v => { const rank = Number(v?.rank); return rank >= 1 && rank <= 5; }).sort((a, b) => Number(a.rank) - Number(b.rank))
               : mapped.slice(0, 5);

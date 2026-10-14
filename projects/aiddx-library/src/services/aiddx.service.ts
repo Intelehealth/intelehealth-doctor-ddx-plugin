@@ -34,12 +34,15 @@ export class AiddxService {
     return !prescriptionShared && this.isPrecomputeEnabled();
   }
 
-  getAIDiagnosis(casehistory: any, visitUuid: string, prescriptionShared: boolean = false) {
+  getAIDiagnosis(casehistory: any, visitUuid: string, prescriptionShared: boolean = false, recompute: boolean = false) {
     if (prescriptionShared) {
       return this.http.post(`${this.env.mindmapURL}/ddxfinal`, { casehistory, visitUuid });
     }
     if (!this.isPrecomputeEnabled()) {
       return this.http.post(`${this.env.mindmapURL}/ddx`, { casehistory, visitUuid });
+    }
+    if (recompute) {
+      return this.computeAIDiagnosis(casehistory, visitUuid);
     }
     return this.fetchStoredDiagnosis(visitUuid).pipe(
       catchError((err: any) => (this.isRetryable(err) ? of({ status: "retry" }) : throwError(err))),
@@ -54,6 +57,10 @@ export class AiddxService {
 
   private isRetryable(err: any): boolean {
     return err?.status === 404 && AI_DDX_AUTO_RETRY_STATUSES.includes(err?.error?.status);
+  }
+
+  computeAIDiagnosis(casehistory: any, visitUuid: string): Observable<any> {
+    return this.http.post(`${this.env.mindmapURL}/ai-ddx/${visitUuid}/compute`, { casehistory });
   }
 
   retryAIDiagnosis(visitUuid: string): Observable<any> {
