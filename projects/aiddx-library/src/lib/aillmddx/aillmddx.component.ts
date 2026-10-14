@@ -84,7 +84,7 @@ export class AillmddxComponent implements OnChanges, OnDestroy {
   public getAIDiagnosis(notes?: string) {
     this.visitSummaryJson = this.resolveVisitSummaryJson();
     const payload = this.ddxSvc.getDDxPayload(this.patientInfo, this.visit, notes, this.visitSummaryJson);
-    this.loadDiagnosis(this.ddxSvc.getAIDiagnosis(payload, this.visit.uuid, this.visitCompleted));
+    this.loadDiagnosis(this.ddxSvc.getAIDiagnosis(payload, this.visit.uuid, this.visitCompleted, !!notes?.trim()));
   }
 
   private loadDiagnosis(source$: Observable<any>) {
@@ -117,7 +117,7 @@ export class AillmddxComponent implements OnChanges, OnDestroy {
               rationale: v?.rationale
             }
           });
-          const hasNumericRank = mapped.some(v => { const r = Number(v?.rank); return !isNaN(r) && r >= 1; });
+          const hasNumericRank = mapped.some(v => { const r = Number(v?.rank); return r >= 1 && r <= 5; });
           this.diagnosisList = this.visitCompleted
             ? (hasNumericRank
                 ? mapped.filter(v => { const rank = Number(v?.rank); return rank >= 1 && rank <= 5; }).sort((a, b) => Number(a.rank) - Number(b.rank))
@@ -179,7 +179,7 @@ export class AillmddxComponent implements OnChanges, OnDestroy {
                 rationale: v?.rationale
               }
             });
-            const hasNumericRank = mapped.some(v => { const r = Number(v?.rank); return !isNaN(r) && r >= 1; });
+            const hasNumericRank = mapped.some(v => { const r = Number(v?.rank); return r >= 1 && r <= 5; });
             this.diagnosisList = this.visitCompleted
               ? (hasNumericRank
                   ? mapped.filter(v => { const rank = Number(v?.rank); return rank >= 1 && rank <= 5; }).sort((a, b) => Number(a.rank) - Number(b.rank))
@@ -223,7 +223,7 @@ export class AillmddxComponent implements OnChanges, OnDestroy {
   }
 
   onTryAgain() {
-    if (!this.ddxSvc.usesPrecompute(this.visitCompleted)) {
+    if (!this.ddxSvc.usesPrecompute(this.visitCompleted) || this.notes?.trim()) {
       this.getAIDiagnosis(this.notes);
       return;
     }
