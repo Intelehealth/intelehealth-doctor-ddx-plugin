@@ -54,8 +54,8 @@
         <div *ngIf="testList.length"  class="advice-container">
             <div *ngFor="let test of testList" class="advice-card">
                 <div class="advice-content">
-                        <input type="checkbox" [ngClass]="{ 'selected-med': test.selected }"
-                            class="custom-checkbox me-2" [(ngModel)]="test.selected" [checked]="isTestSelected(test)"
+                        <input type="checkbox" [ngClass]="{ 'selected-med': isTestSelected(test) }"
+                            class="custom-checkbox me-2" [checked]="isTestSelected(test)"
                             [disabled]="isTestExists(test.test_name)" (change)="onAITestChange(test)" />
                         <span class="med-name" [class.text-muted]="isTestExists(test.test_name)"> {{ test.test_name
                             }}</span>

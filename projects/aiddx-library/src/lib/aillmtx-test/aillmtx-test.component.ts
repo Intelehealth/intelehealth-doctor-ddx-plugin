@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { AiTxService } from '../../services/aitx.service';
+import { normalizeTests } from '../ttx-suggestions';
 
 @Component({
   selector: 'lib-aillmtx-test',
@@ -75,17 +76,19 @@ export class AillmtxTestComponent {
       this.furtherQuestionsList = [];
       this.TxService.getAITTx(payload, diagnosis, this.visit.uuid).subscribe({
         next: (data: any) => {
-          if (data.result.data.success && data.result.data.tests_to_be_done.length > 0) {
+          const res = data?.result?.data;
+          const items = res?.success ? normalizeTests(res.tests_to_be_done) : [];
+          if (items.length > 0) {
             this.noData = false;
-            this.testList = data.result.data.tests_to_be_done.map(v => {              
+            this.testList = items.map(v => {
               return {
                 ...v,
                 rationale: this.TxService.markdownit(v?.rationale)
               }
             });
-          } else if(!data.data.success) {
+          } else if (!res || !res.success) {
               this.hasError = true;
-              this.loggedError = data.data?.error;
+              this.loggedError = res?.error;
           } else {
             this.noData = true;
           }

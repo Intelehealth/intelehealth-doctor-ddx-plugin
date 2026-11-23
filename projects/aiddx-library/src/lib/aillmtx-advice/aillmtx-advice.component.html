@@ -54,7 +54,7 @@
         <div *ngIf="adviceList.length" class="advice-container">
             <div  *ngFor="let advice of adviceList" class="advice-card">
                 <div class="advice-content">
-                        <input type="checkbox" [ngClass]="{ 'selected-med': advice.selected }" class="custom-checkbox me-2"  [(ngModel)]="advice.selected"  [checked]="isAdviceSelected(advice)"
+                        <input type="checkbox" [ngClass]="{ 'selected-med': isAdviceSelected(advice) }" class="custom-checkbox me-2" [checked]="isAdviceSelected(advice)"
                        [disabled]="isAdviceExists(advice.v)" (change)="onAIAdviceChange(advice)"/>
                         <div class="med-name"[class.text-muted]="isAdviceExists(advice.v)">{{ advice.v }}</div>
                 </div>

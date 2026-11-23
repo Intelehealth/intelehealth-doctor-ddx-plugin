@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { AiTxService } from '../../services/aitx.service';
+import { normalizeReferral, referralKey, referralMatchesExisting } from '../ttx-suggestions';
 
 @Component({
   selector: 'lib-aillmtx-referral',
@@ -78,16 +79,18 @@ export class AillmtxReferralComponent {
       this.furtherQuestionsList = [];
       this.TxService.getAITTx(payload, diagnosis, this.visit.uuid).subscribe({
         next: (data: any) => {
-          if (data.result.data.success && data?.result?.data.referral?.length > 0) {
+          const res = data?.result?.data;
+          const items = res?.success ? normalizeReferral(res.referral) : [];
+          if (items.length > 0) {
             this.noData = false;
-            this.referralList = data.result.data.referral.map((v: any) => {
+            this.referralList = items.map((v: any) => {
               return {
                 ...v,
               }
             });
-           } else if (data.result.data?.success) {
+           } else if (!res || !res.success) {
               this.hasError = true;
-              this.loggedError = data.result.data?.error;
+              this.loggedError = res?.error;
           } else {
             this.noData = true;
           }
@@ -127,9 +130,9 @@ export class AillmtxReferralComponent {
     } else if (Array.isArray(event)) {
       this.selectedReferral = [...event];
     } else {
-      const index = this.selectedReferral.findIndex(r => r.referral_to === event.referral_to);
+      const index = this.selectedReferral.findIndex(r => referralKey(r) === referralKey(event));
       if (index > -1) {
-        this.selectedReferral = this.selectedReferral.filter(r => r.referral_to !== event.referral_to);
+        this.selectedReferral = this.selectedReferral.filter(r => referralKey(r) !== referralKey(event));
       } else {
         const referralData = {
           referral_facility: event.referral_facility,
@@ -143,11 +146,15 @@ export class AillmtxReferralComponent {
     this.referralSelected.emit(this.selectedReferral);
   }
 
-  isReferralExists(referral: string): boolean {
-    return this.existingReferral.some(d => d.speciality === referral);
+  referralLabel(referral: any): string {
+    return [referral?.referral_to, referral?.referral_facility, referral?.remark].filter(p => !!p).join(', ');
+  }
+
+  isReferralExists(referral: any): boolean {
+    return this.existingReferral.some(d => referralMatchesExisting(referral, d));
   }
 
   isReferralSelected(referral): boolean {
-    return this.selectedReferral.some(r => r.referral_to === referral.referral_to) || this.existingReferral.some(d => d.speciality === referral.referral_to);
+    return this.selectedReferral.some(r => referralKey(r) === referralKey(referral)) || this.isReferralExists(referral);
   }
 }

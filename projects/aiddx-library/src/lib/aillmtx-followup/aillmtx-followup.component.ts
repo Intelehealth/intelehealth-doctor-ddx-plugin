@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { AiTxService } from '../../services/aitx.service';
+import { normalizeFollowUp } from '../ttx-suggestions';
 
 @Component({
   selector: 'lib-aillmtx-followup',
@@ -75,16 +76,18 @@ export class AillmtxFollowupComponent {
       this.furtherQuestionsList = [];
       this.TxService.getAITTx(payload, diagnosis, this.visit.uuid).subscribe({
         next: (data: any) => {
-          if (data.result.data.success && data.result.data.follow_up.length > 0 && data.result.data.follow_up[0]?.follow_up_duration) {
+          const res = data?.result?.data;
+          const items = res?.success ? normalizeFollowUp(res.follow_up).filter(f => f?.follow_up_duration) : [];
+          if (items.length > 0) {
             this.noData = false;
-            this.followUpList = data.result.data.follow_up.map(v => {
+            this.followUpList = items.map(v => {
               return {
                 ...v,
               }
             });
-           } else if(!data.result.data.success) {
+           } else if (!res || !res.success) {
               this.hasError = true;
-              this.loggedError = data.result.data?.error;
+              this.loggedError = res?.error;
           } else {
             this.noData = true;
           }
