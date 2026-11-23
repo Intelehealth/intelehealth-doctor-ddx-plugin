@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { AiTxService } from '../../services/aitx.service';
+import { normalizeAdvice } from '../ttx-suggestions';
 
 @Component({
   selector: 'lib-aillmtx-advice',
@@ -75,16 +76,14 @@ export class AillmtxAdviceComponent {
       this.furtherQuestionsList = [];
       this.TxService.getAITTx(payload, diagnosis, this.visit.uuid).subscribe({
         next: (data: any) => {
-          if (data.result.data.success &&  data.result.data.medical_advice.length > 0) {
+          const res = data?.result?.data;
+          const items = res?.success ? normalizeAdvice(res.medical_advice) : [];
+          if (items.length > 0) {
             this.noData = false;
-            this.adviceList = data.result.data.medical_advice.map(v => {
-              return {
-                v
-              }
-            });
-          } else if(!data.data.success) {
+            this.adviceList = items;
+          } else if (!res || !res.success) {
               this.hasError = true;
-              this.loggedError = data.data?.error;
+              this.loggedError = res?.error;
           } else {
             this.noData = true;
           }
