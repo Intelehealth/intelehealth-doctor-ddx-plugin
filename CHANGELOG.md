@@ -4,6 +4,21 @@ Versions are published as orphan branches (`vX.Y.Z`) holding the built library,
 and consumed as `github:Intelehealth/intelehealth-doctor-ddx-plugin#vX.Y.Z`.
 See `aiddx-library-dev.md` for the publish procedure.
 
+## v1.4.8
+
+### Changed
+
+- `ai_llm.json_format_visit_summary` is now a parent flag with two child flags:
+  `json_format_visit_summary_ddx` (DDx) and `json_format_visit_summary_ttx`
+  (TTx). DDx sends the JSON summary only when parent AND ddx child are on; TTx
+  only when parent AND ttx child are on. Parent off disables both regardless of
+  children. An explicit `useJsonVisitSummary` override still wins.
+- `isJsonVisitSummaryEnabled(configService, override?, kind?)` takes an optional
+  `'ddx' | 'ttx'` kind (`JsonVisitSummaryKind`); without it only the parent is
+  checked. New constants `JSON_VISIT_SUMMARY_DDX_CONFIG_KEY` /
+  `JSON_VISIT_SUMMARY_TTX_CONFIG_KEY`. `AiddxService` resolves with `'ddx'`,
+  `AiTxService` with `'ttx'`.
+
 ## v1.4.1
 
 ### Added

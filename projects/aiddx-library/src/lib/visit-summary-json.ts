@@ -2,11 +2,28 @@ export const ADULTINITIAL_ENCOUNTER = 'ADULTINITIAL';
 export const JSON_VISIT_SUMMARY_CONCEPT = 'JSON Format Visit Summary';
 export const JSON_VISIT_SUMMARY_CONFIG_KEY = 'json_format_visit_summary';
 
-export function isJsonVisitSummaryEnabled(configService: any, override?: boolean): boolean {
+export const JSON_VISIT_SUMMARY_DDX_CONFIG_KEY = 'json_format_visit_summary_ddx';
+export const JSON_VISIT_SUMMARY_TTX_CONFIG_KEY = 'json_format_visit_summary_ttx';
+
+export type JsonVisitSummaryKind = 'ddx' | 'ttx';
+
+export function isJsonVisitSummaryEnabled(
+  configService: any,
+  override?: boolean,
+  kind?: JsonVisitSummaryKind
+): boolean {
   if (override !== undefined && override !== null) {
     return !!override;
   }
-  return !!configService?.ai_llm?.[JSON_VISIT_SUMMARY_CONFIG_KEY];
+  const llm = configService?.ai_llm;
+  if (!llm?.[JSON_VISIT_SUMMARY_CONFIG_KEY]) {
+    return false;
+  }
+  if (!kind) {
+    return true;
+  }
+  const childKey = kind === 'ddx' ? JSON_VISIT_SUMMARY_DDX_CONFIG_KEY : JSON_VISIT_SUMMARY_TTX_CONFIG_KEY;
+  return !!llm[childKey];
 }
 
 export function getEncounterByType(visit: any, encounterType: string): any {

@@ -119,7 +119,7 @@ export class AiddxService {
   }
 
   isJsonVisitSummaryEnabled(override?: boolean): boolean {
-    return isJsonVisitSummaryEnabled(this.configService, override);
+    return isJsonVisitSummaryEnabled(this.configService, override, 'ddx');
   }
 
   resolveVisitSummaryJson(visit: any, override?: boolean): any | null {
