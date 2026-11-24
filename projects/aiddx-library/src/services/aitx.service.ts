@@ -41,7 +41,7 @@ export class AiTxService {
   }
 
   isJsonVisitSummaryEnabled(override?: boolean): boolean {
-    return isJsonVisitSummaryEnabled(this.configService, override);
+    return isJsonVisitSummaryEnabled(this.configService, override, 'ttx');
   }
 
   resolveVisitSummaryJson(visit: any, override?: boolean): any | null {
