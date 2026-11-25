@@ -65,8 +65,13 @@ describe('DDx payload flag resolution', () => {
   });
   it('both on, obs present -> JSON, with notes', () => {
     const s = make(cfg(true, true, false));
-    expect(s.getDDxPayload(patient, visitWith(true))).toEqual(SUMMARY);
-    expect(s.getDDxPayload(patient, visitWith(true), 'n')).toEqual({ ...SUMMARY, notes: 'n' });
+    const plain = s.getDDxPayload(patient, visitWith(true));
+    expect(typeof plain).toBe('string');
+    expect(JSON.parse(plain)).toEqual(SUMMARY);
+    expect('notes' in JSON.parse(plain)).toBeFalse();
+    const withNotes = s.getDDxPayload(patient, visitWith(true), 'n');
+    expect(typeof withNotes).toBe('string');
+    expect(JSON.parse(withNotes)).toEqual({ ...SUMMARY, notes: 'n' });
   });
   it('both on, obs missing -> string', () => {
     const s = make(cfg(true, true, true));
@@ -92,7 +97,9 @@ describe('TTx payload flag resolution', () => {
   });
   it('both on, obs present -> JSON', () => {
     const s = make(cfg(true, false, true));
-    expect(s.getTxPayload(patient, visitWith(true))).toEqual(SUMMARY);
+    const out = s.getTxPayload(patient, visitWith(true));
+    expect(typeof out).toBe('string');
+    expect(JSON.parse(out)).toEqual(SUMMARY);
   });
   it('both on, obs missing -> string', () => {
     const s = make(cfg(true, true, true));
