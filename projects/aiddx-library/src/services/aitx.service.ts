@@ -73,7 +73,7 @@ export class AiTxService {
       .join("\n")}`;
 
     if (summaryJson) {
-      return summaryJson;
+      return JSON.stringify(summaryJson);
     }
 
     const payload = `Gender: ${get("pi.person.gender", "Not specified")}

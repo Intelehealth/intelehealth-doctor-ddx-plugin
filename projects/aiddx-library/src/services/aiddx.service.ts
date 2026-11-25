@@ -151,7 +151,7 @@ export class AiddxService {
       .join("\n")}`;
 
     if (summaryJson) {
-      return notes ? { ...summaryJson, notes } : summaryJson;
+      return JSON.stringify(notes ? { ...summaryJson, notes } : summaryJson);
     }
 
     const payload = `Gender: ${get("pi.person.gender", "Not specified")}

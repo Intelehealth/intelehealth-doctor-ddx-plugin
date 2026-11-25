@@ -4,6 +4,13 @@ Versions are published as orphan branches (`vX.Y.Z`) holding the built library,
 and consumed as `github:Intelehealth/intelehealth-doctor-ddx-plugin#vX.Y.Z`.
 See `aiddx-library-dev.md` for the publish procedure.
 
+## v1.4.9
+
+### Changed
+
+- JSON visit summary is sent as a JSON string in `casehistory` (DDx) and
+  `case` (TTx) instead of an object.
+
 ## v1.4.8
 
 ### Changed
